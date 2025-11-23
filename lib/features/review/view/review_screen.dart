@@ -33,15 +33,15 @@ class ReviewsPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 8),
-                    ReviewSummaryCard(),
+                    // const SizedBox(height: 8),
+                     ReviewSummaryCard(),
                     const SizedBox(height: 12),
                     Expanded(child: ReviewsList()),
                   ],
                 ),
               ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+    /*   floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openWriteReviewSheet(context),
         backgroundColor: const Color(0xFFD8B384),
         label: const Text(
@@ -49,8 +49,8 @@ class ReviewsPage extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
         icon: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      ), */
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
