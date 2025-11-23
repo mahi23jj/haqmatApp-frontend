@@ -5,10 +5,26 @@ import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/widgets/add_to_cart_bar.dart';
+import 'package:haqmate/features/review/widget/review_list.dart';
+import 'package:haqmate/features/review/widget/write_review.dart';
 import 'package:provider/provider.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final _scrollController = ScrollController();
+
+  void _openWriteReviewSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (ctx) => Padding(
+        padding: MediaQuery.of(ctx).viewInsets,
+        child: const WriteReviewSheet(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,15 +152,59 @@ class ProductDetailPage extends StatelessWidget {
                       _buildDescription(vm),
 
                       SizedBox(height: 12),
-                      _buildWeightOptions(vm),
-                      /*                SizedBox(height: 16),
-                        _buildDeliveryAndLocation(vm), */
-                      SizedBox(height: 30),
-                      _buildDescription(vm),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Reviews',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            onPressed: () => _openWriteReviewSheet(context),
+                            icon: Icon(Icons.wifi_protected_setup_sharp),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 9),
+
+                      
+
+                      ReviewsList(count: 2),
+
+                       Center(
+                         child: ElevatedButton(
+                                             style: ElevatedButton.styleFrom(
+                                               backgroundColor: AppColors.primary,
+                                               shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                                               ),
+                                             ),
+                                             onPressed: (){},
+                                             child: const Padding(
+                                               padding: EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 50,
+                                               ),
+                                               child: Text(
+                          "Read More Reviews",
+                          style: TextStyle(
+                            color: AppColors.background,
+                            fontSize: 17,
+                          ),
+                                               ),
+                                             ),
+                                           ),
+                       ),
+
                       /*           SizedBox(height: 16),
                         _buildProductsList(vm), */
-                      SizedBox(height: 20), // leave space for bottom bar
-                      // SizedBox(height: 20), // leave space for bottom bar
+                      // SizedBox(height: 0), // leave space for bottom bar
+
+                      
+
+                      SizedBox(height: 90), // leave space for bottom bar
                     ],
                   ),
                 ),

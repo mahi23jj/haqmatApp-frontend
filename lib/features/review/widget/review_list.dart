@@ -1,28 +1,39 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/review/model/review_model.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/startDisplay.dart';
 import 'package:provider/provider.dart';
 
 class ReviewsList extends StatelessWidget {
-  ReviewsList({Key? key}) : super(key: key);
+  int count;
+
+  ReviewsList({Key? key, this.count = 0}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
+
+     final actualCount = (count == 0)
+        ? vm.reviews.length
+        : math.min(count, vm.reviews.length);
 
     if (vm.reviews.isEmpty) {
       return const Center(child: Text('No reviews yet'));
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 90),
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 20),
       itemBuilder: (ctx, index) {
         final r = vm.reviews[index];
         return AnimatedReviewCard(review: r, index: index);
       },
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemCount: vm.reviews.length,
+      itemCount: actualCount,
     );
   }
 }
@@ -83,6 +94,7 @@ class _AnimatedReviewCardState extends State<AnimatedReviewCard>
       child: SlideTransition(
         position: _offset,
         child: Card(
+          color: const Color.fromARGB(255, 255, 255, 255),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),

@@ -49,7 +49,7 @@ class TeffApp extends StatelessWidget {
 
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: ReviewsPage(),
+        home: ProductDetailPage(),
       ),
     );
   }
