@@ -169,41 +169,36 @@ class ProductDetailPage extends StatelessWidget {
 
                       SizedBox(height: 9),
 
-                      
-
                       ReviewsList(count: 2),
 
-                       Center(
-                         child: ElevatedButton(
-                                             style: ElevatedButton.styleFrom(
-                                               backgroundColor: AppColors.primary,
-                                               shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                                               ),
-                                             ),
-                                             onPressed: (){},
-                                             child: const Padding(
-                                               padding: EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 50,
-                                               ),
-                                               child: Text(
-                          "Read More Reviews",
-                          style: TextStyle(
-                            color: AppColors.background,
-                            fontSize: 17,
+                      Center(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                                               ),
-                                             ),
-                                           ),
-                       ),
+                          onPressed: () {},
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 50,
+                            ),
+                            child: Text(
+                              "Read More Reviews",
+                              style: TextStyle(
+                                color: AppColors.background,
+                                fontSize: 17,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
 
                       /*           SizedBox(height: 16),
                         _buildProductsList(vm), */
                       // SizedBox(height: 0), // leave space for bottom bar
-
-                      
-
                       SizedBox(height: 90), // leave space for bottom bar
                     ],
                   ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/view/cart_view.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:haqmate/features/home/views/home_view.dart';
+import 'package:haqmate/features/orders/view/order_screen.dart';
+import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:haqmate/features/product_detail/service/product_detail_repo.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/views/product_view.dart';
@@ -42,15 +44,16 @@ class TeffApp extends StatelessWidget {
           child: ReviewsPage(),
         ),
         ChangeNotifierProvider<CartViewModel>(create: (_) => CartViewModel()),
+
+        ChangeNotifierProvider<OrdersViewModel>(
+          create: (_) => OrdersViewModel(),
+        ),
         // You can add more providers here:
         // ChangeNotifierProvider(create: (_) => AuthViewModel()),
         // ChangeNotifierProvider(create: (_) => CartViewModel()),
       ],
 
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: ProductDetailPage(),
-      ),
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: OrdersPage()),
     );
   }
 }
