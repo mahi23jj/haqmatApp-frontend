@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:haqmate/features/auth/widget/custom_input.dart';
+import 'package:haqmate/features/home/views/home_view.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants.dart';
 import '../widget/glass_card.dart';
 import '../../../core/app_router.dart';
@@ -17,6 +20,7 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AuthViewModel>(context, listen: false);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -84,7 +88,22 @@ class SignupScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () async {
+                      final value = await provider.signup(
+                        email.text,
+                        password.text,
+                        name.text,
+                        location.text,
+                        phone.text,
+                      );
+                      
+                      if (value) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomeView()),
+                        );
+                      }
+                    },
                     child: const Padding(
                       padding: EdgeInsets.symmetric(
                         vertical: 12,
@@ -100,7 +119,13 @@ class SignupScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 15),
-
+                  if (provider.error != null)
+                    Text(
+                      provider.error!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  const SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
                       Navigator.push(

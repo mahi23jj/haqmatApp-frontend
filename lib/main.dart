@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/auth/view/signup_screen.dart';
+import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:haqmate/features/cart/view/cart_view.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:haqmate/features/home/views/home_view.dart';
@@ -28,6 +30,7 @@ class TeffApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<AuthViewModel>(create: (_) => AuthViewModel()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
 
         ChangeNotifierProvider(
@@ -51,16 +54,18 @@ class TeffApp extends StatelessWidget {
           create: (_) => OrdersViewModel(),
         ),
 
-
-          ChangeNotifierProvider<OrderdetailViewModel>(
-          create: (_) =>OrderdetailViewModel(),
+        ChangeNotifierProvider<OrderdetailViewModel>(
+          create: (_) => OrderdetailViewModel(),
         ),
         // You can add more providers here:
         // ChangeNotifierProvider(create: (_) => AuthViewModel()),
         // ChangeNotifierProvider(create: (_) => CartViewModel()),
       ],
 
-      child: MaterialApp(debugShowCheckedModeBanner: false, home: OrderDetailsPage()),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: HomeView(),
+      ),
     );
   }
 }
