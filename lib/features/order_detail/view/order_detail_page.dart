@@ -17,9 +17,10 @@ class OrderDetailsPage extends StatelessWidget {
       ),
 
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: ListView(
           children: [
+            SizedBox(height: 16),
             _buildOrderId(vm),
             SizedBox(height: 20),
             _buildTrackingSection(vm),
@@ -27,8 +28,26 @@ class OrderDetailsPage extends StatelessWidget {
             _buildOrderItems(vm),
             SizedBox(height: 20),
             _buildAddress(vm),
-            SizedBox(height: 20),
-            _buildAddress(vm),
+            // SizedBox(height: 20),
+            // _buildAddress(vm),
+            SizedBox(height: 25),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () {},
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 50),
+                child: Text(
+                  "Contact Sellers",
+                  style: TextStyle(color: AppColors.background, fontSize: 17),
+                ),
+              ),
+            ),
+             SizedBox(height: 16),
           ],
         ),
       ),
@@ -38,7 +57,7 @@ class OrderDetailsPage extends StatelessWidget {
   Widget _buildOrderId(OrderdetailViewModel vm) {
     return FadeIn(
       child: Text(
-        vm.order.orderId,
+        "Order Id - ${vm.order.orderId}",
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
@@ -56,7 +75,7 @@ class OrderDetailsPage extends StatelessWidget {
               "Order Tracking",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 18),
             ...vm.order.tracking.map((step) {
               final isLast = step == vm.order.tracking.last;
               return _trackingTile(step, isLast);
@@ -132,6 +151,21 @@ class OrderDetailsPage extends StatelessWidget {
             ),
             SizedBox(height: 10),
             ...vm.order.items.map((item) => _itemCard(item)),
+            Divider(height: 24, thickness: 1),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Total",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  "2000 ETB",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -140,26 +174,30 @@ class OrderDetailsPage extends StatelessWidget {
 
   Widget _itemCard(item) {
     return SlideIn(
-      child: Container(
-        margin: EdgeInsets.only(bottom: 14),
-        decoration: _boxDecoration(),
-        child: ListTile(
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              item.image,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 14),
+            decoration: _boxDecoration(),
+            child: ListTile(
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  item.image,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              title: Text(item.name),
+              subtitle: Text("${item.origin}\n${item.quantity} x"),
+              trailing: Text(
+                "${item.price} ETB",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
-          title: Text(item.name),
-          subtitle: Text("${item.origin}\n${item.quantity} x"),
-          trailing: Text(
-            "${item.price} ETB",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
+        ],
       ),
     );
   }

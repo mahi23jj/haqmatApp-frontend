@@ -1,15 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/home/service/product_repository.dart';
 import '../models/product.dart';
-
 
 class HomeViewModel extends ChangeNotifier {
   final FakeRepository _repo = FakeRepository();
   bool _loading = true;
   String? _error;
-  List<Product> featured = [];
-  List<Product> flashSale = [];
+  // List<Product> featured = [];
+  List<ProductModel> flashSale = [];
 
   bool get loading => _loading;
   String? get error => _error;
@@ -18,21 +16,23 @@ class HomeViewModel extends ChangeNotifier {
     load();
   }
 
-  Future<void> load() async {
+  Future<List<ProductModel>> load() async {
     _loading = false;
     _error = null;
     notifyListeners();
 
     try {
- /*      final results = await Future.wait([
-        
-       
-      ]); */
-      featured = _repo.fetchFeatured() ;
-      flashSale =  _repo.fetchFlashSale() ;
+      flashSale = await _repo.fetchFeatured();
+
+      print(flashSale.length);
+
+      _loading = false;
+      notifyListeners();
+
+      return flashSale;
     } catch (e) {
-      // Log.e('HomeViewModel load failed', e);
       _error = 'Failed to load data';
+      return [];
     } finally {
       _loading = false;
       notifyListeners();

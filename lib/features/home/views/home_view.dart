@@ -39,7 +39,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.read<HomeViewModel>();
+    final vm = Provider.of<HomeViewModel>(context, listen: true);
+
+    print(vm.flashSale.length);
 
     return Scaffold(
       extendBody: true,
@@ -241,10 +243,13 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                             return FlashSaleItem(product: item);
                           },),
                     ), */
+
+                    
                     SizedBox(
                       height: 550,
                       child: GridView.builder(
                         itemCount: vm.flashSale.length,
+                        
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2, // 2 columns
                           mainAxisSpacing: 10, // spacing between rows

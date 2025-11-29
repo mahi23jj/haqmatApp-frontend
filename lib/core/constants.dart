@@ -10,3 +10,8 @@ class AppColors {
   static const localPreviewImage =
       '/mnt/data/9bafefa5-747c-4533-95c9-b67ea8830e09.png';
 }
+
+class Constants {
+  static const baseurl = 'http://localhost:3000';
+  
+}

@@ -45,6 +45,22 @@ class OrderdetailViewModel extends ChangeNotifier {
           image:
               "assets/images/teff.jpg",
         ),
+        OrderItem(
+          name: "Pure White Teff",
+          origin: "Grown in Gojjam",
+          quantity: 2,
+          price: 4500,
+          image:
+              "assets/images/teff.jpg",
+        ),
+        OrderItem(
+          name: "Pure White Teff",
+          origin: "Grown in Gojjam",
+          quantity: 2,
+          price: 4500,
+          image:
+              "assets/images/teff.jpg",
+        ),
       ],
     );
 

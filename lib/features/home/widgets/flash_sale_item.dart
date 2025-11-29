@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 
 class FlashSaleItem extends StatelessWidget {
-  final Product product;
+  final ProductModel product;
   const FlashSaleItem({Key? key, required this.product}) : super(key: key);
 
   @override
