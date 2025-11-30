@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/auth/model/auth_model.dart';
 import 'package:haqmate/features/auth/service/auth_reposiroty.dart';
 
@@ -25,6 +26,9 @@ class AuthViewModel extends ChangeNotifier {
       print(result);
       _user = result;
 
+
+      await saveToken(_user!.token); // save token to local storage
+
       _loading = false;
       notifyListeners();
       return true;
@@ -50,6 +54,8 @@ class AuthViewModel extends ChangeNotifier {
     try {
       final result = await _repo.signup(email, password, name, location, phone);
       _user = result;
+
+       await saveToken(_user!.token); // save token to local storage
 
       _loading = false;
       notifyListeners();

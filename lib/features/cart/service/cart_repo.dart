@@ -7,10 +7,10 @@ import 'package:haqmate/features/review/model/review_model.dart';
 import 'package:http/http.dart' as Http;
 
 // Fake implementation for local testing. Replace with a real HTTP client later.
-class ReviewService {
+class CartService {
   // get token from local storage
 
-  Future<ReviewList> fetchReviews(String productid) async {
+  Future<ReviewList> fetchs(String productid) async {
     try {
       final response = await Http.get(
         Uri.parse('${Constants.baseurl}api/feedback/$productid'),

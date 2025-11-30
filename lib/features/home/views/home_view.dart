@@ -4,6 +4,8 @@ import 'package:haqmate/core/bottom_nev.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
 import 'package:haqmate/features/home/widgets/catagory_item.dart';
+import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
+import 'package:haqmate/features/product_detail/views/product_view.dart';
 import 'package:provider/provider.dart';
 import '../widgets/banner_card.dart';
 import '../widgets/flash_sale_item.dart';
@@ -170,7 +172,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                       ],
                     ),
 
-          /*           const SizedBox(height: 12),
+                    /*           const SizedBox(height: 12),
                     SizedBox(
                       height: 86,
                       child: ListView(
@@ -190,7 +192,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                     const SizedBox(height: 18), */
 
                     // Flash sale header
-                   /*  Row(
+                    /*  Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
@@ -213,7 +215,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                       ],
                     ), */
 
-            /*         const SizedBox(height: 12),
+                    /*         const SizedBox(height: 12),
 
                     // Flash sale filters
                     SizedBox(
@@ -228,7 +230,6 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         ],
                       ),
                     ), */
-
                     const SizedBox(height: 16),
 
                     // make grid 2*2
@@ -243,13 +244,11 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                             return FlashSaleItem(product: item);
                           },),
                     ), */
-
-                    
                     SizedBox(
                       height: 550,
                       child: GridView.builder(
                         itemCount: vm.flashSale.length,
-                        
+
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2, // 2 columns
                           mainAxisSpacing: 10, // spacing between rows
@@ -260,7 +259,18 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         itemBuilder: (context, index) {
                           final item =
                               vm.flashSale[index % vm.flashSale.length];
-                          return FlashSaleItem(product: item);
+                          return GestureDetector(
+                            onTap: () {
+                              context.read<ProductViewModel>().load(item.id);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProductDetailPage(),
+                                ),
+                              );
+                            },
+                            child: FlashSaleItem(product: item),
+                          );
                         },
                       ),
                     ),

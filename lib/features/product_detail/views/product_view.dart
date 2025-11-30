@@ -169,7 +169,20 @@ class ProductDetailPage extends StatelessWidget {
 
                       SizedBox(height: 9),
 
-                      ReviewsList(count: 2),
+                      if (product.reviews.isEmpty)
+                        const Center(child: Text('No reviews yet')),
+
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 20),
+                        itemBuilder: (ctx, index) {
+                          final r = product.reviews[index];
+                          return AnimatedReviewCard(review: r, index: index);
+                        },
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemCount: product.reviews.length,
+                      ),
 
                       Center(
                         child: ElevatedButton(
@@ -409,7 +422,7 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   Widget _buildWeightOptions(ProductViewModel vm) {
-    final weights = vm.product!.weights;
+    final weights = vm.weights;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -468,25 +481,25 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDeliveryAndLocation(ProductViewModel vm) {
-    final p = vm.product!;
-    return Row(
-      children: [
-        Icon(Icons.location_on_outlined, color: AppColors.primary),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            p.locationInfo,
-            style: TextStyle(color: AppColors.textDark),
-          ),
-        ),
-        SizedBox(width: 12),
-        Icon(Icons.delivery_dining, color: AppColors.accent),
-        SizedBox(width: 8),
-        Text('Delivery', style: TextStyle(color: AppColors.textDark)),
-      ],
-    );
-  }
+  // Widget _buildDeliveryAndLocation(ProductViewModel vm) {
+  //   final p = vm.product!;
+  //   return Row(
+  //     children: [
+  //       Icon(Icons.location_on_outlined, color: AppColors.primary),
+  //       SizedBox(width: 8),
+  //       Expanded(
+  //         child: Text(
+  //           p.locationInfo,
+  //           style: TextStyle(color: AppColors.textDark),
+  //         ),
+  //       ),
+  //       SizedBox(width: 12),
+  //       Icon(Icons.delivery_dining, color: AppColors.accent),
+  //       SizedBox(width: 8),
+  //       Text('Delivery', style: TextStyle(color: AppColors.textDark)),
+  //     ],
+  //   );
+  // }
 
   Widget _buildDescription(ProductViewModel vm) {
     final p = vm.product!;
@@ -503,7 +516,7 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProductsList(ProductViewModel vm) {
+  /*  Widget _buildProductsList(ProductViewModel vm) {
     // For teff app we show related product weights or other variants
     final p = vm.product!;
     return Column(
@@ -515,9 +528,9 @@ class ProductDetailPage extends StatelessWidget {
           height: 120,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: p.weights.length,
+            itemCount: vm.weights.length,
             itemBuilder: (context, index) {
-              final w = p.weights[index];
+              final w = vm.weights[index];
               final price =
                   (p.basePrice * w.multiplier) *
                   (p.discountPercent != null
@@ -569,5 +582,5 @@ class ProductDetailPage extends StatelessWidget {
         ),
       ],
     );
-  }
+  } */
 }

@@ -34,7 +34,7 @@ class TeffApp extends StatelessWidget {
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
 
         ChangeNotifierProvider(
-          create: (_) => ProductViewModel(FakeRepository())..load('teff-1'),
+          create: (_) => ProductViewModel(ProductDetailRepo()),
           child: ProductDetailPage(),
         ),
 
