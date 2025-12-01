@@ -61,7 +61,11 @@ class TeffApp extends StatelessWidget {
         // ChangeNotifierProvider(create: (_) => CartViewModel()),
       ],
 
-      child: MaterialApp(debugShowCheckedModeBanner: false, home: HomeView()),
+      child: MaterialApp(
+        
+        debugShowCheckedModeBanner: false, 
+        home: LoginScreen(),
+        ),
     );
   }
 }

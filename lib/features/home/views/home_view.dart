@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           ),
         ],
       ),
-      bottomNavigationBar: const TeffBottomNav(),
+      
       body: SafeArea(
         child: vm.loading
             ? const Center(child: CircularProgressIndicator())

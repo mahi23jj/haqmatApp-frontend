@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/bottom_nev_page.dart';
 import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:haqmate/features/auth/widget/custom_input.dart';
 import 'package:haqmate/features/auth/widget/glass_card.dart';
@@ -75,7 +76,7 @@ class LoginScreen extends StatelessWidget {
                       if (value) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => HomeView()),
+                          MaterialPageRoute(builder: (context) => TeffBottomNavPage()),
                         );
                       }
                     },
