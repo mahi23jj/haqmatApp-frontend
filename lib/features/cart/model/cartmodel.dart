@@ -23,20 +23,37 @@ class CartModel {
     required this.totalprice,
   });
 
+  // factory CartModel.fromJson(Map<String, dynamic> json) {
+  //   return CartModel(
+  //     id: json['id'],
+  //     name: json['product']['name'],
+  //     //
+  //     // price: (json['product']['pricePerKg'] as num).toDouble(),
+  //     imageUrl: json['product']['image'],
+  //     packaging: json['packagingSize'],
+  //     quantity: json['quantity'],
+  //     tefftype: json['product']['tefftype'],
+  //     quality: json['product']['quality'],
+  //     productId: json['product']['id'],
+  //     totalprice: json['totalprice']
+  //   );
+  // }
+
   factory CartModel.fromJson(Map<String, dynamic> json) {
-    return CartModel(
-      id: json['id'],
-      name: json['product']['name'],
-      // price: (json['product']['pricePerKg'] as num).toDouble(),
-      imageUrl: json['product']['image'],
-      packaging: json['packagingSize'],
-      quantity: json['quantity'],
-      tefftype: json['product']['tefftype'],
-      quality: json['product']['quality'],
-      productId: json['product']['id'],
-      totalprice: json['totalprice']
-    );
-  }
+  return CartModel(
+    id: json['id'],
+    name: json['product']['name'],
+    imageUrl: json['product']['image'],
+    packaging: json['packagingSize'],
+    quantity: json['quantity'],
+    tefftype: json['product']['teffType'], // FIXED
+    quality: json['product']['quality'],
+    productId: json['product']['id'],
+    totalprice: json['totalprice'],
+  );
+}
+
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

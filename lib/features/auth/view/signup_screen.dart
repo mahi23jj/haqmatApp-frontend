@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/bottom_nev_page.dart';
 import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:haqmate/features/auth/widget/custom_input.dart';
 import 'package:haqmate/features/home/views/home_view.dart';
@@ -81,7 +82,96 @@ class SignupScreen extends StatelessWidget {
 
                   const SizedBox(height: 25),
 
-                  ElevatedButton(
+                  Consumer<AuthViewModel>(
+                    builder: (context, provider, child) {
+                      return Column(
+                        children: [
+                          // Show error message
+                          if (provider.error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                provider.error!,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.secondary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                              onPressed: provider.loading
+                                  ? null
+                                  : () async {
+                                      final ok = await provider.signup(
+                                        email.text,
+                                        password.text,
+                                        name.text,
+                                        location.text,
+                                        phone.text,
+                                      );
+
+                                      if (ok) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => TeffBottomNavPage(),
+                                          ),
+                                        );
+                                      }
+                                    },
+                              child: provider.loading
+                                  ? const SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Sign Up",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          TextButton(
+                            onPressed: provider.loading
+                                ? null
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      AppRouter.animatedRoute(LoginScreen()),
+                                    );
+                                  },
+                            child: const Text(
+                              "Create an account",
+                              style: TextStyle(color: AppColors.primary),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+// Japi&2020
+                /*   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.secondary,
                       shape: RoundedRectangleBorder(
@@ -96,7 +186,7 @@ class SignupScreen extends StatelessWidget {
                         location.text,
                         phone.text,
                       );
-                      
+
                       if (value) {
                         Navigator.push(
                           context,
@@ -137,7 +227,7 @@ class SignupScreen extends StatelessWidget {
                       "Already have an account? Login",
                       style: TextStyle(color: AppColors.primary),
                     ),
-                  ),
+                  ), */
                 ],
               ),
             ),

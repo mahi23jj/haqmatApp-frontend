@@ -29,8 +29,9 @@ class FlashSaleItem extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
-              child: Image.network(
-                product.imageUrl,
+              child: Image.asset(
+                'assets/images/teff.jpg',
+                // product.imageUrl,
                 height: 140,
                 width: double.infinity,
                 fit: BoxFit.cover,

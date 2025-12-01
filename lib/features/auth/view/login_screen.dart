@@ -61,7 +61,93 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  ElevatedButton(
+                  Consumer<AuthViewModel>(
+                    builder: (context, provider, child) {
+                      return Column(
+                        children: [
+                          // Show error message
+                          if (provider.error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                provider.error!,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.secondary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                              onPressed: provider.loading
+                                  ? null
+                                  : () async {
+                                      final ok = await provider.login(
+                                        email.text.trim(),
+                                        password.text.trim(),
+                                      );
+
+                                      if (ok) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => TeffBottomNavPage(),
+                                          ),
+                                        );
+                                      }
+                                    },
+                              child: provider.loading
+                                  ? const SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Login",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          TextButton(
+                            onPressed: provider.loading
+                                ? null
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      AppRouter.animatedRoute(SignupScreen()),
+                                    );
+                                  },
+                            child: const Text(
+                              "Create an account",
+                              style: TextStyle(color: AppColors.primary),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  /*  ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.secondary,
                       shape: RoundedRectangleBorder(
@@ -107,7 +193,7 @@ class LoginScreen extends StatelessWidget {
                       "Create an account",
                       style: TextStyle(color: AppColors.primary),
                     ),
-                  ),
+                  ), */
                 ],
               ),
             ),

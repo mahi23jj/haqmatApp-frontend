@@ -35,19 +35,15 @@ class TeffApp extends StatelessWidget {
 
         ChangeNotifierProvider(
           create: (_) => ProductViewModel(ProductDetailRepo()),
-          child: ProductDetailPage(),
         ),
 
-        /*       ChangeNotifierProvider(
-          create: (_) => ProductViewModel(FakeRepository())..load('teff-1'),
-          child: CartScreen(),
-        ), */
         ChangeNotifierProvider(
           create: (_) => ReviewViewModel(repository: ReviewService()),
-          child: ReviewsPage(),
         ),
 
-        ChangeNotifierProvider<CartViewModel>(create: (_) => CartViewModel()..loadCart()),
+        ChangeNotifierProvider<CartViewModel>(
+          create: (_) => CartViewModel()..loadCart(),
+        ),
 
         ChangeNotifierProvider<OrdersViewModel>(
           create: (_) => OrdersViewModel(),
@@ -56,16 +52,12 @@ class TeffApp extends StatelessWidget {
         ChangeNotifierProvider<OrderdetailViewModel>(
           create: (_) => OrderdetailViewModel(),
         ),
-        // You can add more providers here:
-        // ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        // ChangeNotifierProvider(create: (_) => CartViewModel()),
       ],
 
       child: MaterialApp(
-        
-        debugShowCheckedModeBanner: false, 
+        debugShowCheckedModeBanner: false,
         home: LoginScreen(),
-        ),
+      ),
     );
   }
 }

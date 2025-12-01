@@ -27,6 +27,8 @@ class CartViewModel extends ChangeNotifier {
 
     try {
       _cartItems = await _cartService.fetchcart();
+      print(_cartItems);
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
     }
@@ -63,35 +65,80 @@ class CartViewModel extends ChangeNotifier {
   // -------------------------
   // UPDATE QUANTITY (+ or -)
   // -------------------------
-  Future<void> updateQuantity({
-    required String productId,
-    required int quantity,
-    required int packagingSize,
-  }) async {
-    _loading = true;
-    notifyListeners();
+  // Future<void> updateQuantity({
+  //   required String productId,
+  //   required int quantity,
+  //   required int packagingSize,
+  // }) async {
+  //   _loading = true;
+  //   notifyListeners();
 
-    try {
-      await _cartService.updatecartquanty(productId, quantity, packagingSize);
+  //   try {
+  //     await _cartService.updatecartquanty(productId, quantity, packagingSize);
          
 
-         final carts = _cartItems!.items;
-      // update local object immediately
-      final index = carts.indexWhere((c) =>
-          c.productId == productId && c.packaging == packagingSize);
+  //        final carts = _cartItems!.items;
+  //     // update local object immediately
+  //     final index = carts.indexWhere((c) =>
+  //         c.productId == productId && c.packaging == packagingSize);
 
-      if (index != -1) {
-        carts[index] =
-          carts[index].copyWith(quantity: quantity);
-      }
+  //     if (index != -1) {
+  //       carts[index] =
+  //         carts[index].copyWith(quantity: quantity);
+  //     }
 
-    } catch (e) {
-      _error = e.toString();
+  //   } catch (e) {
+  //     _error = e.toString();
+  //   }
+
+  //   _loading = false;
+  //   notifyListeners();
+  // }
+
+
+  Future<void> updateQuantity({
+  required String productId,
+  required int quantity,
+  required int packagingSize,
+}) async {
+  try {
+    await _cartService.updatecartquanty(productId, quantity, packagingSize);
+
+    final carts = _cartItems!.items;
+    final index = carts.indexWhere(
+      (c) => c.productId == productId && c.packaging == packagingSize,
+    );
+
+    if (index != -1) {
+      final old = carts[index];
+
+      final pricePerItem = old.totalprice ~/ old.quantity;
+
+      carts[index] = old.copyWith(
+        quantity: quantity,
+        totalprice: quantity * pricePerItem,
+      );
     }
 
-    _loading = false;
-    notifyListeners();
+    // recompute subtotal, tax, total
+    final subtotal = carts.fold(0, (sum, item) => sum + item.totalprice);
+    final tax = subtotal * 0.15; // adjust rate based on backend
+    final total = subtotal + tax;
+
+    _cartItems = CartModelList(
+      items: carts,
+      subtotal: subtotal,
+      tax: tax,
+      totalPrice: total,
+    );
+
+  } catch (e) {
+    _error = e.toString();
   }
+
+  notifyListeners();
+}
+
 
   // -------------------------
   // CLEAR CART ERROR

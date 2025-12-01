@@ -14,14 +14,18 @@ class CartService {
   Future<CartModelList> fetchcart() async {
     String? token = await getToken();
 
+    print(token);
+
     try {
       final response = await Http.get(
-        Uri.parse('${Constants.baseurl}api/cart'),
+        Uri.parse('${Constants.baseurl}/api/cart'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
+
+      print(response.body);
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -50,7 +54,7 @@ class CartService {
 
     try {
       final response = await Http.post(
-        Uri.parse('${Constants.baseurl}api/cart/add_update'),
+        Uri.parse('${Constants.baseurl}/api/cart/add_update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -83,7 +87,7 @@ class CartService {
 
     try {
       final response = await Http.put(
-        Uri.parse('${Constants.baseurl}api/cart/quantity_update'),
+        Uri.parse('${Constants.baseurl}/api/cart/quantity_update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

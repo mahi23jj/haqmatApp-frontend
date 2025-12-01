@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/bottom_nev.dart';
 import 'package:haqmate/features/cart/view/cart_view.dart';
+import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:haqmate/features/home/views/home_view.dart';
 import 'package:haqmate/features/orders/view/order_screen.dart';
+import 'package:provider/provider.dart';
 
 class TeffBottomNavPage extends StatefulWidget {
   const TeffBottomNavPage({Key? key}) : super(key: key);
@@ -24,6 +26,13 @@ class _TeffBottomNavPageState extends State<TeffBottomNavPage> {
 
   void _onTap(int idx) {
     setState(() => _selectedIndex = idx);
+
+    if (idx == 2) {
+    // Cart tab clicked
+    Future.microtask(() {
+      Provider.of<CartViewModel>(context, listen: false).loadCart();
+    });
+  }
   }
 
   @override
