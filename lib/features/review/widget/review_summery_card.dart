@@ -9,11 +9,8 @@ class ReviewSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
-    final total = vm.reviews.length;
-    final avg = vm.reviews.isEmpty
-        ? 0.0
-        : vm.reviews.map((r) => r.rating).reduce((a, b) => a + b) /
-              (total == 0 ? 1 : total);
+    final total = vm.reviews!.totalCount;
+    final avg = vm.reviews!.averageRating;
 
     void _openWriteReviewSheet(BuildContext context) {
       showModalBottomSheet(

@@ -8,19 +8,23 @@ import 'package:haqmate/features/review/widget/startDisplay.dart';
 import 'package:provider/provider.dart';
 
 class ReviewsList extends StatelessWidget {
-  int count;
-
-  ReviewsList({Key? key, this.count = 0}) : super(key: key);
+  ReviewsList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
 
-     final actualCount = (count == 0)
-        ? vm.reviews.length
-        : math.min(count, vm.reviews.length);
+    List<Review> reviewlist = vm.reviews!.reviews;
 
-    if (vm.reviews.isEmpty) {
+    if (vm.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (vm.error != null) {
+      return Center(child: Text('Error: ${vm.error}'));
+    }
+
+    if (reviewlist.isEmpty) {
       return const Center(child: Text('No reviews yet'));
     }
 
@@ -29,11 +33,11 @@ class ReviewsList extends StatelessWidget {
       physics: NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 20),
       itemBuilder: (ctx, index) {
-        final r = vm.reviews[index];
+        final r = reviewlist[index];
         return AnimatedReviewCard(review: r, index: index);
       },
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemCount: actualCount,
+      itemCount: reviewlist.length,
     );
   }
 }

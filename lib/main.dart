@@ -43,11 +43,10 @@ class TeffApp extends StatelessWidget {
           child: CartScreen(),
         ), */
         ChangeNotifierProvider(
-          create: (_) => ReviewViewModel(
-            repository: ReviewRepository(service: FakeReviewService()),
-          )..loadReviews(),
+          create: (_) => ReviewViewModel(repository: ReviewService()),
           child: ReviewsPage(),
         ),
+
         ChangeNotifierProvider<CartViewModel>(create: (_) => CartViewModel()),
 
         ChangeNotifierProvider<OrdersViewModel>(
@@ -62,10 +61,7 @@ class TeffApp extends StatelessWidget {
         // ChangeNotifierProvider(create: (_) => CartViewModel()),
       ],
 
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: HomeView(),
-      ),
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: HomeView()),
     );
   }
 }
