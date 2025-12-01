@@ -20,87 +20,106 @@ class CartScreen extends StatelessWidget {
           title: Text("Your Cart", style: TextStyle(color: AppColors.textDark)),
         ),
         body: Consumer<CartViewModel>(
-          builder: (context, vm, _) => Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: vm.CartModels.length,
-                  itemBuilder: (context, index) {
-                    final CartModel = vm.CartModels[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
+          builder: (context, vm, _) {
+            final carts = vm.cartItems!.items;
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: carts.length,
+                    itemBuilder: (context, index) {
+                      final cartModel = carts[index];
+
+                      Widget quantityButton(IconData icon, VoidCallback onTap) {
+                        return GestureDetector(
+                          onTap: onTap,
+                          child: Icon(
+                            icon,
+                            size: 18,
+                            color: AppColors.textDark,
+                          ),
+                        );
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // IMAGE
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                CartModel.imageUrl,
-                                width: 70,
-                                height: 70,
-                                fit: BoxFit.cover,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // IMAGE
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  cartModel.imageUrl,
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
 
-                            SizedBox(width: 12),
+                              SizedBox(width: 12),
 
-                            // NAME + PRICE
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    CartModel.name,
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
+                              // NAME + PRICE
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      cartModel.name,
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "\$${CartModel.price}",
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontSize: 14,
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "\$${cartModel.totalprice.toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
 
-                            // + QUANTITY -
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(31, 182, 127, 26),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: Column(
-                                mainAxisSize:
-                                    MainAxisSize.min, // 🟢 prevents overflow
-                                children: [
-                                  quantityButton(
-                                    Icons.remove,
-                                    () => vm.decrement(CartModel),
-                                  ),
-                                  /*  GestureDetector(
+                              // + QUANTITY -
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(31, 182, 127, 26),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Column(
+                                  mainAxisSize:
+                                      MainAxisSize.min, // 🟢 prevents overflow
+                                  children: [
+                                    quantityButton(Icons.remove, () {
+                                      if (cartModel.quantity > 1) {
+                                        vm.updateQuantity(
+                                          productId: cartModel.productId,
+                                          quantity: cartModel.quantity - 1,
+                                          packagingSize: cartModel.packaging,
+                                        );
+                                      }
+                                    }),
+                                    /*  GestureDetector(
                                     onTap: () => vm.decrement(CartModel),
                                     child: Icon(
                                       Icons.remove,
@@ -108,22 +127,26 @@ class CartScreen extends StatelessWidget {
                                       color: AppColors.textDark,
                                     ),
                                   ), */
-                                  SizedBox(height: 4),
+                                    SizedBox(height: 4),
 
-                                  Text(
-                                    CartModel.quantity.toString(),
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontWeight: FontWeight.bold,
+                                    Text(
+                                      cartModel.quantity.toString(),
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 4),
+                                    SizedBox(height: 4),
 
-                                  quantityButton(
-                                    Icons.add,
-                                    () => vm.increment(CartModel),
-                                  ),
-                                  /*  GestureDetector(
+                                    quantityButton(
+                                      Icons.add,
+                                      () => vm.updateQuantity(
+                                        productId: cartModel.productId,
+                                        quantity: cartModel.quantity + 1,
+                                        packagingSize: cartModel.packaging,
+                                      ),
+                                    ),
+                                    /*  GestureDetector(
                                     onTap: () => vm.increment(CartModel),
                                     child: Icon(
                                       Icons.add,
@@ -131,15 +154,15 @@ class CartScreen extends StatelessWidget {
                                       color: AppColors.textDark,
                                     ),
                                   ), */
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
+                      );
 
-                    /*          Padding(
+                      /*          Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
@@ -201,66 +224,69 @@ class CartScreen extends StatelessWidget {
 
                       ),
                     ); */
-                  },
+                    },
+                  ),
                 ),
-              ),
-              Container(
-                padding: EdgeInsets.all(16),
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Subtotal Items (${vm.CartModels.length})"),
-                        Text("\$${vm.subtotal.toStringAsFixed(2)}"),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Delivery Fee"),
-                        Text("\$${vm.deliveryFee.toStringAsFixed(2)}"),
-                      ],
-                    ),
-                    Divider(height: 24, thickness: 1),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Total",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                Container(
+                  padding: EdgeInsets.all(16),
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Subtotal Items (${carts.length})"),
+                          Text(
+                            "\$${vm.cartItems!.subtotal.toStringAsFixed(2)}",
                           ),
-                        ),
-                        Text(
-                          "\$${vm.total.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Tax Fee"),
+                          Text("\$${vm.cartItems!.tax.toStringAsFixed(2)}"),
+                        ],
+                      ),
+                      Divider(height: 24, thickness: 1),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Total",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
+                          Text(
+                            "\$${vm.cartItems!.totalPrice.toStringAsFixed(2)}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          minimumSize: Size(double.infinity, 50),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        minimumSize: Size(double.infinity, 50),
+                        onPressed: () {},
+                        child: Text(
+                          "Go to Payment",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
-                      onPressed: () {},
-                      child: Text(
-                        "Go to Payment",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
         ),
       ),
     );

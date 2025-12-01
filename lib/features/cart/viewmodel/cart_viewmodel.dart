@@ -1,38 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 
-class CartViewModel extends ChangeNotifier {
-  List<CartModel> CartModels = [
-    CartModel(
-        name: "CLUB C 85 LOONEY TUNES",
-        price: 1200,
-        imageUrl: "assets/images/injera.jpg"),
-    CartModel(
-        name: "AF1 CRATER FLYKNIT NN (GS)",
-        price: 670,
-        imageUrl: "assets/images/injera.jpg"),
-    CartModel(
-        name: "BLAZER LOW PLATFORM (W)",
-        price: 880,
-        imageUrl: "assets/images/injera.jpg"),
-  ];
+import 'package:flutter/material.dart';
+import 'package:haqmate/features/cart/model/cartmodel.dart';
+import 'package:haqmate/features/cart/service/cart_repo.dart';
 
-  void increment(CartModel CartModel) {
-    CartModel.quantity++;
+
+class CartViewModel extends ChangeNotifier {
+  final CartService _cartService = CartService();
+
+  CartModelList? _cartItems;
+  bool _loading = false;
+  String? _error;
+
+  CartModelList? get cartItems => _cartItems;
+  bool get loading => _loading;
+  String? get error => _error;
+
+  // -------------------------
+  // FETCH CART ITEMS
+  // -------------------------
+  Future<void> loadCart() async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _cartItems = await _cartService.fetchcart();
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _loading = false;
     notifyListeners();
   }
 
-  void decrement(CartModel CartModel) {
-    if (CartModel.quantity > 1) {
-      CartModel.quantity--;
-      notifyListeners();
+  // -------------------------
+  // ADD OR UPDATE CART
+  // -------------------------
+  Future<void> addToCart({
+    required String productId,
+    required int quantity,
+    required int packagingSize,
+  }) async {
+    _loading = true;
+    notifyListeners();
+
+    try {
+      await _cartService.addcart(productId, quantity, packagingSize);
+
+      // reload cart after adding
+      await loadCart();
+
+    } catch (e) {
+      _error = e.toString();
     }
+
+    _loading = false;
+    notifyListeners();
   }
 
-  double get subtotal =>
-      CartModels.fold(0, (sum, item) => sum + item.price * item.quantity);
+  // -------------------------
+  // UPDATE QUANTITY (+ or -)
+  // -------------------------
+  Future<void> updateQuantity({
+    required String productId,
+    required int quantity,
+    required int packagingSize,
+  }) async {
+    _loading = true;
+    notifyListeners();
 
-  double get deliveryFee => 2;
+    try {
+      await _cartService.updatecartquanty(productId, quantity, packagingSize);
+         
 
-  double get total => subtotal + deliveryFee;
+         final carts = _cartItems!.items;
+      // update local object immediately
+      final index = carts.indexWhere((c) =>
+          c.productId == productId && c.packaging == packagingSize);
+
+      if (index != -1) {
+        carts[index] =
+          carts[index].copyWith(quantity: quantity);
+      }
+
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _loading = false;
+    notifyListeners();
+  }
+
+  // -------------------------
+  // CLEAR CART ERROR
+  // -------------------------
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
 }

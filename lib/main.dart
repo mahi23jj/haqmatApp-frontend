@@ -47,7 +47,7 @@ class TeffApp extends StatelessWidget {
           child: ReviewsPage(),
         ),
 
-        ChangeNotifierProvider<CartViewModel>(create: (_) => CartViewModel()),
+        ChangeNotifierProvider<CartViewModel>(create: (_) => CartViewModel()..loadCart()),
 
         ChangeNotifierProvider<OrdersViewModel>(
           create: (_) => OrdersViewModel(),
