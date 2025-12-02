@@ -12,7 +12,7 @@ class ReviewsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<ReviewViewModel>();
+    final vm = Provider.of<ReviewViewModel>(context, listen: false);
 
     List<Review> reviewlist = vm.reviews!.reviews;
 

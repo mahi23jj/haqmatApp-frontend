@@ -5,6 +5,8 @@ import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/widgets/add_to_cart_bar.dart';
+import 'package:haqmate/features/review/view/review_screen.dart';
+import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/review_list.dart';
 import 'package:haqmate/features/review/widget/write_review.dart';
 import 'package:provider/provider.dart';
@@ -192,7 +194,18 @@ class ProductDetailPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            context.read<ReviewViewModel>().loadReviews(
+                              product.id,
+                            );
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReviewsPage(),
+                              ),
+                            );
+                          },
                           child: const Padding(
                             padding: EdgeInsets.symmetric(
                               vertical: 12,

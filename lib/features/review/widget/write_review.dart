@@ -14,7 +14,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
   int _rating = 0;
   final _controller = TextEditingController();
   bool _submitting = false;
-  String _author = 'You'; // in real app, use user profile
+
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
           Expanded(
             child: TextField(
               controller: _controller,
-              maxLines: null,
+              maxLines: 3,
               expands: true,
               decoration: InputDecoration(
                 hintText: 'Share your experience with this product...',
@@ -120,7 +120,12 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
     setState(() => _submitting = true);
     final vm = context.read<ReviewViewModel>();
     try {
-      await vm.submitReview(_author, _controller.text.trim(), _rating);
+      await vm.submitReview(
+        vm.reviews!.reviews[0].productid,
+        _controller.text.trim(),
+        _rating,
+      );
+      // await vm.submitReview(_author, _controller.text.trim(), _rating);
       Navigator.of(context).pop();
       // show success snackbar
       ScaffoldMessenger.of(
