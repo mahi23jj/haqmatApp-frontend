@@ -19,14 +19,16 @@ class Review {
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-      id: json['id'],
-      productid: json['productid'],
-      author: json['user']['name'],
-      text: json['message'],
-      rating: json['rating'],
-      date: DateTime.parse(json['submittedAt']),
+      id: json['id'] ?? "", 
+      productid: json['productid'] ?? "",
+      author: json['user']['name']  ?? "",
+      text: json['message']  ?? "",
+      rating: json['rating'] ?? 0,
+      date: DateTime.parse(json['submittedAt']) ?? DateTime.now(),
     );
   }
+
+
 }
 
 class ReviewList {

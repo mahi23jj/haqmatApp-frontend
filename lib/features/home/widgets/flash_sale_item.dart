@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/product.dart';
+import 'package:haqmate/features/home/models/product.dart';
+import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
+import 'package:haqmate/features/product_detail/views/product_view.dart';
+import 'package:provider/provider.dart';
 
 class FlashSaleItem extends StatelessWidget {
   final ProductModel product;
@@ -7,8 +10,18 @@ class FlashSaleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: product.id,
+    return GestureDetector(
+      onTap: () async{
+
+        /* await context.read<ProductViewModel>().load(product.id); */
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(productid: product.id),
+          ),
+        );
+      },
       child: Container(
         width: 170,
         decoration: BoxDecoration(

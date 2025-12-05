@@ -5,31 +5,40 @@ import 'package:haqmate/features/product_detail/service/product_detail_repo.dart
 class ProductViewModel extends ChangeNotifier {
   final ProductDetailRepo _repo;
   Product? product;
-  List<WeightOption> get weights => [WeightOption(label: '1 kg', multiplier: 1), WeightOption(label: '5 kg', multiplier: 5), WeightOption(label: '10 kg', multiplier: 10)];
-  bool loading = true;
+
+  List<WeightOption> get weights => [
+    WeightOption(label: '1 kg', multiplier: 1),
+    WeightOption(label: '5 kg', multiplier: 5),
+    WeightOption(label: '10 kg', multiplier: 10),
+  ];
+
+  bool loading = false;
   String? error;
 
-  // UI state
   int selectedImageIndex = 0;
   int quantity = 1;
   int selectedWeightIndex = 0;
 
   ProductViewModel(this._repo);
 
-  void load(String id) async{
-    loading = false;
+  Future<void> load(String id) async {
+    loading = true; // FIXED
     error = null;
+    // product = null; // IMPORTANT FIX
     notifyListeners();
 
     try {
       product = await _repo.fetchProductById(id);
-      loading = false;
+      print('view model $product');
+
       notifyListeners();
     } catch (e) {
-      loading = false;
       error = e.toString();
-      notifyListeners();
+      print('error in product viewmodel: $error');
     }
+
+    loading = false;
+    notifyListeners();
   }
 
   void selectImage(int idx) {
@@ -55,11 +64,46 @@ class ProductViewModel extends ChangeNotifier {
 
   double get price {
     if (product == null) return 0.0;
-    final base =
-        product!.basePrice * weights[selectedWeightIndex].multiplier;
+    final base = product!.basePrice * weights[selectedWeightIndex].multiplier;
     final priceAfterDiscount = product!.discountPercent != null
         ? base * (1 - product!.discountPercent! / 100)
         : base;
     return priceAfterDiscount * quantity;
   }
 }
+
+
+// class ProductViewModel extends ChangeNotifier {
+//   final ProductDetailRepo _repo;
+//   Product? product;
+//   List<WeightOption> get weights => [WeightOption(label: '1 kg', multiplier: 1), WeightOption(label: '5 kg', multiplier: 5), WeightOption(label: '10 kg', multiplier: 10)];
+//   bool loading = true;
+//   String? error;
+
+//   // UI state
+//   int selectedImageIndex = 0;
+//   int quantity = 1;
+//   int selectedWeightIndex = 0;
+
+//   ProductViewModel(this._repo);
+
+//   void load(String id) async{
+//     loading = false;
+//     error = null;
+//     notifyListeners();
+
+//     try {
+//       product = await _repo.fetchProductById(id);
+
+//       print('viewmodel $product');
+//       loading = false;
+//       notifyListeners();
+//     } catch (e) {
+//       loading = false;
+//       error = e.toString();
+//       notifyListeners();
+//     }
+//   }
+
+ 
+// }

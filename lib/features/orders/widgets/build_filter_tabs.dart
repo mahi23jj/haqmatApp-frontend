@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 Widget buildFilterTabs(BuildContext context) {
   final vm = context.watch<OrdersViewModel>();
 
-  final filters = ["All", "Pending", "Processing", "Shipped", "Delivered"];
+  final filters = ["All", 'pending', 'failed' , 'paid' , 'delivered' , 'completed' , 'cancelled' , 'refunded'];
 
   return SizedBox(
     height: 45,

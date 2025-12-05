@@ -4,7 +4,8 @@ import 'package:haqmate/features/review/widget/startInpute.dart';
 import 'package:provider/provider.dart';
 
 class WriteReviewSheet extends StatefulWidget {
-  const WriteReviewSheet({Key? key}) : super(key: key);
+  final String productId;
+  WriteReviewSheet({Key? key, required this.productId}) : super(key: key);
 
   @override
   State<WriteReviewSheet> createState() => _WriteReviewSheetState();
@@ -14,7 +15,6 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
   int _rating = 0;
   final _controller = TextEditingController();
   bool _submitting = false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -54,22 +54,37 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
           ),
           const SizedBox(height: 12),
           const Text('Your Review', style: TextStyle(color: Colors.black54)),
+          // const SizedBox(height: 8),
+          // inside Column of sheet
           const SizedBox(height: 8),
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              maxLines: 3,
-              expands: true,
-              decoration: InputDecoration(
-                hintText: 'Share your experience with this product...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                fillColor: Colors.white,
-                filled: true,
+          TextField(
+            controller: _controller,
+            maxLines: 3, // or some reasonable number
+            decoration: InputDecoration(
+              hintText: 'Share your experience with this product...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
+              fillColor: Colors.white,
+              filled: true,
             ),
           ),
+
+          // Expanded(
+          //   child: TextField(
+          //     controller: _controller,
+          //     maxLines: 3,
+          //     expands: true,
+          //     decoration: InputDecoration(
+          //       hintText: 'Share your experience with this product...',
+          //       border: OutlineInputBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //       fillColor: Colors.white,
+          //       filled: true,
+          //     ),
+          //   ),
+          // ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -116,27 +131,64 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
       _showError('Please write your review');
       return;
     }
-
-    setState(() => _submitting = true);
+    
+    // setState(() => _submitting = true);
     final vm = context.read<ReviewViewModel>();
-    try {
-      await vm.submitReview(
-        vm.reviews!.reviews[0].productid,
-        _controller.text.trim(),
-        _rating,
-      );
-      // await vm.submitReview(_author, _controller.text.trim(), _rating);
-      Navigator.of(context).pop();
-      // show success snackbar
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Review submitted')));
-    } catch (e) {
-      _showError(e.toString());
-    } finally {
-      if (mounted) setState(() => _submitting = false);
-    }
+
+    await vm.submitReview(widget.productId, _controller.text.trim(), _rating);
+
+    Navigator.of(context).pop();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$vm.review'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    // try {
+
+    // } catch (e) {
+    //   _showError(e.toString());
+    // } finally {
+    //   if (mounted) setState(() => _submitting = false);
+    // }
   }
+
+  // Future<void> _submit(BuildContext context) async {
+  //   if (_rating == 0) {
+  //     _showError('Please select a rating');
+  //     return;
+  //   }
+  //   if (_controller.text.trim().isEmpty) {
+  //     _showError('Please write your review');
+  //     return;
+  //   }
+
+  //   setState(() => _submitting = true);
+  //   final vm = context.read<ReviewViewModel>();
+  //   try {
+  //     await vm.submitReview(
+  //       vm.reviews!.reviews[0].productid,
+  //       _controller.text.trim(),
+  //       _rating,
+  //     );
+  //     // await vm.submitReview(_author, _controller.text.trim(), _rating);
+  //     Navigator.of(context).pop();
+  //     // show success snackbar
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(const SnackBar(content: Text('Review submitted')));
+  //   } catch (e) {
+  //     _showError(e.toString());
+  //   } finally {
+  //     if (mounted) setState(() => _submitting = false);
+  //   }
+  // }
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));

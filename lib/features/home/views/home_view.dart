@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           ),
         ],
       ),
-      
+
       body: SafeArea(
         child: vm.loading
             ? const Center(child: CircularProgressIndicator())
@@ -259,18 +259,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         itemBuilder: (context, index) {
                           final item =
                               vm.flashSale[index % vm.flashSale.length];
-                          return GestureDetector(
-                            onTap: () {
-                              context.read<ProductViewModel>().load(item.id);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProductDetailPage(),
-                                ),
-                              );
-                            },
-                            child: FlashSaleItem(product: item),
-                          );
+                          return FlashSaleItem(product: item);
                         },
                       ),
                     ),

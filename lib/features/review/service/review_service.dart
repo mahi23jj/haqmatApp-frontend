@@ -11,10 +11,14 @@ class ReviewService {
   // get token from local storage
 
   Future<ReviewList> fetchReviews(String productid) async {
+    String? token = await getToken();
     try {
       final response = await Http.get(
-        Uri.parse('${Constants.baseurl}api/feedback/$productid'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('${Constants.baseurl}/api/feedback/$productid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${token}',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -24,31 +28,32 @@ class ReviewService {
         final feedbacksJson = body["data"] ?? body;
 
         final feedbacks = ReviewList.fromJson(feedbacksJson);
+        print('fetched reviews: $feedbacks');
 
         return feedbacks;
       } else {
         final body = jsonDecode(response.body);
+        print('body: $body');
         final message = ErrorParser.parse(body);
+        print(message);
         throw Exception(message);
       }
     } catch (e) {
+      print('error in review service: $e');
       throw Exception('Login error: $e');
     }
   }
 
-  // Simulate network latency
-  /*  await Future.delayed(Duration(milliseconds: 500 + _rnd.nextInt(300)));
-    return List<Review>.from(_data.reversed); */
 
   Future<String> submitReview(String productid, String text, int rating) async {
     String? token = await getToken();
 
     try {
       final response = await Http.post(
-        Uri.parse('${Constants.baseurl}api/feedback'),
+        Uri.parse('${Constants.baseurl}/api/feedback'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${token}',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
           "productId": productid,
@@ -58,18 +63,16 @@ class ReviewService {
       );
 
       if (response.statusCode == 200) {
-        // final body = jsonDecode(response.body);
-
         return 'Review submitted successfully';
       } else {
         final body = jsonDecode(response.body);
         final message = ErrorParser.parse(body);
+        print('message: $message');
         throw Exception(message);
       }
     } catch (e) {
-      throw Exception('Login error: $e');
+      print('error in submit review service: $e');
+      throw Exception(e.toString()); // ← correct
     }
   }
 }
-
-

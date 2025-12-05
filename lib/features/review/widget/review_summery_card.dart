@@ -6,6 +6,8 @@ import 'package:haqmate/features/review/widget/write_review.dart';
 import 'package:provider/provider.dart';
 
 class ReviewSummaryCard extends StatelessWidget {
+  final String productId;
+  const ReviewSummaryCard({super.key , required this.productId});
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
@@ -21,7 +23,7 @@ class ReviewSummaryCard extends StatelessWidget {
         ),
         builder: (ctx) => Padding(
           padding: MediaQuery.of(ctx).viewInsets,
-          child: const WriteReviewSheet(),
+          child:  WriteReviewSheet(productId: productId,),
         ),
       );
     }
@@ -50,7 +52,7 @@ class ReviewSummaryCard extends StatelessWidget {
                   StarDisplay(value: avg.round()),
                   const SizedBox(height: 4),
                   Text(
-                    '\${total} reviews',
+                    '$total reviews',
                     style: const TextStyle(color: Colors.black54),
                   ),
                   const SizedBox(height: 10),
@@ -68,7 +70,7 @@ class ReviewSummaryCard extends StatelessWidget {
                         horizontal: 50,
                       ),
                       child: Text(
-                        "Login",
+                        "write a review",
                         style: TextStyle(
                           color: AppColors.background,
                           fontSize: 17,

@@ -11,26 +11,56 @@ import 'package:haqmate/features/review/widget/review_list.dart';
 import 'package:haqmate/features/review/widget/write_review.dart';
 import 'package:provider/provider.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
+  final String productid;
+  const ProductDetailPage({super.key, required this.productid});
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
   final _scrollController = ScrollController();
 
-  void _openWriteReviewSheet(BuildContext context) {
+  void _openWriteReviewSheet(BuildContext context, String productId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
       ),
       builder: (ctx) => Padding(
         padding: MediaQuery.of(ctx).viewInsets,
-        child: const WriteReviewSheet(),
+        child: WriteReviewSheet(productId: productId),
       ),
     );
   }
 
   @override
+  void initState() {
+    super.initState();
+    print('product id in detail page: ${widget.productid}');
+    // Run AFTER the first frame so notifyListeners is safe
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductViewModel>().load(widget.productid);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ProductViewModel>(context);
+    final vm = context.watch<ProductViewModel>();
+
+    // 1️⃣ LOADING SCREEN
+    if (vm.loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // 2️⃣ NO PRODUCT FOUND
+    if (vm.product == null) {
+      return const Scaffold(body: Center(child: Text("No product found")));
+    }
+
+    // 3️⃣ SAFE — product is guaranteed non-null here
     final product = vm.product!;
 
     return Scaffold(
@@ -163,7 +193,8 @@ class ProductDetailPage extends StatelessWidget {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           IconButton(
-                            onPressed: () => _openWriteReviewSheet(context),
+                            onPressed: () =>
+                                _openWriteReviewSheet(context, product.id),
                             icon: Icon(Icons.wifi_protected_setup_sharp),
                           ),
                         ],
@@ -195,14 +226,15 @@ class ProductDetailPage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            context.read<ReviewViewModel>().loadReviews(
+                            /*   context.read<ReviewViewModel>().loadReviews(
                               product.id,
-                            );
+                            ); */
 
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ReviewsPage(),
+                                builder: (context) =>
+                                    ReviewsPage(productid: product.id),
                               ),
                             );
                           },
@@ -262,7 +294,7 @@ class ProductDetailPage extends StatelessWidget {
     }
 
     return Hero(
-      tag: product.id,
+      tag: "product_${widget.productid}",
       child: Container(
         color: Colors.white,
         child: Stack(

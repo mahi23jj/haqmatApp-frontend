@@ -30,22 +30,36 @@ required this.reviews,
 // from json  
 factory Product.fromJson(Map<String, dynamic> json) {
   return Product(
-    id: json['id'],
-    name: json['name'],
-    description: json['description'],
-    basePrice: (json['price'] as num).toDouble(),
-    images: List<String>.from(json['images']),
-    inStock: json['isstock'],
-    rating: (json['averageRating'] as num).toDouble(),
-    reviewsCount: json['totalRatings'],
-    reviews: (json['feedback'] as List<dynamic>)
-        .map((e) => Review.fromJson(e as Map<String, dynamic>))
-        .toList(),
-     discountPercent: json['discount'] != null
-        ? (json['discount'] as num).toDouble()
-        : null, 
+    id: json['id'] ?? "",
+
+    name: json['name'] ?? "",
+
+    description: json['description'] ?? "",
+
+    basePrice: (json['price'] as num?)?.toDouble() ?? 0.0,
+
+    images: json['images'] != null
+        ? List<String>.from(json['images'])
+        : [],
+
+    inStock: json['isstock'] ?? false,
+
+    rating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
+
+    reviewsCount: json['totalRatings'] ?? 0,
+
+    reviews: json['feedback'] != null
+        ? (json['feedback'] as List<dynamic>)
+            .map((e) => Review.fromJson(e))
+            .toList()
+        : [],
+
+    discountPercent: json['discount'] != null
+        ? (json['discount'] as num?)?.toDouble()
+        : null,
   );
 }
+
 
 
 }

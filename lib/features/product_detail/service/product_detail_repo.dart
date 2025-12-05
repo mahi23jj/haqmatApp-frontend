@@ -13,13 +13,11 @@ class ProductDetailRepo {
         headers: {'Content-Type': 'application/json'},
       );
 
-      print(response.body);
-
-      print(response.statusCode);
+    
 
       if (response.statusCode == 201) {
         final body = jsonDecode(response.body);
-        print(body);
+       
 
         // If API returns { "data": [...] }
         final productsJson = body["data"] ?? body;
@@ -30,7 +28,7 @@ class ProductDetailRepo {
 
         final products = Product.fromJson(productsJson);
 
-        print(products);
+        print('product detail $products');
 
         return products;
       } else {
