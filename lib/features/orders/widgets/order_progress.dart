@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 
 class OrderProgress extends StatelessWidget {
-  final int stage; // 1–4
+  final String stage; // 1–4
 
   const OrderProgress({required this.stage});
 
   @override
   Widget build(BuildContext context) {
-    final steps = ["Ordered", "Packed", "Shipped", "Delivered"];
+    final steps = ["pending", 'failed' , 'paid' , 'delivered' ,'completed', 'cancelled', 'refunded'];
+
+    // get index of steps where equal with stage
+    final index = steps.indexWhere((element) => element == stage);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(4, (i) {
-        final completed = i < stage;
+      children: List.generate(7, (i) {
+        final completed = i < (index + 1);
 
         return Row(
           children: [

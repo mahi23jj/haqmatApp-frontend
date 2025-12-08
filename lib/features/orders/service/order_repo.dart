@@ -1,7 +1,59 @@
+import 'dart:convert';
+
+import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/error_parser.dart';
 import 'package:haqmate/features/orders/model/order.dart';
+import 'package:http/http.dart' as Http;
 
 class OrdersRepository {
-  Future<List<OrderItem>> fetchOrders() async {
+
+
+
+   Future<List<OrderItem>> fetchOrders()async {
+    try {
+      final response = await Http.get(
+        Uri.parse('${Constants.baseurl}/api/order'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print(response.body);
+
+      print(response.statusCode);
+
+      if (response.statusCode == 201) {
+
+         final body = jsonDecode(response.body);
+         print(body);
+
+      // If API returns { "data": [...] }
+      final productsJson = body["data"] ?? body;
+
+      if (productsJson is! List) {
+        throw Exception("Invalid data format");
+      }
+
+      final orders = productsJson
+          .map<OrderItem>((json) => OrderItem.fromJson(json))
+          .toList();
+
+          print(orders);
+
+      return orders;
+
+
+      } else {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Login error: $e');
+    }
+  }
+
+
+
+  /* Future<List<OrderItem>> fetchOrders() async {
     await Future.delayed(Duration(milliseconds: 800));
 
     return [
@@ -28,4 +80,7 @@ class OrdersRepository {
       )
     ];
   }
+ */
+
+  
 }

@@ -51,7 +51,7 @@ class OrderCard extends StatelessWidget {
           SizedBox(height: 14),
 
           // ORDER STAGE
-          OrderProgress(stage: order.stage),
+          OrderProgress(stage: order.status),
 
           SizedBox(height: 14),
 
