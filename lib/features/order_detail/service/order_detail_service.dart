@@ -2,19 +2,20 @@ import 'dart:convert';
 
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/core/error_parser.dart';
+import 'package:haqmate/features/order_detail/model/order_model.dart';
 import 'package:haqmate/features/orders/model/order.dart';
 import 'package:http/http.dart' as Http;
 
-class OrdersRepository {
+class OrdersDetailRepository {
 
 
 
-   Future<List<OrderItem>> fetchOrders()async {
+   Future<OrderDetails> fetchOrdersdetail(String id)async {
      String? token = await getToken();
 
     try {
       final response = await Http.get(
-        Uri.parse('${Constants.baseurl}/api/order'),
+        Uri.parse('${Constants.baseurl}/api/order/$id'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -28,22 +29,21 @@ class OrdersRepository {
       if (response.statusCode == 200) {
 
          final body = jsonDecode(response.body);
-         print(body);
+
 
       // If API returns { "data": [...] }
       final productsJson = body["data"] ?? body;
 
-      if (productsJson is! List) {
-        throw Exception("Invalid data format");
-      }
+      print('productsJson: $productsJson');
 
-      final orders = productsJson
-          .map<OrderItem>((json) => OrderItem.fromJson(json))
-          .toList();
+    
 
-          print(orders);
+      final ordersdetail = OrderDetails.fromJson(productsJson);
 
-      return orders;
+      print('ordersdetail: $ordersdetail');
+         
+
+      return ordersdetail;
 
 
       } else {

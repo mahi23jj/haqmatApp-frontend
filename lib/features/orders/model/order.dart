@@ -1,5 +1,6 @@
 class OrderItem {
   final String id;
+  final String orderid;
   final double amount;
   final List<String> imageUrls;
   final String status;
@@ -7,6 +8,7 @@ class OrderItem {
 
   OrderItem({
     required this.id,
+    required this.orderid,
     required this.amount,
     required this.imageUrls,
     required this.status,
@@ -24,7 +26,8 @@ class OrderItem {
     }
 
     return OrderItem(
-      id: json['merchantOrderId'],
+      id: json['id'],
+      orderid: json['merchantOrderId'],
       amount: (json['totalAmount'] as num).toDouble(),
       imageUrls: images,
       status: json['status'],

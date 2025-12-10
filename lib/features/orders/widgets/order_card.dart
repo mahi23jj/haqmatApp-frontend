@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/order_detail/view/order_detail_page.dart';
 import 'package:haqmate/features/orders/model/order.dart';
 import 'package:haqmate/features/orders/widgets/order_progress.dart';
 import 'package:haqmate/features/orders/widgets/status_badge.dart';
@@ -20,7 +21,7 @@ class OrderCard extends StatelessWidget {
             color: Colors.black12,
             blurRadius: 10,
             offset: Offset(0, 4),
-          )
+          ),
         ],
       ),
       padding: EdgeInsets.all(12),
@@ -37,7 +38,7 @@ class OrderCard extends StatelessWidget {
               itemBuilder: (context, i) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
+                  child: Image.network(
                     order.imageUrls[i],
                     width: 95,
                     height: 95,
@@ -60,7 +61,7 @@ class OrderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                order.id,
+                order.orderid,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -71,16 +72,26 @@ class OrderCard extends StatelessWidget {
           ),
 
           SizedBox(height: 4),
-          Text("${order.amount.toStringAsFixed(0)} ETB",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.secondary)),
+          Text(
+            "${order.amount.toStringAsFixed(0)} ETB",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: AppColors.secondary,
+            ),
+          ),
 
           SizedBox(height: 12),
 
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OrderDetailPage(orderId: order.id),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               minimumSize: Size(double.infinity, 45),
@@ -88,11 +99,8 @@ class OrderCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              "Track Order",
-              style: TextStyle(color: Colors.white),
-            ),
-          )
+            child: Text("Track Order", style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );

@@ -8,7 +8,12 @@ class OrdersViewModel extends ChangeNotifier {
   List<OrderItem> orders = [];
   List<OrderItem> filtered = [];
 
-  bool loading = true;
+ bool _loading = false;
+ String? _error;
+
+
+ bool get loading => _loading;
+   String? get error => _error;
 
   String activeFilter = "All";
 
@@ -17,14 +22,22 @@ class OrdersViewModel extends ChangeNotifier {
   }
 
   Future<void> load() async {
-    loading = true;
+    _loading = true;
+    _error = null;
     notifyListeners();
+  
 
+  try {
     orders = await _repo.fetchOrders();
-
+    print(orders);
     applyFilter("All");
+     notifyListeners();
+    
+  } catch (e) {
+      _error = e.toString();
+  }
 
-    loading = false;
+    _loading = false;
     notifyListeners();
   }
 

@@ -1,12 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/order_detail/model/order_model.dart';
+import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:provider/provider.dart';
 import '../viewmodel/order_viewmodel.dart';
 
-class OrderDetailsPage extends StatelessWidget {
+class OrderDetailPage extends StatefulWidget {
+  final String orderId;
+  const OrderDetailPage({super.key, required this.orderId});
+
+  @override
+  State<OrderDetailPage> createState() => _OrderDetailPageState();
+}
+
+class _OrderDetailPageState extends State<OrderDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    print('order id in detail page: ${widget.orderId}');
+    // Run AFTER the first frame so notifyListeners is safe
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderdetailViewModel>().loadorderdetail(widget.orderId);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<OrderdetailViewModel>(context);
+
+    if (vm.loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // 2️⃣ NO PRODUCT FOUND
+    if (vm.order == null) {
+      return const Scaffold(body: Center(child: Text("No order found")));
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -38,7 +67,9 @@ class OrderDetailsPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                vm.callSeller('+251985272557');
+              },
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 50),
                 child: Text(
@@ -47,7 +78,7 @@ class OrderDetailsPage extends StatelessWidget {
                 ),
               ),
             ),
-             SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -57,7 +88,7 @@ class OrderDetailsPage extends StatelessWidget {
   Widget _buildOrderId(OrderdetailViewModel vm) {
     return FadeIn(
       child: Text(
-        "Order Id - ${vm.order.orderId}",
+        "Order Id - ${vm.order!.orderId}",
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
@@ -76,8 +107,8 @@ class OrderDetailsPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 18),
-            ...vm.order.tracking.map((step) {
-              final isLast = step == vm.order.tracking.last;
+            ...vm.order!.tracking.map((step) {
+              final isLast = step == vm.order!.tracking.last;
               return _trackingTile(step, isLast);
             }).toList(),
           ],
@@ -150,7 +181,21 @@ class OrderDetailsPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 10),
-            ...vm.order.items.map((item) => _itemCard(item)),
+            ...vm.order!.items.map((item) => _itemCard(item)),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "delivery fee",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  "${vm.order!.deliveryFee}",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ],
+            ),
             Divider(height: 24, thickness: 1),
 
             Row(
@@ -161,7 +206,7 @@ class OrderDetailsPage extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 Text(
-                  "2000 ETB",
+                  "${vm.order!.totalAmount}",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ],
@@ -172,7 +217,7 @@ class OrderDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _itemCard(item) {
+  Widget _itemCard(OrderItem item) {
     return SlideIn(
       child: Column(
         children: [
@@ -182,7 +227,7 @@ class OrderDetailsPage extends StatelessWidget {
             child: ListTile(
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
+                child: Image.network(
                   item.image,
                   width: 50,
                   height: 50,
@@ -190,7 +235,7 @@ class OrderDetailsPage extends StatelessWidget {
                 ),
               ),
               title: Text(item.name),
-              subtitle: Text("${item.origin}\n${item.quantity} x"),
+              subtitle: Text("${item.packagingSize} kg\n${item.quantity} x"),
               trailing: Text(
                 "${item.price} ETB",
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -215,8 +260,8 @@ class OrderDetailsPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 10),
-            Text(vm.order.username),
-            Text(vm.order.address),
+            Text('+251 ${vm.order!.phoneNumber}'),
+            Text(vm.order!.address),
           ],
         ),
       ),
