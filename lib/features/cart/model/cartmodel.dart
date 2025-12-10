@@ -10,6 +10,7 @@ class CartModel {
   final String productId;
   final int  totalprice;
 
+
   CartModel({
     required this.id,
     required this.name,
@@ -99,31 +100,49 @@ class CartModel {
 
 class CartModelList {
   final List<CartModel> items;
-  final int subtotal;
-  final double tax;
-  final double totalPrice;
-
-
+  final LocationModel location;
+  final String phoneNumber;
+  final int totalPrice;
 
   CartModelList({
     required this.items,
-    required this.subtotal,
-    required this.tax,
+    required this.location,
+    required this.phoneNumber,
     required this.totalPrice,
-    }
-    );
+  });
 
- // from json
+  // from json
   factory CartModelList.fromJson(Map<String, dynamic> json) {
     var list = json['cart'] as List;
-    List<CartModel> cartItems = list.map((i) => CartModel.fromJson(i)).toList();
+    List<CartModel> cartItems =
+        list.map((i) => CartModel.fromJson(i)).toList();
 
     return CartModelList(
       items: cartItems,
-      subtotal: json['subtotalPrice'],
-      tax: (json['taxprice'] as num).toDouble(),
-      totalPrice: (json['totalPrice'] as num).toDouble(),
+      location: LocationModel.fromJson(json['area']),
+      phoneNumber: json['phoneNumber'],
+      totalPrice: (json['subtotalPrice'] as num).toInt(),
     );
   }
-  
+}
+
+class LocationModel {
+  final String id;
+  final String name;
+  final int deliveryFee;
+
+  LocationModel({
+    required this.id,
+    required this.name,
+    required this.deliveryFee,
+  });
+
+  // from json
+  factory LocationModel.fromJson(Map<String, dynamic> json) {
+    return LocationModel(
+      id: json['id'],
+      name: json['name'],
+      deliveryFee: (json['baseFee'] as num).toInt(),
+    );
+  }
 }

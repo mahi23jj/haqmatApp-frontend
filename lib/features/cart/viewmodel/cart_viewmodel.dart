@@ -17,6 +17,51 @@ class CartViewModel extends ChangeNotifier {
   bool get loading => _loading;
   String? get error => _error;
 
+
+
+  Future<void> updateQuantity({
+  required String productId,
+  required int quantity,
+  required int packagingSize,
+}) async {
+  try {
+    await _cartService.updatecartquanty(productId, quantity, packagingSize);
+
+    final carts = _cartItems!.items;
+    final index = carts.indexWhere(
+      (c) => c.productId == productId && c.packaging == packagingSize,
+    );
+
+    if (index != -1) {
+      final old = carts[index];
+
+      final pricePerItem = old.totalprice ~/ old.quantity;
+
+      carts[index] = old.copyWith(
+        quantity: quantity,
+        totalprice: quantity * pricePerItem,
+      );
+    }
+
+    // recompute subtotal, tax, total
+    final total = carts.fold(0, (sum, item) => sum + item.totalprice);
+ /*    final tax = subtotal * 0.15; // adjust rate based on backend
+    final total = subtotal + tax; */
+
+    _cartItems = CartModelList(
+      items: carts,
+     location: _cartItems!.location,
+     phoneNumber: _cartItems!.phoneNumber,
+      totalPrice: total,
+    );
+
+  } catch (e) {
+    _error = e.toString();
+  }
+
+  notifyListeners();
+}
+
   // -------------------------
   // FETCH CART ITEMS
   // -------------------------
@@ -98,48 +143,6 @@ class CartViewModel extends ChangeNotifier {
   // }
 
 
-  Future<void> updateQuantity({
-  required String productId,
-  required int quantity,
-  required int packagingSize,
-}) async {
-  try {
-    await _cartService.updatecartquanty(productId, quantity, packagingSize);
-
-    final carts = _cartItems!.items;
-    final index = carts.indexWhere(
-      (c) => c.productId == productId && c.packaging == packagingSize,
-    );
-
-    if (index != -1) {
-      final old = carts[index];
-
-      final pricePerItem = old.totalprice ~/ old.quantity;
-
-      carts[index] = old.copyWith(
-        quantity: quantity,
-        totalprice: quantity * pricePerItem,
-      );
-    }
-
-    // recompute subtotal, tax, total
-    final subtotal = carts.fold(0, (sum, item) => sum + item.totalprice);
-    final tax = subtotal * 0.15; // adjust rate based on backend
-    final total = subtotal + tax;
-
-    _cartItems = CartModelList(
-      items: carts,
-      subtotal: subtotal,
-      tax: tax,
-      totalPrice: total,
-    );
-
-  } catch (e) {
-    _error = e.toString();
-  }
-
-  notifyListeners();
-}
 
 
   // -------------------------

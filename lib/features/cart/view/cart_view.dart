@@ -209,21 +209,6 @@ class _CartScreenState extends State<CartScreen> {
                 color: Colors.white,
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Subtotal Items (${carts.length})"),
-                        Text("\$${vm.cartItems!.subtotal.toStringAsFixed(2)}"),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Tax Fee"),
-                        Text("\$${vm.cartItems!.tax.toStringAsFixed(2)}"),
-                      ],
-                    ),
                     Divider(height: 24, thickness: 1),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
