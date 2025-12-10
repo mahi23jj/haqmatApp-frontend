@@ -67,6 +67,6 @@ factory Product.fromJson(Map<String, dynamic> json) {
 
 class WeightOption {
 final String label; // e.g. 1kg, 5kg
-final double multiplier; // price multiplier vs base
+final int multiplier; // price multiplier vs base
 WeightOption({required this.label, required this.multiplier});
 }

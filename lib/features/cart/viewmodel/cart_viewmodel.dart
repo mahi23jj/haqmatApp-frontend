@@ -49,7 +49,9 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _cartService.addcart(productId, quantity, packagingSize);
+   final items = await _cartService.addcart(productId, quantity, packagingSize);
+
+   print(items);
 
       // reload cart after adding
       await loadCart();

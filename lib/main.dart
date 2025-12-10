@@ -45,6 +45,10 @@ class TeffApp extends StatelessWidget {
           create: (_) => CartViewModel()..loadCart(),
         ),
 
+         ChangeNotifierProvider<OrdersViewModel>(
+          create: (_) => OrdersViewModel()..load(),
+        ),
+
         ChangeNotifierProvider<OrdersViewModel>(
           create: (_) => OrdersViewModel(),
         ),

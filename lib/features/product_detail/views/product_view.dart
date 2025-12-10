@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
-import 'package:haqmate/features/product_detail/widgets/add_to_cart_bar.dart';
+import 'package:haqmate/features/product_detail/widgets/add_to_cart.dart';
 import 'package:haqmate/features/review/view/review_screen.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/review_list.dart';
@@ -44,6 +44,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductViewModel>().load(widget.productid);
     });
+  }
+
+
+  // dispose() 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override

@@ -69,6 +69,8 @@ class CartService {
       if (response.statusCode == 200) {
         // final body = jsonDecode(response.body);
 
+        print('cart: $response.body');
+
         return response.body;
       } else {
         final body = jsonDecode(response.body);

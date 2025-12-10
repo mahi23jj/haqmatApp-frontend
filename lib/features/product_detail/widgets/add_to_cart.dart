@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:provider/provider.dart';
 
@@ -47,8 +48,8 @@ class StickyAddToCartBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              icon: Icon(Icons.shopping_bag_outlined  , color: Colors.white,),
-              label: Text('Add to cart' , style: TextStyle(color: Colors.white),) ,
+              icon: Icon(Icons.shopping_bag_outlined, color: Colors.white),
+              label: Text('Add to cart', style: TextStyle(color: Colors.white)),
               onPressed: () => _onAddToCart(context, vm),
             ),
           ],
@@ -57,10 +58,16 @@ class StickyAddToCartBar extends StatelessWidget {
     );
   }
 
-  void _onAddToCart(BuildContext context, ProductViewModel vm) {
+  void _onAddToCart(BuildContext context, ProductViewModel vm) async{
+    await context.read<CartViewModel>().addToCart(
+      productId: vm.product!.id,
+      quantity: vm.quantity,
+      packagingSize: vm.weights[vm.selectedWeightIndex].multiplier,
+    );
+
     final snack = SnackBar(
       content: Text(
-        'Added \${vm.quantity} x \${vm.product!.weights[vm.selectedWeightIndex].label} to cart',
+        'Added ${vm.quantity} x ${vm.weights[vm.selectedWeightIndex].label} to cart',
       ),
       backgroundColor: AppColors.primary,
     );
