@@ -57,6 +57,49 @@ class OrdersRepository {
   }
 
 
+Future<String> createMultiOrder({
+  required List<Map<String, dynamic>> products,
+  required String location,
+  required String phoneNumber,
+  required String orderReceived,
+  required String paymentMethod,
+}) async {
+  String? token = await getToken();
+
+   print('created order 2 $products, $location, $phoneNumber, $orderReceived, $paymentMethod');
+
+  try {
+    final response = await Http.post(
+      Uri.parse('${Constants.baseurl}/api/order/multi-create'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "products": products,
+        "location": location,
+        "phoneNumber": phoneNumber,
+        "orderRecived": orderReceived,
+        "paymentMethod": paymentMethod
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print("ORDER CREATED: ${response.body}");
+      return response.body;
+    } else {
+      final body = jsonDecode(response.body);
+      print(body);
+      final message = ErrorParser.parse(body);
+      throw Exception(message);
+    }
+  } catch (e) {
+    throw Exception("Order creation failed: $e");
+  }
+}
+
+
+
 
   /* Future<List<OrderItem>> fetchOrders() async {
     await Future.delayed(Duration(milliseconds: 800));

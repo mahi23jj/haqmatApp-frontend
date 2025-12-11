@@ -1,71 +1,104 @@
-// checkout_viewmodel.dart
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
+import 'package:haqmate/features/checkout/model/checkout_model.dart';
 import 'package:haqmate/features/checkout/service/checkout_service.dart';
 
-
 class CheckoutViewModel extends ChangeNotifier {
-  /* final CheckoutService service;
-  final String userId; // pass current user id
+  final CheckoutService service = CheckoutService();
 
-  CheckoutViewModel({required this.service, required this.userId}); */
-
-
-   final CheckoutService service = CheckoutService();
-
-  // initial cart snapshot (passed from cart page)
+  // Initial cart snapshot
   late CartModelList cart;
 
-  // UI state
-  LocationModel? selectedLocation;
-  String phoneNumber = '';
-  bool saveAsDefault = false;
+  // Controllers for UI
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
 
-  // suggestions for search-as-you-type
+  // Location + phone
+  LocationModel? selectedLocation;
+
+   PaymentIntentResponse? chapaIntent;
+
+  // Search UI state
   List<LocationModel> suggestions = [];
   bool loadingSuggestions = false;
 
-  // order state
-  bool processingOrder = false;
+  // Order state
+  bool saveAsDefault = false;
   String? errorMessage;
+  String? _error;
+  Timer? _debounce;
   Map<String, dynamic>? lastOrderResponse;
 
-  // debounce
-  Timer? _debounce;
-
-  void initFromCart(CartModelList cartModel) {
-    cart = cartModel;
-    selectedLocation = cart.location;
-    phoneNumber = cart.phoneNumber;
-    notifyListeners();
-  }
-
-  // compute fees
+  // Computed fees
   int get subtotal => cart.totalPrice;
-  int get deliveryFee => selectedLocation?.deliveryFee ?? cart.location.deliveryFee;
+
+  int get deliveryFee =>
+      selectedLocation?.deliveryFee ?? cart.location.deliveryFee;
+
   int get total => subtotal + deliveryFee;
 
+  String get error => _error ?? "";
+
+
+
+
+
+  // ------------------------------------
+  // INIT FROM CART
+  // ------------------------------------
+  void initFromCart(CartModelList cartModel) {
+    cart = cartModel;
+
+    // initial values
+    selectedLocation = cart.location;
+
+    locationController.text = cart.location.name;
+    phoneController.text = cart.phoneNumber ?? "";
+
+    notifyListeners();
+  }
+
+  // ------------------------------------
+  // PHONE UPDATE
+  // ------------------------------------
   void updatePhone(String phone) {
-    phoneNumber = phone;
+    phoneController.text = phone;
     notifyListeners();
   }
 
-  void toggleSaveAsDefault(bool v) {
-    saveAsDefault = v;
-    notifyListeners();
-  }
-
+  // ------------------------------------
+  // SELECT LOCATION
+  // ------------------------------------
   void selectLocation(LocationModel loc) {
     selectedLocation = loc;
-    suggestions = [];
+    locationController.text = loc.name; // show selected location
+    suggestions = []; // hide dropdown
     notifyListeners();
   }
 
-  /// search locations with debounce (search while typing)
+  // ------------------------------------
+  // SAVE DEFAULT
+  // ------------------------------------
+  Future<void> saveDefault(String locationId, String phone) async {
+      print("saveDefault, $locationId, $phone");
+
+    try {
+      await service.updateuserstatus(locationId, phone);
+      saveAsDefault = true;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  // ------------------------------------
+  // SEARCH LOCATIONS (DEBOUNCE)
+  // ------------------------------------
   void searchLocations(String query) {
     _debounce?.cancel();
+
     if (query.isEmpty) {
       suggestions = [];
       notifyListeners();
@@ -75,50 +108,54 @@ class CheckoutViewModel extends ChangeNotifier {
     _debounce = Timer(const Duration(milliseconds: 350), () async {
       loadingSuggestions = true;
       notifyListeners();
+
       try {
-        final list = await service.searchLocations(query);
-        suggestions = list;
-      } catch (e) {
+        final results = await service.searchLocations(query);
+        suggestions = results;
+      } catch (_) {
         suggestions = [];
-      } finally {
-        loadingSuggestions = false;
-        notifyListeners();
       }
+
+      loadingSuggestions = false;
+      notifyListeners();
     });
   }
 
- /*  Future<bool> placeOrder() async {
-    processingOrder = true;
-    errorMessage = null;
+
+  Future<void> createChapaPayment({
+    required String orderId,
+    required String email,
+    required String firstName,
+    required String lastName,
+  }) async {
+    // _loading = true;
     notifyListeners();
 
     try {
-      final response = await service.placeOrder(
-        userId: userId,
-        location: selectedLocation ?? cart.location,
-        phoneNumber: phoneNumber,
-        items: cart.items,
-        deliveryFee: deliveryFee,
-        subtotal: subtotal,
-        total: total,
-        saveAsDefault: saveAsDefault,
+      chapaIntent = await service.createChapaIntent(
+        orderId: orderId,
+        currency: "ETB",
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
       );
-
-      lastOrderResponse = response;
-      processingOrder = false;
-      notifyListeners();
-      return true;
     } catch (e) {
-      errorMessage = e.toString();
-      processingOrder = false;
-      notifyListeners();
-      return false;
+      print("❌ Chapa Intent Error: $e");
     }
-  } */
 
+    // loading = false;
+    notifyListeners();
+  }
+
+
+  // ------------------------------------
+  // DISPOSE
+  // ------------------------------------
   @override
   void dispose() {
     _debounce?.cancel();
+    locationController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 }

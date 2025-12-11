@@ -3,25 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/checkout/service/checkout_service.dart';
 import 'package:haqmate/features/checkout/viewmodel/checkout_viewmodel.dart';
+import 'package:haqmate/features/checkout/widget/paymentMethod.dart';
+import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:provider/provider.dart';
 
-class CheckoutView extends StatelessWidget {
-  /// Pass cart snapshot from Cart page
+class CheckoutView extends StatefulWidget {
   final CartModelList cart;
   final String orderrecived;
-  // final CheckoutService service;
-
   const CheckoutView({
-    Key? key,
+    super.key,
     required this.cart,
     required this.orderrecived,
-    // required this.service,
-  }) : super(key: key);
+  });
+
+  @override
+  State<CheckoutView> createState() => _CheckoutViewState();
+}
+
+class _CheckoutViewState extends State<CheckoutView> {
+  // final CheckoutService service;
+
+  String selectedPayment = '';
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<CheckoutViewModel>(
-      create: (_) => CheckoutViewModel()..initFromCart(cart),
+      create: (_) => CheckoutViewModel()..initFromCart(widget.cart),
       child: Consumer<CheckoutViewModel>(
         builder: (context, vm, _) {
           return Scaffold(
@@ -32,7 +39,7 @@ class CheckoutView extends StatelessWidget {
                 child: Column(
                   children: [
                     // Location + search-as-you-type
-                    if (orderrecived == 'Delivery') 
+                    if (widget.orderrecived == 'Delivery')
                       Card(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -55,12 +62,11 @@ class CheckoutView extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              // search field
+
                               TextField(
+                                controller: vm.locationController,
                                 decoration: InputDecoration(
-                                  hintText:
-                                      vm.selectedLocation?.name ??
-                                      'Search location...',
+                                  hintText: 'Search location...',
                                   prefixIcon: const Icon(Icons.search),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -80,11 +86,18 @@ class CheckoutView extends StatelessWidget {
                                 ),
                                 onChanged: vm.searchLocations,
                               ),
-                              // suggestions list
+
+                              // 🔽 SUGGESTION DROP-DOWN
                               if (vm.suggestions.isNotEmpty)
                                 Container(
                                   constraints: const BoxConstraints(
                                     maxHeight: 150,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: ListView.separated(
                                     shrinkWrap: true,
@@ -103,53 +116,37 @@ class CheckoutView extends StatelessWidget {
                                     },
                                   ),
                                 ),
-                              const SizedBox(height: 8),
-                              // show chosen location and allow editing detail (optional)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      initialValue: vm.selectedLocation?.name,
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                        labelText: 'Selected location',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+
+                              const SizedBox(height: 16),
+
+                              // 📱 PHONE NUMBER
+                              TextFormField(
+                                controller: vm.phoneController,
+                                keyboardType: TextInputType.phone,
+                                decoration: InputDecoration(
+                                  labelText: 'Phone number',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: TextFormField(
-                                      initialValue: vm.cart.phoneNumber,
-                                      decoration: InputDecoration(
-                                        labelText: 'Phone number',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                      onChanged: vm.updatePhone,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    value: vm.saveAsDefault,
-                                    onChanged: (v) =>
-                                        vm.toggleSaveAsDefault(v ?? false),
-                                  ),
-                                  const Text(
+
+                              const SizedBox(height: 16),
+
+                              // 💾 SAVE DEFAULT
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    vm.saveDefault(
+                                      vm.selectedLocation?.id ?? '',
+                                      vm.phoneController.text,
+                                    );
+                                  },
+                                  child: const Text(
                                     'Save as my default for future orders',
                                   ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -210,6 +207,15 @@ class CheckoutView extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
+                    PaymentMethodCard(
+                      onSelected: (method) {
+                        setState(() {
+                          selectedPayment = method;
+                        });
+                        print("Selected payment: $method");
+                      },
+                    ),
+
                     // total + place order
                     Column(
                       children: [
@@ -235,22 +241,70 @@ class CheckoutView extends StatelessWidget {
                                 ),
                               ],
                             ),
+
                             ElevatedButton(
-                              onPressed: vm.processingOrder
-                                  ? null
-                                  : () async {
-                                      /*   final ok = await vm.placeOrder();
-                                      if (ok) {
+                              onPressed: () async{
+                                final List<Map<String, dynamic>> products = vm
+                                    .cart
+                                    .items
+                                    .map<Map<String, dynamic>>((e) {
+                                      return {
+                                        "productId": e.productId,
+                                        "quantity": e.quantity,
+                                        "packagingsize": e.packaging,
+                                      };
+                                    })
+                                    .toList();
+                                await context.read<OrdersViewModel>().createorder(
+                                  products,
+                                  vm.selectedLocation!.id,
+                                  vm.phoneController.text,
+                                  widget.orderrecived,
+                                  selectedPayment,
+                                );
+                              // print(result);
+
+                            /*   ElevatedButton(
+  onPressed: () async {
+    final vm = context.read<PaymentViewModel>();
+
+    await vm.createChapaPayment(
+      orderId: orderId,
+      email: "user@gmail.com",
+      firstName: "Mahlet",
+      lastName: "Solomon",
+    );
+
+    if (vm.chapaIntent != null) {
+      final checkoutUrl = vm.chapaIntent!.clientSecret;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => WebViewPaymentScreen(url: checkoutUrl),
+        ),
+      );
+    }
+  },
+  child: Text("Pay with Chapa"),
+)
+ */
+
+                                  if (vm.error == null) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(content: Text('Order placed successfully')),
                                         );
                                         // navigate away or clear cart as needed
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(vm.errorMessage ?? 'Failed to place order')),
+                                          SnackBar(content: Text(vm.error ?? 'Failed to place order')),
                                         );
-                                      } */
-                                    },
+                                      } 
+                              },
+
+
+                            
+                                  
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.brown,
                                 padding: const EdgeInsets.symmetric(
@@ -258,7 +312,8 @@ class CheckoutView extends StatelessWidget {
                                   vertical: 12,
                                 ),
                               ),
-                              child: vm.processingOrder
+                              child:
+                                  /* vm.processingOrder
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
@@ -267,7 +322,8 @@ class CheckoutView extends StatelessWidget {
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : const Text('Place Order'),
+                                  :  */
+                                  const Text('Place Order'),
                             ),
                           ],
                         ),

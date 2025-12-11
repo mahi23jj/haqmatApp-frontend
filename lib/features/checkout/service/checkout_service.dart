@@ -1,34 +1,104 @@
 // checkout_service.dart
 import 'dart:convert';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/error_parser.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
+import 'package:haqmate/features/checkout/model/checkout_model.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:http/http.dart' as Http;
 
 class CheckoutService {
-
-
- 
-
   /// Search locations while typing: GET /locations?query=:q
   Future<List<LocationModel>> searchLocations(String query) async {
-    final uri = Uri.parse('${Constants.baseurl}/locations?query=${Uri.encodeComponent(query)}');
+    print('searching locations for query: $query');
+    final uri = Uri.parse(
+      '${Constants.baseurl}/api/delivery/location?query=${Uri.encodeComponent(query)}',
+    );
+
+    print('uri $uri');
+
     final resp = await http.get(uri);
 
     if (resp.statusCode == 200) {
-      final data = json.decode(resp.body);
-      if (data is List) {
-        return data.map((e) => LocationModel.fromJson(e as Map<String, dynamic>)).toList();
-      } else {
-        // handle object with items
-        final list = data['results'] as List? ?? [];
-        return list.map((e) => LocationModel.fromJson(e as Map<String, dynamic>)).toList();
-      }
+      final jsonBody = json.decode(resp.body);
+
+      final list = jsonBody["data"] as List? ?? [];
+
+      print('location $list');
+
+      return list
+          .map((e) => LocationModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } else {
-      throw Exception('Failed to search locations: ${resp.statusCode}');
+      throw Exception('Location search failed: ${resp.statusCode}');
     }
   }
 
+  Future<String> updateuserstatus(String locationid, String phoneNumber) async {
+    String? token = await getToken();
+
+    print(
+      'updating user status with phone number: $phoneNumber and location id: $locationid',
+    );
+
+    try {
+      final response = await Http.put(
+        Uri.parse('${Constants.baseurl}/api/user/update-status'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({"phoneNumber": phoneNumber, "location": locationid}),
+      );
+
+      print('update user status ${response.body}');
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('update error: $e');
+    }
+  }
+
+
+  Future<PaymentIntentResponse> createChapaIntent({
+    required String orderId,
+    required String currency,
+    required String email,
+    required String firstName,
+    required String lastName,
+  }) async {
+    final url = Uri.parse("${Constants.baseurl}/intents");
+
+    final body = {
+      "orderId": orderId,
+      "currency": currency,
+      "metadata": {
+        "email": email,
+        "firstName": firstName,
+        "lastName": lastName,
+      }
+    };
+
+    final res = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body),
+    );
+
+    if (res.statusCode != 201) {
+      throw Exception("Failed to create Chapa Intent: ${res.body}");
+    }
+
+    return PaymentIntentResponse.fromJson(jsonDecode(res.body));
+  }
   // u
 
   /// Place order: POST /orders/create

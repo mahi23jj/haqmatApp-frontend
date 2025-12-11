@@ -8,12 +8,11 @@ class OrdersViewModel extends ChangeNotifier {
   List<OrderItem> orders = [];
   List<OrderItem> filtered = [];
 
- bool _loading = false;
- String? _error;
+  bool _loading = false;
+  String? _error;
 
-
- bool get loading => _loading;
-   String? get error => _error;
+  bool get loading => _loading;
+  String? get error => _error;
 
   String activeFilter = "All";
 
@@ -25,20 +24,51 @@ class OrdersViewModel extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
-  
 
-  try {
-    orders = await _repo.fetchOrders();
-    print(orders);
-    applyFilter("All");
-     notifyListeners();
-    
-  } catch (e) {
+    try {
+      orders = await _repo.fetchOrders();
+      print(orders);
+      applyFilter("All");
+      notifyListeners();
+    } catch (e) {
       _error = e.toString();
-  }
+    }
 
     _loading = false;
     notifyListeners();
+  }
+
+  Future<String> createorder(
+    List<Map<String, dynamic>> products,
+    String locationid,
+    String phoneNumber,
+    String orderReceived,
+    String paymentMethod,
+  ) async {
+    print('created order $products, $locationid, $phoneNumber, $orderReceived, $paymentMethod');
+    _loading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final value = await _repo.createMultiOrder(
+        products: products,
+        location: locationid,
+        phoneNumber: phoneNumber,
+        orderReceived: orderReceived,
+        paymentMethod: paymentMethod,
+      );
+      print('created multi order $value');
+      notifyListeners();
+      return value;
+      // applyFilter("All");
+    } catch (e) {
+      _error = e.toString();
+      return _error!;
+    }
+
+    // _loading = false;
+    // notifyListeners();
   }
 
   void applyFilter(String filter) {
@@ -53,4 +83,3 @@ class OrdersViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-
