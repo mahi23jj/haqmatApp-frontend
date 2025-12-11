@@ -1,3 +1,5 @@
+import 'package:haqmate/features/home/models/product.dart';
+
 class CartModel {
   final String id;
   final String name;
@@ -23,22 +25,6 @@ class CartModel {
     required this.productId,
     required this.totalprice,
   });
-
-  // factory CartModel.fromJson(Map<String, dynamic> json) {
-  //   return CartModel(
-  //     id: json['id'],
-  //     name: json['product']['name'],
-  //     //
-  //     // price: (json['product']['pricePerKg'] as num).toDouble(),
-  //     imageUrl: json['product']['image'],
-  //     packaging: json['packagingSize'],
-  //     quantity: json['quantity'],
-  //     tefftype: json['product']['tefftype'],
-  //     quality: json['product']['quality'],
-  //     productId: json['product']['id'],
-  //     totalprice: json['totalprice']
-  //   );
-  // }
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
   return CartModel(
@@ -146,3 +132,26 @@ class LocationModel {
     );
   }
 }
+
+
+
+class ProductOptions {
+  final List<ProductModel> teffTypes;
+  final List<int> packagingSizes;
+
+  ProductOptions({
+    required this.teffTypes,
+    required this.packagingSizes,
+  });
+
+  factory ProductOptions.fromJson(Map<String, dynamic> json) {
+    return ProductOptions(
+      teffTypes: (json["teffTypes"] as List)
+          .map((e) => ProductModel.fromJson(e))
+          .toList(),
+    
+      packagingSizes: List<int>.from(json["packagingSizes"]),
+    );
+  }
+}
+

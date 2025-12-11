@@ -62,6 +62,26 @@ class CartViewModel extends ChangeNotifier {
   notifyListeners();
 }
 
+
+
+ Future<void> updateItem({
+  required String id,
+  required String? productId,
+  required int? quantity,
+  required int? packagingSize,
+}) async {
+  try {
+    await _cartService.updatecart(id, productId, quantity, packagingSize);
+
+     loadCart();
+
+  } catch (e) {
+    _error = e.toString();
+  }
+
+  notifyListeners();
+}
+
   // -------------------------
   // FETCH CART ITEMS
   // -------------------------

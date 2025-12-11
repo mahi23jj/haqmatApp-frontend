@@ -6,7 +6,7 @@ import 'package:http/http.dart' as Http;
 
 import '../models/product.dart';
 
-class FakeRepository {
+class ProductsRepository {
   // Simulate network latency and return demo data
   Future<List<ProductModel>> fetchFeatured() async {
     try {

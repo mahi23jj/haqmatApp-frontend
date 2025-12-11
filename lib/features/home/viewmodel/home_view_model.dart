@@ -3,7 +3,7 @@ import 'package:haqmate/features/home/service/product_repository.dart';
 import '../models/product.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  final FakeRepository _repo = FakeRepository();
+  final ProductsRepository _repo = ProductsRepository();
   bool _loading = true;
   String? _error;
   // List<Product> featured = [];

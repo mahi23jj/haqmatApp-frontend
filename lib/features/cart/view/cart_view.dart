@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/cart/model/cartmodel.dart';
+import 'package:haqmate/features/cart/view/cart_edit_page.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
+import 'package:haqmate/features/checkout/view/checkout_screen.dart';
 import 'package:haqmate/features/product_detail/widgets/header_section.dart';
 import 'package:provider/provider.dart';
 
@@ -12,13 +15,74 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-
-
   @override
   void initState() {
     super.initState();
     Provider.of<CartViewModel>(context, listen: false).loadCart();
   }
+
+  void _openproductoptionSheet(BuildContext context, CartModel cartmodel) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (ctx) => Padding(
+        padding: MediaQuery.of(ctx).viewInsets,
+        child: ProductOptionBottomSheet(cartitem: cartmodel,),
+      ),
+    );
+  }
+
+
+  Future<void> showDeliveryChoiceDialog(BuildContext context , CartModelList cart) async {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Choose Order Type"),
+        content: const Text("How would you like to receive your order?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // close dialog
+               Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CheckoutView(cart: cart ,orderrecived: 'Pickup',)
+                ),
+              ); 
+             /*  Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CheckoutPage(
+                    orderType: "pickup",
+                  ),
+                ),
+              ); */
+            },
+            child: const Text("Pick Up"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // close dialog
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CheckoutView(cart: cart ,orderrecived: 'Delivery',)
+                ),
+              ); 
+            },
+            child: const Text("Delivery"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -76,128 +140,131 @@ class _CartScreenState extends State<CartScreen> {
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // IMAGE
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                'assets/images/teff.jpg',
-                                // cartModel.imageUrl ?? ,
-                                width: 70,
-                                height: 70,
-                                fit: BoxFit.cover,
+                      child: GestureDetector(
+                        onTap: () => _openproductoptionSheet(context, cartModel),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // IMAGE
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                 'assets/images/teff.jpg',
+                                // cartModel.imageUrl ,
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-
-                            SizedBox(width: 12),
-
-                            // NAME + PRICE
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    cartModel.name,
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
+                        
+                              SizedBox(width: 12),
+                        
+                              // NAME + PRICE
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      cartModel.name,
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 4),
-                                   Text(
-                                    '${cartModel.packaging} Kg',
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w300,
+                                    SizedBox(height: 4),
+                                    Text(
+                                      '${cartModel.packaging} Kg',
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "\$${cartModel.totalprice.toStringAsFixed(2)}",
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontSize: 14,
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "\$${cartModel.totalprice.toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-
-                            // + QUANTITY -
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(31, 182, 127, 26),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: Column(
-                                mainAxisSize:
-                                    MainAxisSize.min, // 🟢 prevents overflow
-                                children: [
-                                  quantityButton(Icons.remove, () {
-                                    if (cartModel.quantity > 1) {
-                                      vm.updateQuantity(
-                                        productId: cartModel.productId,
-                                        quantity: cartModel.quantity - 1,
-                                        packagingSize: cartModel.packaging,
-                                      );
-                                    }
-                                  }),
-                                  /*  GestureDetector(
-                                    onTap: () => vm.decrement(CartModel),
-                                    child: Icon(
-                                      Icons.remove,
-                                      size: 18,
-                                      color: AppColors.textDark,
+                        
+                              // + QUANTITY -
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(31, 182, 127, 26),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Column(
+                                  mainAxisSize:
+                                      MainAxisSize.min, // 🟢 prevents overflow
+                                  children: [
+                                    quantityButton(Icons.remove, () {
+                                      if (cartModel.quantity > 1) {
+                                        vm.updateQuantity(
+                                          productId: cartModel.productId,
+                                          quantity: cartModel.quantity - 1,
+                                          packagingSize: cartModel.packaging,
+                                        );
+                                      }
+                                    }),
+                                    /*  GestureDetector(
+                                      onTap: () => vm.decrement(CartModel),
+                                      child: Icon(
+                                        Icons.remove,
+                                        size: 18,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ), */
+                                    SizedBox(height: 4),
+                        
+                                    Text(
+                                      cartModel.quantity.toString(),
+                                      style: TextStyle(
+                                        color: AppColors.textDark,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ), */
-                                  SizedBox(height: 4),
-
-                                  Text(
-                                    cartModel.quantity.toString(),
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-
-                                  quantityButton(
-                                    Icons.add,
-                                    () => vm.updateQuantity(
-                                      productId: cartModel.productId,
-                                      quantity: cartModel.quantity + 1,
-                                      packagingSize: cartModel.packaging,
-                                    ),
-                                  ),
-                                  /*  GestureDetector(
-                                    onTap: () => vm.increment(CartModel),
-                                    child: Icon(
+                                    SizedBox(height: 4),
+                        
+                                    quantityButton(
                                       Icons.add,
-                                      size: 18,
-                                      color: AppColors.textDark,
+                                      () => vm.updateQuantity(
+                                        productId: cartModel.productId,
+                                        quantity: cartModel.quantity + 1,
+                                        packagingSize: cartModel.packaging,
+                                      ),
                                     ),
-                                  ), */
-                                ],
+                                    /*  GestureDetector(
+                                      onTap: () => vm.increment(CartModel),
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 18,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ), */
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -235,7 +302,18 @@ class _CartScreenState extends State<CartScreen> {
                         backgroundColor: AppColors.primary,
                         minimumSize: Size(double.infinity, 50),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        // navigate to checkout page
+
+                         showDeliveryChoiceDialog(context, vm.cartItems!);
+                       /*  Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CheckoutView(cart: vm.cartItems!),
+                          ),
+                        ); */
+                      },
                       child: Text(
                         "Go to Payment",
                         style: TextStyle(color: Colors.white),

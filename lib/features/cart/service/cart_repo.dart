@@ -33,7 +33,7 @@ class CartService {
         final cartJson = body["data"] ?? body;
 
         final carts = CartModelList.fromJson(cartJson);
-            
+
         return carts;
       } else {
         final body = jsonDecode(response.body);
@@ -49,7 +49,11 @@ class CartService {
   /*  await Future.delayed(Duration(milliseconds: 500 + _rnd.nextInt(300)));
     return List<Review>.from(_data.reversed); */
 
-  Future<String> addcart(String productid, int quantity , int packagingsize) async {
+  Future<String> addcart(
+    String productid,
+    int quantity,
+    int packagingsize,
+  ) async {
     String? token = await getToken();
 
     try {
@@ -82,9 +86,11 @@ class CartService {
     }
   }
 
-
-
-  Future<String> updatecartquanty(String productid, int quantity , int packagingsize) async {
+  Future<String> updatecartquanty(
+    String productid,
+    int quantity,
+    int packagingsize,
+  ) async {
     String? token = await getToken();
 
     try {
@@ -98,6 +104,43 @@ class CartService {
           "productId": productid,
           "quantity": quantity,
           "packagingsize": packagingsize,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // final body = jsonDecode(response.body);
+
+        return response.body;
+      } else {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Login error: $e');
+    }
+  }
+
+
+   Future<String> updatecart(
+    String id,
+    String? productid,
+    int? quantity,
+    int? packagingsize,
+  ) async {
+    String? token = await getToken();
+
+    try {
+      final response = await Http.put(
+        Uri.parse('${Constants.baseurl}/api/cart/update/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "updatedproductid": productid,
+          "updatedquantity": quantity,
+          "updatedpackagingsize": packagingsize,
         }),
       );
 
