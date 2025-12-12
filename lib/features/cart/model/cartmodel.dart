@@ -26,6 +26,7 @@ class CartModel {
     required this.totalprice,
   });
 
+
   factory CartModel.fromJson(Map<String, dynamic> json) {
   return CartModel(
     id: json['id'],
