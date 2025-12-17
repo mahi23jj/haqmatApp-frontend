@@ -1,11 +1,15 @@
 // checkout_view.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/checkout/service/checkout_service.dart';
+import 'package:haqmate/features/checkout/view/chapa_webview.dart';
+import 'package:haqmate/features/checkout/viewmodel/chapa_viewmodel.dart';
 import 'package:haqmate/features/checkout/viewmodel/checkout_viewmodel.dart';
 import 'package:haqmate/features/checkout/widget/paymentMethod.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CheckoutView extends StatefulWidget {
   final CartModelList cart;
@@ -243,7 +247,133 @@ class _CheckoutViewState extends State<CheckoutView> {
                             ),
 
                             ElevatedButton(
-                              onPressed: () async{
+                              onPressed: () async {
+                                // Show loading state
+                                // If you have a processingOrder flag, uncomment and use it
+                                // vm.processingOrder = true;
+                                // notifyListeners(); // If using ChangeNotifier
+
+                                try {
+                                  // Prepare products data
+                                  final List<Map<String, dynamic>> products = vm
+                                      .cart
+                                      .items
+                                      .map<Map<String, dynamic>>((e) {
+                                        return {
+                                          "productId": e.productId,
+                                          "quantity": e.quantity,
+                                          "packagingsize": e
+                                              .packaging, // Make sure this matches your API
+                                        };
+                                      })
+                                      .toList();
+
+                                  // Create order
+                                  await context
+                                      .read<CheckoutViewModel>()
+                                      .createorder(
+                                        products,
+                                        vm.selectedLocation!.id,
+                                        vm.phoneController.text.trim(),
+                                        widget.orderrecived,
+                                        selectedPayment,
+                                      );
+
+                                  // Create payment with the order ID
+                                  // final paymentViewModel = context.read<PaymentViewModel>();
+
+                                  // Navigate to payment screen if payment intent is created
+                                  if (vm.value!.clientSecret != null) {
+                                    final checkoutUrl = vm.value!.clientSecret;
+
+                                    print(
+                                      "Opening payment URL: ${checkoutUrl}",
+                                    );
+
+                                    if (kIsWeb) {
+                                      // Open in new tab for web
+                                      final Uri uri = Uri.parse(checkoutUrl);
+                                      await launchUrl(
+                                        uri,
+                                        mode: LaunchMode
+                                            .inAppWebView, // Opens in same tab
+                                        webOnlyWindowName: '_self',
+                                      );
+
+                                      // Show instructions to user
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Payment page opened. Return here after payment.',
+                                          ),
+                                          duration: Duration(seconds: 5),
+                                        ),
+                                      );
+                                    } else {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => WebViewPaymentScreen(
+                                            url: checkoutUrl,
+                                          ),
+                                        ),
+                                      );
+                                    }
+
+                                    /*   .then((_) {
+                                      // Handle payment completion
+                                   /*    ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Order placed successfully',
+                                          ),
+                                        ),
+                                      ); */
+                                      // Clear cart or navigate away
+                                    }); */
+                                  }
+                                } catch (e) {
+                                  // Handle errors
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to place order: ${e.toString()}',
+                                      ),
+                                    ),
+                                  );
+                                } finally {
+                                  // Hide loading state
+                                  // vm.processingOrder = false;
+                                  // notifyListeners(); // If using ChangeNotifier
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.brown,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: /* vm.processingOrder
+    ? const SizedBox(
+        width: 18,
+        height: 18,
+        child: CircularProgressIndicator(
+          color: Colors.white,
+          strokeWidth: 2,
+        ),
+      )
+    : */ const Text(
+                                'Place Order',
+                              ),
+                            ),
+
+                            /*  ElevatedButton(
+                              onPressed: () async {
                                 final List<Map<String, dynamic>> products = vm
                                     .cart
                                     .items
@@ -255,56 +385,54 @@ class _CheckoutViewState extends State<CheckoutView> {
                                       };
                                     })
                                     .toList();
-                                await context.read<OrdersViewModel>().createorder(
-                                  products,
-                                  vm.selectedLocation!.id,
-                                  vm.phoneController.text,
-                                  widget.orderrecived,
-                                  selectedPayment,
-                                );
-                              // print(result);
+                                final id = await context
+                                    .read<OrdersViewModel>()
+                                    .createorder(
+                                      products,
+                                      vm.selectedLocation!.id,
+                                      vm.phoneController.text,
+                                      widget.orderrecived,
+                                      selectedPayment,
+                                    );
 
-                            /*   ElevatedButton(
-  onPressed: () async {
-    final vm = context.read<PaymentViewModel>();
+                                // final vms = context.read<PaymentViewModel>();
 
-    await vm.createChapaPayment(
-      orderId: orderId,
-      email: "user@gmail.com",
-      firstName: "Mahlet",
-      lastName: "Solomon",
-    );
+                                // await vms.createChapaPayment(orderId: id);
 
-    if (vm.chapaIntent != null) {
-      final checkoutUrl = vm.chapaIntent!.clientSecret;
+                                // if (vm.chapaIntent != null) {
+                                //   final checkoutUrl =
+                                //       vm.chapaIntent!.clientSecret;
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => WebViewPaymentScreen(url: checkoutUrl),
-        ),
-      );
-    }
-  },
-  child: Text("Pay with Chapa"),
-)
- */
+                                //   Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (_) => WebViewPaymentScreen(
+                                //         url: checkoutUrl,
+                                //       ),
+                                //     ),
+                                //   );
+                                // }
 
-                                  if (vm.error == null) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Order placed successfully')),
-                                        );
-                                        // navigate away or clear cart as needed
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(vm.error ?? 'Failed to place order')),
-                                        );
-                                      } 
+                                if (vm.error == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Order placed successfully ',
+                                      ),
+                                    ),
+                                  );
+                                  // navigate away or clear cart as needed
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        vm.error ?? 'Failed to place order',
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
 
-
-                            
-                                  
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.brown,
                                 padding: const EdgeInsets.symmetric(
@@ -324,7 +452,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                                     )
                                   :  */
                                   const Text('Place Order'),
-                            ),
+                            ), */
                           ],
                         ),
                       ],

@@ -66,39 +66,155 @@ class CheckoutService {
   }
 
 
-  Future<PaymentIntentResponse> createChapaIntent({
-    required String orderId,
-    required String currency,
-    required String email,
-    required String firstName,
-    required String lastName,
-  }) async {
-    final url = Uri.parse("${Constants.baseurl}/intents");
+Future<PaymentIntentModel> pay({
+  required List<Map<String, dynamic>> products,
+  required String location,
+  required String phoneNumber,
+  required String orderReceived,
+  required String paymentMethod,
+}) async {
+  String? token = await getToken();
 
-    final body = {
-      "orderId": orderId,
-      "currency": currency,
-      "metadata": {
-        "email": email,
-        "firstName": firstName,
-        "lastName": lastName,
-      }
-    };
+  print(
+    'created order 2 $products, $location, $phoneNumber, $orderReceived, $paymentMethod',
+  );
 
-    final res = await http.post(
-      url,
+  try {
+    final response = await Http.post(
+      Uri.parse('${Constants.baseurl}/api/pay'),
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(body),
+      body: jsonEncode({
+        "products": products,
+        "location": location,
+        "phoneNumber": phoneNumber,
+        "orderRecived": orderReceived,
+        "paymentMethod": paymentMethod,
+      }),
     );
 
-    if (res.statusCode != 201) {
-      throw Exception("Failed to create Chapa Intent: ${res.body}");
-    }
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      print("Full Response: $responseBody");
 
-    return PaymentIntentResponse.fromJson(jsonDecode(res.body));
+      // Check if response has status and data keys
+      if (responseBody['status'] == 'success' && responseBody['data'] != null) {
+        // Extract the payment intent data from the 'data' field
+        final paymentData = responseBody['data'];
+        
+        final paymentIntent = PaymentIntentModel.fromJson(paymentData);
+        print("ORDER CREATED: ${paymentIntent}");
+        return paymentIntent;
+      } else {
+        // If the structure is different, try to parse the whole response
+        try {
+          final paymentIntent = PaymentIntentModel.fromJson(responseBody);
+          return paymentIntent;
+        } catch (e) {
+          throw Exception("Invalid response format: ${e.toString()}");
+        }
+      }
+    } else {
+      final body = jsonDecode(response.body);
+      print("Error Response: $body");
+      final message = ErrorParser.parse(body);
+      throw Exception(message);
+    }
+  } catch (e) {
+    print("Exception in pay method: $e");
+    throw Exception("Order creation failed: $e");
   }
+}
+
+  // Future<PaymentIntentModel> pay({
+  //   required List<Map<String, dynamic>> products,
+  //   required String location,
+  //   required String phoneNumber,
+  //   required String orderReceived,
+  //   required String paymentMethod,
+  // }) async {
+  //   String? token = await getToken();
+
+  //   print(
+  //     'created order 2 $products, $location, $phoneNumber, $orderReceived, $paymentMethod',
+  //   );
+
+  //   try {
+  //     final response = await Http.post(
+  //       Uri.parse('${Constants.baseurl}/api/pay'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $token',
+  //       },
+  //       body: jsonEncode({
+  //         "products": products,
+  //         "location": location,
+  //         "phoneNumber": phoneNumber,
+  //         "orderRecived": orderReceived,
+  //         "paymentMethod": paymentMethod,
+  //       }),
+  //     );
+
+  //     if (response.statusCode == 201) {
+  //       final responseBody = jsonDecode(response.body);
+
+  //      final responses = responseBody['data'];
+
+  //       final paymentIntent = PaymentIntentModel.fromJson(responses);
+
+  //       print("ORDER CREATED: ${paymentIntent}");
+  //       return paymentIntent;
+  //     } else {
+  //       final body = jsonDecode(response.body);
+  //       print(body);
+  //       final message = ErrorParser.parse(body);
+  //       throw Exception(message);
+  //     }
+  //   } catch (e) {
+  //     throw Exception("Order creation failed: $e");
+  //   }
+  // }
+
+  
+
+
+
+
+  // Future<PaymentIntentResponse> createChapaIntent({
+  //   required String orderId,
+  //   required String currency,
+  //   required String email,
+  //   required String firstName,
+  //   required String lastName,
+  // }) async {
+  //   final url = Uri.parse("${Constants.baseurl}/intents");
+
+  //   final body = {
+  //     "orderId": orderId,
+  //     "currency": currency,
+  //     "metadata": {
+  //       "email": email,
+  //       "firstName": firstName,
+  //       "lastName": lastName,
+  //     }
+  //   };
+
+  //   final res = await http.post(
+  //     url,
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: jsonEncode(body),
+  //   );
+
+  //   if (res.statusCode != 201) {
+  //     throw Exception("Failed to create Chapa Intent: ${res.body}");
+  //   }
+
+  //   return PaymentIntentResponse.fromJson(jsonDecode(res.body));
+  // }
   // u
 
   /// Place order: POST /orders/create

@@ -8,6 +8,8 @@ class OrdersViewModel extends ChangeNotifier {
   List<OrderItem> orders = [];
   List<OrderItem> filtered = [];
 
+  // late PaymentIntentModel value;
+
   bool _loading = false;
   String? _error;
 
@@ -38,38 +40,7 @@ class OrdersViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String> createorder(
-    List<Map<String, dynamic>> products,
-    String locationid,
-    String phoneNumber,
-    String orderReceived,
-    String paymentMethod,
-  ) async {
-    print('created order $products, $locationid, $phoneNumber, $orderReceived, $paymentMethod');
-    _loading = true;
-    _error = null;
-    notifyListeners();
 
-    try {
-      final value = await _repo.createMultiOrder(
-        products: products,
-        location: locationid,
-        phoneNumber: phoneNumber,
-        orderReceived: orderReceived,
-        paymentMethod: paymentMethod,
-      );
-      print('created multi order $value');
-      notifyListeners();
-      return value;
-      // applyFilter("All");
-    } catch (e) {
-      _error = e.toString();
-      return _error!;
-    }
-
-    // _loading = false;
-    // notifyListeners();
-  }
 
   void applyFilter(String filter) {
     activeFilter = filter;

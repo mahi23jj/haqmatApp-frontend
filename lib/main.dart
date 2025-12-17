@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:haqmate/features/auth/view/signup_screen.dart';
 import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:haqmate/features/cart/view/cart_view.dart';
@@ -19,9 +20,41 @@ import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
 
 import 'features/auth/view/login_screen.dart';
 
-void main() {
+void main() async{
+
+    // Important: Add this line
+  /* idgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize InAppWebView
+  await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+  
+  // If you're on Android, you might also need:
+  if (InAppWebView == null) {
+    // This will automatically initialize the platform
+    var webView = InAppWebView(
+      initialUrlRequest: URLRequest(url: WebUri('about:blank')),
+    );
+  } */
+  
   runApp(const TeffApp());
 }
+
+
+// void _initializeWebView() {
+//   if (WebViewPlatform.instance == null) {
+//     // Check which platform we're on and set the appropriate implementation
+//     if (WebViewPlatform.instance == null) {
+//       WebViewPlatform.instance = createWebViewPlatform();
+//     }
+//   }
+// }
+
+// WebViewPlatform createWebViewPlatform() {
+//   // This should automatically use the correct platform implementation
+//   // For Flutter 3.0+
+//   return WebViewPlatform.instance ?? const WebViewPlatform();
+// }
+
 
 class TeffApp extends StatelessWidget {
   const TeffApp({super.key});

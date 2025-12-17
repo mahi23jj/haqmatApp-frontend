@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/checkout/model/checkout_model.dart';
+import 'package:haqmate/features/checkout/service/chapa_service.dart';
 import 'package:haqmate/features/checkout/service/checkout_service.dart';
 
 class CheckoutViewModel extends ChangeNotifier {
@@ -17,7 +18,9 @@ class CheckoutViewModel extends ChangeNotifier {
   // Location + phone
   LocationModel? selectedLocation;
 
-   PaymentIntentResponse? chapaIntent;
+     PaymentIntentModel? value;
+
+  
 
   // Search UI state
   List<LocationModel> suggestions = [];
@@ -42,7 +45,29 @@ class CheckoutViewModel extends ChangeNotifier {
 
 
 
+//  final PaymentService _service = PaymentService();
 
+  bool loading = false;
+
+
+  // Future<void> createPayment({
+  //   required String orderId,
+  // }) async {
+  //   loading = true;
+  //   notifyListeners();
+
+  //   try {
+  //     chapaIntent = await _service.createChapaIntent(
+  //       orderId: orderId,
+  //       currency: "ETB",
+  //     );
+  //   } catch (e) {
+  //     print("❌ Chapa Intent Error: $e");
+  //   }
+
+  //   loading = false;
+  //   notifyListeners();
+  // }
 
   // ------------------------------------
   // INIT FROM CART
@@ -121,31 +146,65 @@ class CheckoutViewModel extends ChangeNotifier {
     });
   }
 
-
-  Future<void> createChapaPayment({
-    required String orderId,
-    required String email,
-    required String firstName,
-    required String lastName,
-  }) async {
-    // _loading = true;
+    Future<void> createorder(
+    List<Map<String, dynamic>> products,
+    String locationid,
+    String phoneNumber,
+    String orderReceived,
+    String paymentMethod,
+  ) async {
+    print('created order $products, $locationid, $phoneNumber, $orderReceived, $paymentMethod');
+    loading = true;
+    _error = null;
     notifyListeners();
 
     try {
-      chapaIntent = await service.createChapaIntent(
-        orderId: orderId,
-        currency: "ETB",
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
+      value = await service.pay(
+        products: products,
+        location: locationid,
+        phoneNumber: phoneNumber,
+        orderReceived: orderReceived,
+        paymentMethod: paymentMethod,
       );
+      print('created multi order $value');
+      notifyListeners();
+      // applyFilter("All");
     } catch (e) {
-      print("❌ Chapa Intent Error: $e");
+      _error = e.toString();
+
+      print(_error);
+      throw e;
     }
 
-    // loading = false;
-    notifyListeners();
+    // _loading = false;
+    // notifyListeners();
   }
+
+
+  // Future<void> createChapaPayment({
+  //   required String orderId,
+  //   required String email,
+  //   required String firstName,
+  //   required String lastName,
+  // }) async {
+  //   // _loading = true;
+  //   notifyListeners();
+
+  //   try {
+  //     chapaIntent = await service.createChapaIntent(
+  //       orderId: orderId,
+  //       currency: "ETB",
+  //       email: email,
+  //       firstName: firstName,
+  //       lastName: lastName,
+  //     );
+  //   } catch (e) {
+  //     print("❌ Chapa Intent Error: $e");
+  //   }
+
+  //   // loading = false;
+  //   notifyListeners();
+  // }
 
 
   // ------------------------------------
