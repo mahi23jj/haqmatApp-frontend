@@ -11,6 +11,7 @@ final double rating;
 final int reviewsCount;
  final double? discountPercent; // nullable
 final List<Review> reviews;
+final Review? myReview;
 
 
 Product({
@@ -24,6 +25,7 @@ required this.rating,
 required this.reviewsCount,
 required this.reviews,
  this.discountPercent,
+ this.myReview,
 });
 
 
@@ -59,6 +61,46 @@ factory Product.fromJson(Map<String, dynamic> json) {
         : null,
   );
 }
+
+
+// copywith
+Product copyWith({
+  String? id,
+  String? name,
+  String? description,
+  double? basePrice,
+  List<String>? images,
+  bool? inStock,
+  double? rating,
+  int? reviewsCount,
+  List<Review>? reviews,
+  double? discountPercent,
+  Review? myReview, 
+} 
+) {
+  return Product(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    basePrice: basePrice ?? this.basePrice,
+    images: images ?? this.images,
+    inStock: inStock ?? this.inStock,
+    rating: rating ?? this.rating,
+    reviewsCount: reviewsCount ?? this.reviewsCount,
+    reviews: reviews ?? this.reviews,
+  );
+}
+
+
+  /// Return all reviews including user's own review on top
+  List<Review> get allReviews {
+    if (myReview == null) return reviews;
+
+    // Avoid duplicate if myReview exists in reviews
+    final filtered = reviews.where((r) => r.id != myReview!.id).toList();
+    return [myReview!, ...filtered];
+  }
+
 
 
 

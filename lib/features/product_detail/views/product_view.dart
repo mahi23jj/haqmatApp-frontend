@@ -46,8 +46,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     });
   }
 
-
-  // dispose() 
+  // dispose()
   @override
   void dispose() {
     _scrollController.dispose();
@@ -185,7 +184,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       // SizedBox(height: 12),
                       // _buildTagPills(vm),
                       SizedBox(height: 12),
-                      _buildWeightOptions(vm),
+                      _buildWeightOptions(context, vm),
                       /*                SizedBox(height: 16),
                         _buildDeliveryAndLocation(vm), */
                       SizedBox(height: 30),
@@ -210,7 +209,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                       SizedBox(height: 9),
 
-                      if (product.reviews.isEmpty)
+                      /* if (product.reviews.isEmpty)
                         const Center(child: Text('No reviews yet')),
 
                       ListView.separated(
@@ -223,6 +222,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         },
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemCount: product.reviews.length,
+                      ), */
+                      if (product.allReviews.isEmpty)
+                        const Center(child: Text('No reviews yet')),
+
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 20),
+                        itemBuilder: (ctx, index) {
+                          final r = product.allReviews[index];
+                          return AnimatedReviewCard(review: r, index: index);
+                        },
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemCount: product.allReviews.length,
                       ),
 
                       Center(
@@ -474,8 +487,69 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  Widget _buildWeightOptions(ProductViewModel vm) {
+  // Widget _buildWeightOptions(ProductViewModel vm) {
+  //   final weights = vm.weights;
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text('Weight', style: TextStyle(fontWeight: FontWeight.bold)),
+  //       SizedBox(height: 15),
+  //       Row(
+  //         children: List.generate(weights.length + 1, (i) {
+  //           final isSelected = i == vm.selectedWeightIndex;
+
+  //           if (i == weights.length) {
+  //             return GestureDetector(
+  //               onTap: () => vm.selectWeight(i),
+  //               child: AnimatedContainer(
+  //                 duration: Duration(milliseconds: 250),
+  //                 margin: EdgeInsets.only(right: 8),
+  //                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+  //                 decoration: BoxDecoration(
+  //                   color: isSelected ? AppColors.primary : Colors.white,
+  //                   // to make perfect circle
+  //                   borderRadius: BorderRadius.circular(50),
+  //                   border: Border.all(color: Colors.grey.shade200),
+  //                 ),
+  //                 child: Text(
+  //                   'Custom',
+  //                   style: TextStyle(
+  //                     color: isSelected ? Colors.white : AppColors.textDark,
+  //                   ),
+  //                 ),
+  //               ),
+  //             );
+  //           }
+  //           final option = weights[i];
+  //           return GestureDetector(
+  //             onTap: () => vm.selectWeight(i),
+  //             child: AnimatedContainer(
+  //               duration: Duration(milliseconds: 250),
+  //               margin: EdgeInsets.only(right: 8),
+  //               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+  //               decoration: BoxDecoration(
+  //                 color: isSelected ? AppColors.primary : Colors.white,
+  //                 // to make perfect circle
+  //                 borderRadius: BorderRadius.circular(50),
+  //                 border: Border.all(color: Colors.grey.shade200),
+  //               ),
+  //               child: Text(
+  //                 option.label,
+  //                 style: TextStyle(
+  //                   color: isSelected ? Colors.white : AppColors.textDark,
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         }),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildWeightOptions(BuildContext context, ProductViewModel vm) {
     final weights = vm.weights;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -483,45 +557,62 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         SizedBox(height: 15),
         Row(
           children: List.generate(weights.length + 1, (i) {
-            final isSelected = i == vm.selectedWeightIndex;
+            final isCustom = i == weights.length;
+            final isSelected = isCustom
+                ? vm.selectedWeightIndex == -1
+                : vm.selectedWeightIndex == i;
 
-            if (i == weights.length) {
-              return GestureDetector(
-                onTap: () => vm.selectWeight(i),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 250),
-                  margin: EdgeInsets.only(right: 8),
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.white,
-                    // to make perfect circle
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Text(
-                    'Custom',
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textDark,
-                    ),
-                  ),
-                ),
-              );
-            }
-            final option = weights[i];
             return GestureDetector(
-              onTap: () => vm.selectWeight(i),
+              onTap: () async {
+                if (isCustom) {
+                  final custom = await showDialog<String>(
+                    context: context,
+                    builder: (context) {
+                      final controller = TextEditingController();
+                      return AlertDialog(
+                        title: Text('Enter custom weight (kg)'),
+                        content: TextField(
+                          controller: controller,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(hintText: 'e.g., 100'),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(context, controller.text),
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (custom != null && custom.isNotEmpty) {
+                    vm.selectWeight(i, customValue: custom);
+                  }
+                } else {
+                  vm.selectWeight(i);
+                }
+              },
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 250),
                 margin: EdgeInsets.only(right: 8),
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.primary : Colors.white,
-                  // to make perfect circle
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: Text(
-                  option.label,
+                  isCustom
+                      ? (vm.customWeight != null
+                            ? '${vm.customWeight} kg'
+                            : 'Custom')
+                      : weights[i].label,
                   style: TextStyle(
                     color: isSelected ? Colors.white : AppColors.textDark,
                   ),

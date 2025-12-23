@@ -7,7 +7,55 @@ import 'package:http/http.dart' as Http;
 import '../models/product.dart';
 
 class ProductsRepository {
-  // Simulate network latency and return demo data
+  // Simulate network latency and
+   Future<List<ProductModel>> searchFeatured(String param) async {
+
+    print(param);
+
+
+    try {
+      final response = await Http.get(
+        Uri.parse('${Constants.baseurl}/api/products/search?search=$param'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print(response.body);
+
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
+
+         final body = jsonDecode(response.body);
+         print(body);
+
+      // If API returns { "data": [...] }
+      final productsJson = body["data"] ?? body;
+
+      if (productsJson is! List) {
+        throw Exception("Invalid data format");
+      }
+
+      final products = productsJson
+          .map<ProductModel>((json) => ProductModel.fromJson(json))
+          .toList();
+
+          print(products);
+
+      return products;
+
+
+      } else {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Login error: $e');
+    }
+   }
+
+   
+  // return demo data
   Future<List<ProductModel>> fetchFeatured() async {
     try {
       final response = await Http.get(
@@ -48,7 +96,13 @@ class ProductsRepository {
     } catch (e) {
       throw Exception('Login error: $e');
     }
+
+
+
+    
   }
+
+   
 
   //   Future<AuthModel> login(String email, String password) async {
   //   try {

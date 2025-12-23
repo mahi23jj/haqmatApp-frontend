@@ -25,24 +25,56 @@ class CartService {
         },
       );
 
-      print(response.body);
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
+        print('Parsed body: $body');
 
         final cartJson = body["data"] ?? body;
+        print('Cart JSON: $cartJson');
 
         final carts = CartModelList.fromJson(cartJson);
-
         return carts;
       } else {
         final body = jsonDecode(response.body);
         final message = ErrorParser.parse(body);
         throw Exception(message);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error details: $e');
+      print('Stack trace: $stackTrace');
       throw Exception('Login error: $e');
     }
+
+    // try {
+    //   final response = await Http.get(
+    //     Uri.parse('${Constants.baseurl}/api/cart'),
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'Authorization': 'Bearer $token',
+    //     },
+    //   );
+
+    //   print(response.body);
+
+    //   if (response.statusCode == 200) {
+    //     final body = jsonDecode(response.body);
+
+    //     final cartJson = body["data"] ?? body;
+
+    //     final carts = CartModelList.fromJson(cartJson);
+
+    //     return carts;
+    //   } else {
+    //     final body = jsonDecode(response.body);
+    //     final message = ErrorParser.parse(body);
+    //     throw Exception(message);
+    //   }
+    // } catch (e) {
+    //   throw Exception('Login error: $e');
+    // }
   }
 
   // Simulate network latency
@@ -121,8 +153,7 @@ class CartService {
     }
   }
 
-
-   Future<String> updatecart(
+  Future<String> updatecart(
     String id,
     String? productid,
     int? quantity,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 
@@ -17,9 +19,11 @@ class CartViewModel extends ChangeNotifier {
   bool get loading => _loading;
   String? get error => _error;
 
+  Timer? _cartUpdateTimer;
 
 
-  Future<void> updateQuantity({
+
+  /* Future<void> updateQuantity({
   required String productId,
   required int quantity,
   required int packagingSize,
@@ -61,7 +65,91 @@ class CartViewModel extends ChangeNotifier {
 
   notifyListeners();
 }
+ */
 
+
+Future<void> updateQuantity({
+  required String productId,
+  required int quantity,
+  required int packagingSize,
+}) async {
+  if (_cartItems == null) return;
+
+  final carts = List.of(_cartItems!.items);
+
+  final index = carts.indexWhere(
+    (c) => c.productId == productId && c.packaging == packagingSize,
+  );
+
+  if (index == -1) return;
+
+  final oldItem = carts[index];
+
+  // 🔥 1️⃣ UPDATE UI IMMEDIATELY (OPTIMISTIC)
+  final pricePerItem = oldItem.totalprice ~/ oldItem.quantity;
+
+  carts[index] = oldItem.copyWith(
+    quantity: quantity,
+    totalprice: quantity * pricePerItem,
+  );
+
+  final total = carts.fold(0, (sum, item) => sum + item.totalprice);
+
+  _cartItems = _cartItems!.copyWith(
+    items: carts,
+    totalPrice: total,
+  );
+
+  notifyListeners(); // 🚀 UI updates instantly
+
+  // 🔁 2️⃣ BACKGROUND API SYNC
+  try {
+    await _cartService.updatecartquanty(
+      productId,
+      quantity,
+      packagingSize,
+    );
+  } catch (e) {
+    // ❌ 3️⃣ ROLLBACK IF API FAILS (optional but recommended)
+    carts[index] = oldItem;
+
+    final rollbackTotal =
+        carts.fold(0, (sum, item) => sum + item.totalprice);
+
+    _cartItems = _cartItems!.copyWith(
+      items: carts,
+      totalPrice: rollbackTotal,
+    );
+
+    notifyListeners();
+
+    _error = e.toString();
+  }
+}
+
+
+
+
+void updateQuantityDebounced({
+  required String productId,
+  required int quantity,
+  required int packagingSize,
+}) {
+  updateQuantity(
+    productId: productId,
+    quantity: quantity,
+    packagingSize: packagingSize,
+  );
+
+  _cartUpdateTimer?.cancel();
+  _cartUpdateTimer = Timer(const Duration(milliseconds: 400), () {
+    _cartService.updatecartquanty(
+      productId,
+      quantity,
+      packagingSize,
+    );
+  });
+}
 
 
  Future<void> updateItem({

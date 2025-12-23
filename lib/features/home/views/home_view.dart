@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/bottom_nev.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
+import 'package:haqmate/features/home/views/SearchScreen.dart';
 import 'package:haqmate/features/home/widgets/catagory_item.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/views/product_view.dart';
@@ -79,49 +80,47 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                     const SizedBox(height: 8),
 
                     // Search bar and filter
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.search, color: Colors.grey),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Search Furniture',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                ),
-                              ],
-                            ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const Searchscreen(),
                           ),
+                        );
+
+                         context.read<HomeViewModel>().load();
+                      },
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Container(
-                          height: 48,
-                          width: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.tune, color: Colors.white),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.search, color: Colors.grey),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Search Furniture',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
+
                     const SizedBox(height: 18),
 
                     // Banner carousel

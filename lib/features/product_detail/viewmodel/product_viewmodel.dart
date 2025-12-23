@@ -19,7 +19,28 @@ class ProductViewModel extends ChangeNotifier {
   int quantity = 1;
   int selectedWeightIndex = 0;
 
+  // Temporary variable to hold custom weight
+String? customWeight;
+
   ProductViewModel(this._repo);
+
+
+void selectWeight(int idx, {String? customValue}) {
+  if (product == null) return;
+
+  if (idx < weights.length) {
+    // Predefined weight
+    selectedWeightIndex = idx;
+    customWeight = null;
+  } else {
+    // Custom weight selected
+    customWeight = customValue;
+    selectedWeightIndex = -1; // Use -1 for custom
+  }
+
+  notifyListeners();
+}
+
 
   Future<void> load(String id) async {
     loading = true; // FIXED
@@ -55,21 +76,48 @@ class ProductViewModel extends ChangeNotifier {
   void nextQuantity() => setQuantity(quantity + 1);
   void prevQuantity() => setQuantity(quantity - 1);
 
-  void selectWeight(int idx) {
-    if (product == null) return;
-    if (idx < 0 || idx >= weights.length) return;
-    selectedWeightIndex = idx;
-    notifyListeners();
-  }
+  // void selectWeight(int idx) {
+  //   if (product == null) return;
+  //   if (idx < 0 || idx >= weights.length) return;
+  //   selectedWeightIndex = idx;
+  //   notifyListeners();
+  // }
+
+
+
+
+
+
+  // double get price {
+  //   if (product == null) return 0.0;
+  //   final base = product!.basePrice * weights[selectedWeightIndex].multiplier;
+  //   final priceAfterDiscount = product!.discountPercent != null
+  //       ? base * (1 - product!.discountPercent! / 100)
+  //       : base;
+  //   return priceAfterDiscount * quantity;
+  // }
 
   double get price {
-    if (product == null) return 0.0;
-    final base = product!.basePrice * weights[selectedWeightIndex].multiplier;
-    final priceAfterDiscount = product!.discountPercent != null
-        ? base * (1 - product!.discountPercent! / 100)
-        : base;
-    return priceAfterDiscount * quantity;
+  if (product == null) return 0.0;
+
+  // Determine multiplier safely
+  double multiplier;
+
+  if (selectedWeightIndex == -1 && customWeight != null) {
+    multiplier = double.tryParse(customWeight!) ?? 1;
+  } else {
+    multiplier = weights[selectedWeightIndex].multiplier.toDouble();
   }
+
+  final base = product!.basePrice * multiplier;
+
+  final priceAfterDiscount = product!.discountPercent != null
+      ? base * (1 - product!.discountPercent! / 100)
+      : base;
+
+  return priceAfterDiscount * quantity;
+}
+
 }
 
 

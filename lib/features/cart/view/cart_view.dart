@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
@@ -34,6 +36,9 @@ class _CartScreenState extends State<CartScreen> {
       ),
     );
   }
+
+
+
 
 
   Future<void> showDeliveryChoiceDialog(BuildContext context , CartModelList cart) async {
@@ -218,7 +223,7 @@ class _CartScreenState extends State<CartScreen> {
                                   children: [
                                     quantityButton(Icons.remove, () {
                                       if (cartModel.quantity > 1) {
-                                        vm.updateQuantity(
+                                        vm.updateQuantityDebounced(
                                           productId: cartModel.productId,
                                           quantity: cartModel.quantity - 1,
                                           packagingSize: cartModel.packaging,
@@ -246,7 +251,7 @@ class _CartScreenState extends State<CartScreen> {
                         
                                     quantityButton(
                                       Icons.add,
-                                      () => vm.updateQuantity(
+                                      () => vm.updateQuantityDebounced(
                                         productId: cartModel.productId,
                                         quantity: cartModel.quantity + 1,
                                         packagingSize: cartModel.packaging,
