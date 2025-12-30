@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/startInpute.dart';
 import 'package:provider/provider.dart';
@@ -136,6 +137,8 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
     final vm = context.read<ReviewViewModel>();
 
     await vm.submitReview(widget.productId, _controller.text.trim(), _rating);
+
+    // context.read<ProductViewModel>().load(widget.productId);
 
     Navigator.of(context).pop();
 

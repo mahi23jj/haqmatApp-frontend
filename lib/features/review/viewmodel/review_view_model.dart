@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/review/model/review_model.dart';
 import 'package:haqmate/features/review/service/review_service.dart';
 
@@ -8,6 +9,8 @@ class ReviewViewModel extends ChangeNotifier {
   String? successMessage;
   bool loading = false;
   String? error;
+
+  Product? product;
 
   ReviewViewModel({required this.repository});
 
@@ -33,7 +36,22 @@ class ReviewViewModel extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
+      // Immediately add locally for instant UI update
+      final newReview = Review(
+        id: "local-${DateTime.now().millisecondsSinceEpoch}", // temporary ID
+        productid: productid,
+        author: 'you',
+        text: text,
+        rating: rating,
+        date: DateTime.now(),
+      );
+
+      addMyReview(newReview);
+
+      
       final data = await repository.submitReview(productid, text, rating);
+
+
       successMessage = data;
       print('submitted review: $successMessage');
       notifyListeners();
@@ -48,5 +66,13 @@ class ReviewViewModel extends ChangeNotifier {
     loading = false;
     notifyListeners();
     // Basic validation
+  }
+
+  void addMyReview(Review review) {
+    if (product == null) return;
+
+    product = product!.copyWith(myReview: review);
+
+    notifyListeners();
   }
 }

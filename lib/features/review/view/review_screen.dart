@@ -34,7 +34,10 @@ class _ReviewsPageState extends State<ReviewsPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF7B4B27)),
-          onPressed: () {},
+          onPressed: () {
+            // back
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Reviews & Ratings',

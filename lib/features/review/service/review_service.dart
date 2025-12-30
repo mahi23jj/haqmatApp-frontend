@@ -62,7 +62,7 @@ class ReviewService {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         return 'Review submitted successfully';
       } else {
         final body = jsonDecode(response.body);

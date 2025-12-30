@@ -19,16 +19,14 @@ class Review {
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-      id: json['id'] ?? "", 
+      id: json['id'] ?? "",
       productid: json['productid'] ?? "",
-      author: json['user']['name']  ?? "",
-      text: json['message']  ?? "",
+      author: json['user']['name'] ?? "",
+      text: json['message'] ?? "",
       rating: json['rating'] ?? 0,
       date: DateTime.parse(json['submittedAt']) ?? DateTime.now(),
     );
   }
-
-
 }
 
 class ReviewList {
@@ -44,11 +42,11 @@ class ReviewList {
 
   factory ReviewList.fromJson(Map<String, dynamic> json) {
     return ReviewList(
-      reviews: (json['feedback'] as List<dynamic>)
+      reviews: (json['feedback'] as List<dynamic>? ?? [])
           .map((e) => Review.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalCount: json['totalRatings'],
-      averageRating: (json['averageRating'] as num).toDouble(),
+      totalCount: json['totalRatings'] ?? 0,
+      averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
