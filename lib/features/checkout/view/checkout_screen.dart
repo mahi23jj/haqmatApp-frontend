@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/checkout/service/checkout_service.dart';
 import 'package:haqmate/features/checkout/view/chapa_webview.dart';
+import 'package:haqmate/features/checkout/view/manual_payment_screen.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/checkout/viewmodel/chapa_viewmodel.dart';
 import 'package:haqmate/features/checkout/viewmodel/checkout_viewmodel.dart';
 import 'package:haqmate/features/checkout/widget/paymentMethod.dart';
@@ -138,19 +140,15 @@ class _CheckoutViewState extends State<CheckoutView> {
                               const SizedBox(height: 16),
 
                               // 💾 SAVE DEFAULT
-                              SizedBox(
+                              CustomButton(
                                 width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    vm.saveDefault(
-                                      vm.selectedLocation?.id ?? '',
-                                      vm.phoneController.text,
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Save as my default for future orders',
-                                  ),
-                                ),
+                                label: 'Save as my default for future orders',
+                                onPressed: () {
+                                  vm.saveDefault(
+                                    vm.selectedLocation?.id ?? '',
+                                    vm.phoneController.text,
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -160,54 +158,64 @@ class _CheckoutViewState extends State<CheckoutView> {
                     const SizedBox(height: 12),
 
                     // Items summary
-                    Expanded(
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Order items',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 220,
+                            child: ListView.separated(
+                              itemCount: vm.cart.items.length,
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(),
+                              separatorBuilder: (_, __) => const Divider(),
+                              itemBuilder: (context, index) {
+                                final it = vm.cart.items[index];
+                                return ListTile(
+                                  leading: it.imageUrl.isNotEmpty
+                                      ? Image.network(
+                                          it.imageUrl,
+                                          width: 56,
+                                          height: 56,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Container(
+                                          width: 56,
+                                          height: 56,
+                                          color: Colors.grey[200],
+                                        ),
+                                  title: Text(it.name),
+                                  subtitle: Text(
+                                    'Pack: ${it.packaging} • Qty: ${it.quantity}',
+                                  ),
+                                  trailing: Text('${it.totalprice}'),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                   /*  Expanded(
                       child: Card(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Order items',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 8),
-                              Expanded(
-                                child: ListView.separated(
-                                  itemCount: vm.cart.items.length,
-                                  separatorBuilder: (_, __) => const Divider(),
-                                  itemBuilder: (context, index) {
-                                    final it = vm.cart.items[index];
-                                    return ListTile(
-                                      leading: it.imageUrl.isNotEmpty
-                                          ? Image.network(
-                                              it.imageUrl,
-                                              width: 56,
-                                              height: 56,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : Container(
-                                              width: 56,
-                                              height: 56,
-                                              color: Colors.grey[200],
-                                            ),
-                                      title: Text(it.name),
-                                      subtitle: Text(
-                                        'Pack: ${it.packaging} • Qty: ${it.quantity}',
-                                      ),
-                                      trailing: Text('${it.totalprice}'),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        child: 
+                        
+                        
+                
+
+
+
                       ),
-                    ),
+                    ), */
 
                     const SizedBox(height: 12),
 
@@ -246,130 +254,40 @@ class _CheckoutViewState extends State<CheckoutView> {
                               ],
                             ),
 
-                            ElevatedButton(
+                            CustomButton(
+                              label: 'Place Order',
                               onPressed: () async {
-                                // Show loading state
-                                // If you have a processingOrder flag, uncomment and use it
-                                // vm.processingOrder = true;
-                                // notifyListeners(); // If using ChangeNotifier
-
-                                try {
-                                  // Prepare products data
-                                  final List<Map<String, dynamic>> products = vm
-                                      .cart
-                                      .items
-                                      .map<Map<String, dynamic>>((e) {
-                                        return {
+                                final products = vm.cart.items
+                                    .map<Map<String, dynamic>>((e) => {
                                           "productId": e.productId,
                                           "quantity": e.quantity,
-                                          "packagingsize": e
-                                              .packaging, // Make sure this matches your API
-                                        };
-                                      })
-                                      .toList();
+                                          "packagingsize": e.packaging,
+                                        })
+                                    .toList();
 
-                                  // Create order
-                                  await context
-                                      .read<CheckoutViewModel>()
-                                      .createorder(
-                                        products,
-                                        vm.selectedLocation!.id,
-                                        vm.phoneController.text.trim(),
-                                        widget.orderrecived,
-                                        selectedPayment,
-                                      );
-
-                                  // Create payment with the order ID
-                                  // final paymentViewModel = context.read<PaymentViewModel>();
-
-                                  // Navigate to payment screen if payment intent is created
-                                  if (vm.value!.clientSecret != null) {
-                                    final checkoutUrl = vm.value!.clientSecret;
-
-                                    print(
-                                      "Opening payment URL: ${checkoutUrl}",
+                                final paymentIntent = await context
+                                    .read<CheckoutViewModel>()
+                                    .createorder(
+                                      products,
+                                      vm.selectedLocation!.id,
+                                      vm.phoneController.text.trim(),
+                                      widget.orderrecived,
+                                      selectedPayment,
                                     );
 
-                                    if (kIsWeb) {
-                                      // Open in new tab for web
-                                      final Uri uri = Uri.parse(checkoutUrl);
-                                      await launchUrl(
-                                        uri,
-                                        mode: LaunchMode
-                                            .inAppWebView, // Opens in same tab
-                                        webOnlyWindowName: '_self',
-                                      );
+                                final orderId = paymentIntent?.id;
 
-                                      // Show instructions to user
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Payment page opened. Return here after payment.',
-                                          ),
-                                          duration: Duration(seconds: 5),
-                                        ),
-                                      );
-                                    } else {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => WebViewPaymentScreen(
-                                            url: checkoutUrl,
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    /*   .then((_) {
-                                      // Handle payment completion
-                                   /*    ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Order placed successfully',
-                                          ),
-                                        ),
-                                      ); */
-                                      // Clear cart or navigate away
-                                    }); */
-                                  }
-                                } catch (e) {
-                                  // Handle errors
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Failed to place order: ${e.toString()}',
+                                if (orderId != null && context.mounted) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ManualPaymentScreen(
+                                        orderId: orderId,
                                       ),
                                     ),
                                   );
-                                } finally {
-                                  // Hide loading state
-                                  // vm.processingOrder = false;
-                                  // notifyListeners(); // If using ChangeNotifier
                                 }
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.brown,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: /* vm.processingOrder
-    ? const SizedBox(
-        width: 18,
-        height: 18,
-        child: CircularProgressIndicator(
-          color: Colors.white,
-          strokeWidth: 2,
-        ),
-      )
-    : */ const Text(
-                                'Place Order',
-                              ),
                             ),
 
                             /*  ElevatedButton(

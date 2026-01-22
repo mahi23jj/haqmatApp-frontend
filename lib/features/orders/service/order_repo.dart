@@ -6,7 +6,7 @@ import 'package:haqmate/features/orders/model/order.dart';
 import 'package:http/http.dart' as Http;
 
 class OrdersRepository {
-  Future<List<OrderItem>> fetchOrders() async {
+  Future<List<OrderModel>> fetchOrders() async {
     String? token = await getToken();
 
     try {
@@ -34,8 +34,8 @@ class OrdersRepository {
         }
 
         final orders = productsJson
-            .map<OrderItem>((json) => OrderItem.fromJson(json))
-            .toList();
+          .map<OrderModel>((json) => OrderModel.fromJson(json))
+          .toList();
 
         print(orders);
 

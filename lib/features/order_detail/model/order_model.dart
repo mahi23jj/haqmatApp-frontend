@@ -1,11 +1,11 @@
-class OrderItem {
+class OrderItems {
   final String name;
   final int packagingSize;
   final String image;
   final int quantity;
   final double price;
 
-  OrderItem({
+  OrderItems({
     required this.name,
     required this.packagingSize,
     required this.image,
@@ -13,17 +13,29 @@ class OrderItem {
     required this.price,
   });
 
-  factory OrderItem.fromJson(Map<String, dynamic> json) {
+  factory OrderItems.fromJson(Map<String, dynamic> json) {
     final product = json['product'] ?? {};
     final images = product['images'] as List? ?? [];
 
-    return OrderItem(
+    return OrderItems(
       name: product['name'] ?? '',
       packagingSize: json['packagingsize'] ?? 0,
       image: images.isNotEmpty ? images[0]['url'] : '',
       quantity: json['quantity'] ?? 0,
       price: (json['price'] as num).toDouble(),
     );
+  }
+
+
+  //tojson
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'packagingsize': packagingSize,
+      'image': image,
+      'quantity': quantity,
+      'price': price,
+    };
   }
 }
 
@@ -50,7 +62,7 @@ class OrderTrackingStep {
 class OrderDetails {
   final String orderId;
   final List<OrderTrackingStep> tracking;
-  final List<OrderItem> items;
+  final List<OrderItems> items;
   final double deliveryFee;
   final String phoneNumber;
   final String address;
@@ -73,7 +85,7 @@ class OrderDetails {
           .map((x) => OrderTrackingStep.fromJson(x))
           .toList(),
       items: (json['items'] as List<dynamic>)
-          .map((x) => OrderItem.fromJson(x))
+          .map((x) => OrderItems.fromJson(x))
           .toList(),
       deliveryFee: (json['deliveryfee'] as num).toDouble(),
       phoneNumber: json['phoneNumber'].toString(),

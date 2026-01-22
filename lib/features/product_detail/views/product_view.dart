@@ -10,6 +10,8 @@ import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/review_list.dart';
 import 'package:haqmate/features/review/widget/write_review.dart';
 import 'package:provider/provider.dart';
+import 'package:another_flushbar/flushbar.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productid;
@@ -22,8 +24,8 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   final _scrollController = ScrollController();
 
-  void _openWriteReviewSheet(BuildContext context, String productId) {
-    showModalBottomSheet(
+  void _openWriteReviewSheet(BuildContext context, String productId) async {
+    final result = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -34,6 +36,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: WriteReviewSheet(productId: productId),
       ),
     );
+
+    if (result == 'review_success') {
+      Flushbar(
+        message: 'Review submitted successfully',
+        backgroundColor: Colors.green.shade600,
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(12),
+        borderRadius: BorderRadius.circular(12),
+      ).show(context);
+    }
   }
 
   @override
@@ -239,18 +251,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
 
                       Center(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
+                        child: CustomButton(
+                          label: 'Read More Reviews',
                           onPressed: () {
-                            /*   context.read<ReviewViewModel>().loadReviews(
-                              product.id,
-                            ); */
-
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -259,19 +262,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               ),
                             );
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 50,
-                            ),
-                            child: Text(
-                              "Read More Reviews",
-                              style: TextStyle(
-                                color: AppColors.background,
-                                fontSize: 17,
-                              ),
-                            ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 50,
                           ),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
 

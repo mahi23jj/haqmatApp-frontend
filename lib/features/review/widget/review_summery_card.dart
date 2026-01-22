@@ -31,6 +31,7 @@ class ReviewSummaryCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
+
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child:
@@ -56,7 +57,7 @@ class ReviewSummaryCard extends StatelessWidget {
                     style: const TextStyle(color: Colors.black54),
                   ),
                   const SizedBox(height: 10),
-                  ElevatedButton(
+                /*   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
@@ -77,7 +78,7 @@ class ReviewSummaryCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
+                  ), */
                 ],
               ),
             ),

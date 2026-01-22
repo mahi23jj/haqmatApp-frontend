@@ -7,17 +7,19 @@ import 'package:http/http.dart' as Http;
 
 class ProductDetailRepo {
   Future<Product> fetchProductById(String id) async {
+
+    String? token = await getToken();
     try {
       final response = await Http.get(
         Uri.parse('${Constants.baseurl}/api/products/$id'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
-
-    
 
       if (response.statusCode == 201) {
         final body = jsonDecode(response.body);
-       
 
         // If API returns { "data": [...] }
         final productsJson = body["data"] ?? body;

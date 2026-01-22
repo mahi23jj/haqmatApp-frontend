@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/cart/view/cart_edit_page.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:haqmate/features/checkout/view/checkout_screen.dart';
 import 'package:haqmate/features/product_detail/widgets/header_section.dart';
 import 'package:provider/provider.dart';
+import 'package:haqmate/core/widgets/cart_loading_skeleton.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -69,7 +71,8 @@ class _CartScreenState extends State<CartScreen> {
             },
             child: const Text("Pick Up"),
           ),
-          ElevatedButton(
+          CustomButton(
+            label: 'Delivery',
             onPressed: () {
               Navigator.pop(context); // close dialog
               Navigator.push(
@@ -77,9 +80,8 @@ class _CartScreenState extends State<CartScreen> {
                 MaterialPageRoute(
                   builder: (_) => CheckoutView(cart: cart ,orderrecived: 'Delivery',)
                 ),
-              ); 
+              );
             },
-            child: const Text("Delivery"),
           ),
         ],
       );
@@ -105,7 +107,7 @@ class _CartScreenState extends State<CartScreen> {
           // LOADING
           // ----------------
           if (vm.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return const CartLoadingSkeleton();
           }
 
           // ----------------
@@ -302,27 +304,13 @@ class _CartScreenState extends State<CartScreen> {
                       ],
                     ),
                     SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        minimumSize: Size(double.infinity, 50),
-                      ),
+                    CustomButton(
+                      label: 'Go to Payment',
+                      width: double.infinity,
+                      height: 50,
                       onPressed: () {
-                        // navigate to checkout page
-
-                         showDeliveryChoiceDialog(context, vm.cartItems!);
-                       /*  Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CheckoutView(cart: vm.cartItems!),
-                          ),
-                        ); */
+                        showDeliveryChoiceDialog(context, vm.cartItems!);
                       },
-                      child: Text(
-                        "Go to Payment",
-                        style: TextStyle(color: Colors.white),
-                      ),
                     ),
                   ],
                 ),

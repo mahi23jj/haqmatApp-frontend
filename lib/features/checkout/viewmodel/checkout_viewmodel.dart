@@ -146,7 +146,7 @@ class CheckoutViewModel extends ChangeNotifier {
     });
   }
 
-    Future<void> createorder(
+  Future<PaymentIntentModel?> createorder(
     List<Map<String, dynamic>> products,
     String locationid,
     String phoneNumber,
@@ -176,8 +176,7 @@ class CheckoutViewModel extends ChangeNotifier {
       throw e;
     }
 
-    // _loading = false;
-    // notifyListeners();
+    return value;
   }
 
 

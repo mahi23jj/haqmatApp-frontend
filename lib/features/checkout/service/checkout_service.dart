@@ -65,68 +65,73 @@ class CheckoutService {
     }
   }
 
+  Future<PaymentIntentModel> pay({
+    required List<Map<String, dynamic>> products,
+    required String location,
+    required String phoneNumber,
+    required String orderReceived,
+    required String paymentMethod,
+  }) async {
+    String? token = await getToken();
 
-Future<PaymentIntentModel> pay({
-  required List<Map<String, dynamic>> products,
-  required String location,
-  required String phoneNumber,
-  required String orderReceived,
-  required String paymentMethod,
-}) async {
-  String? token = await getToken();
+    // Generate an idempotency key per attempt to satisfy backend validation
+    final idempotencyKey = DateTime.now().millisecondsSinceEpoch.toString();
 
-  print(
-    'created order 2 $products, $location, $phoneNumber, $orderReceived, $paymentMethod',
-  );
-
-  try {
-    final response = await Http.post(
-      Uri.parse('${Constants.baseurl}/api/pay'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        "products": products,
-        "location": location,
-        "phoneNumber": phoneNumber,
-        "orderRecived": orderReceived,
-        "paymentMethod": paymentMethod,
-      }),
+    print(
+      'created order 2 $products, $location, $phoneNumber, $orderReceived, $paymentMethod',
     );
 
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      final responseBody = jsonDecode(response.body);
-      print("Full Response: $responseBody");
+    try {
+      final response = await Http.post(
+        Uri.parse('${Constants.baseurl}/api/pay'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "products": products,
+          "location": location,
+          "phoneNumber": phoneNumber,
+          "orderRecived": orderReceived,
+          "paymentMethod": paymentMethod,
+          "idempotencyKey": idempotencyKey,
+          "metadata": {"idempotencyKey": idempotencyKey},
+        }),
+      );
 
-      // Check if response has status and data keys
-      if (responseBody['status'] == 'success' && responseBody['data'] != null) {
-        // Extract the payment intent data from the 'data' field
-        final paymentData = responseBody['data'];
-        
-        final paymentIntent = PaymentIntentModel.fromJson(paymentData);
-        print("ORDER CREATED: ${paymentIntent}");
-        return paymentIntent;
-      } else {
-        // If the structure is different, try to parse the whole response
-        try {
-          final paymentIntent = PaymentIntentModel.fromJson(responseBody);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        print("Full Response: $responseBody");
+
+        // Check if response has status and data keys
+        if (responseBody['status'] == 'success' &&
+            responseBody['data'] != null) {
+          // Extract the payment intent data from the 'data' field
+          final paymentData = responseBody['data'];
+
+          final paymentIntent = PaymentIntentModel.fromJson(paymentData);
+          print("ORDER CREATED: ${paymentIntent}");
           return paymentIntent;
-        } catch (e) {
-          throw Exception("Invalid response format: ${e.toString()}");
+        } else {
+          // If the structure is different, try to parse the whole response
+          try {
+            final paymentIntent = PaymentIntentModel.fromJson(responseBody);
+            return paymentIntent;
+          } catch (e) {
+            throw Exception("Invalid response format: ${e.toString()}");
+          }
         }
+      } else {
+        final body = jsonDecode(response.body);
+        print("Error Response: $body");
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
       }
-    } else {
-      final body = jsonDecode(response.body);
-      print("Error Response: $body");
-      final message = ErrorParser.parse(body);
-      throw Exception(message);
+    } catch (e) {
+      print("Exception in pay method: $e");
+      throw Exception("Order creation failed: $e");
     }
-  } catch (e) {
-    print("Exception in pay method: $e");
-    throw Exception("Order creation failed: $e");
   }
-}
 
   // Future<PaymentIntentModel> pay({
   //   required List<Map<String, dynamic>> products,
@@ -176,11 +181,6 @@ Future<PaymentIntentModel> pay({
   //     throw Exception("Order creation failed: $e");
   //   }
   // }
-
-  
-
-
-
 
   // Future<PaymentIntentResponse> createChapaIntent({
   //   required String orderId,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_edit_viewmodel.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:provider/provider.dart';
 
@@ -128,7 +129,8 @@ class _ProductOptionBottomSheetState extends State<ProductOptionBottomSheet> {
                 const SizedBox(height: 30),
 
                 // 🔥 APPLY BUTTON
-                ElevatedButton(
+                CustomButton(
+                  label: 'Apply Changes',
                   onPressed: () async {
                     await context.read<CartViewModel>().updateItem(
                       id: widget.cartitem.id,
@@ -144,7 +146,6 @@ class _ProductOptionBottomSheetState extends State<ProductOptionBottomSheet> {
                       "quantity": vm.quantity,
                     });
                   },
-                  child: Text("Apply Changes"),
                 ),
               ],
             ),

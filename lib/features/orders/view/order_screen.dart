@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/checkout/view/manual_payment_screen.dart';
+import 'package:haqmate/features/order_detail/view/order_detail_page.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/orders/widgets/build_filter_tabs.dart';
 import 'package:haqmate/features/orders/widgets/order_card.dart';
 import 'package:provider/provider.dart';
@@ -47,11 +50,52 @@ class OrdersPage extends StatelessWidget {
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 16),
                           itemBuilder: (context, index) {
-                            return OrderCard(order: vm.filtered[index]);
+                            final order = vm.filtered[index];
+                            final config = vm.uiConfigFor(order);
+                            return OrderCard(
+                              order: order,
+                              config: config,
+                              onAction: (action) {
+                                if (action == OrderAction.track) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          OrderDetailPage(orderId: order.id),
+                                    ),
+                                  );
+                                } else if (action == OrderAction.pay) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ManualPaymentScreen(
+                                        orderId: order.id,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  vm.handleAction(action, order);
+                                }
+                              },
+                            );
                           },
                         ),
                 ),
               ],
+            );
+          },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: Consumer<OrdersViewModel>(
+          builder: (context, vm, child) {
+            return SizedBox(
+              width: 260,
+              child: CustomButton(
+                label: 'Contact Seller',
+                borderRadius: BorderRadius.circular(14),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                onPressed: () => vm.contactSeller('+251985272557'),
+              ),
             );
           },
         ),

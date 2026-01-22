@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/orders/model/order.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:provider/provider.dart';
 
 Widget buildFilterTabs(BuildContext context) {
   final vm = context.watch<OrdersViewModel>();
 
-  final filters = ["All",  "PENDING_PAYMENT", "TO_BE_DELIVERED" , "COMPLETED ", "CANCELLED" ];
+  final filters = <OrderStatus?>[
+    null,
+    OrderStatus.pendingPayment,
+    OrderStatus.toBeDelivered,
+    OrderStatus.completed,
+    OrderStatus.cancelled,
+  ];
 
   return SizedBox(
     height: 45,
@@ -18,6 +25,7 @@ Widget buildFilterTabs(BuildContext context) {
       itemBuilder: (context, i) {
         final f = filters[i];
         final active = vm.activeFilter == f;
+        final label = f?.label ?? 'All';
 
         return GestureDetector(
           onTap: () => vm.applyFilter(f),
@@ -29,7 +37,7 @@ Widget buildFilterTabs(BuildContext context) {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              f,
+              label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: active ? Colors.white : AppColors.textDark,

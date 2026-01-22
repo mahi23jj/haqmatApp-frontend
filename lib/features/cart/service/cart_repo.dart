@@ -90,7 +90,7 @@ class CartService {
 
     try {
       final response = await Http.post(
-        Uri.parse('${Constants.baseurl}/api/cart/add_update'),
+        Uri.parse('${Constants.baseurl}/api/cart/add'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -114,7 +114,7 @@ class CartService {
         throw Exception(message);
       }
     } catch (e) {
-      throw Exception('Login error: $e');
+      throw Exception('error: $e');
     }
   }
 

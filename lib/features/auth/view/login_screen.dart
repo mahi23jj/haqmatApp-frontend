@@ -5,6 +5,7 @@ import 'package:haqmate/features/auth/widget/custom_input.dart';
 import 'package:haqmate/features/auth/widget/glass_card.dart';
 import 'package:haqmate/features/home/views/home_view.dart';
 import 'package:provider/provider.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import '../../../core/constants.dart';
 import '../../../core/app_router.dart';
 import 'signup_screen.dart';
@@ -78,52 +79,27 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ),
 
-                          SizedBox(
+                          CustomButton(
                             width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.secondary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                              ),
-                              onPressed: provider.loading
-                                  ? null
-                                  : () async {
-                                      final ok = await provider.login(
-                                        email.text.trim(),
-                                        password.text.trim(),
-                                      );
+                            label: 'Login',
+                            loading: provider.loading,
+                            onPressed: provider.loading
+                                ? null
+                                : () async {
+                                    final ok = await provider.login(
+                                      email.text.trim(),
+                                      password.text.trim(),
+                                    );
 
-                                      if (ok) {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => TeffBottomNavPage(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                              child: provider.loading
-                                  ? const SizedBox(
-                                      height: 18,
-                                      width: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      "Login",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17,
-                                      ),
-                                    ),
-                            ),
+                                    if (ok) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => TeffBottomNavPage(),
+                                        ),
+                                      );
+                                    }
+                                  },
                           ),
 
                           const SizedBox(height: 15),

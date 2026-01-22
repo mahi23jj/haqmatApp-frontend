@@ -3,7 +3,7 @@ import 'package:haqmate/features/order_detail/model/order_model.dart';
 
 
 class ItemCard extends StatelessWidget {
-  final OrderItem item ;
+  final OrderItems item ;
   const ItemCard({super.key, required this.item});
 
     BoxDecoration _boxDecoration() => BoxDecoration(

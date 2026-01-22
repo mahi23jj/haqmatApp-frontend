@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/bottom_nev_page.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:haqmate/features/auth/widget/custom_input.dart';
-import 'package:haqmate/features/home/views/home_view.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants.dart';
-import '../widget/glass_card.dart';
 import '../../../core/app_router.dart';
 import 'login_screen.dart';
 
@@ -21,7 +20,6 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AuthViewModel>(context, listen: false);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -86,7 +84,6 @@ class SignupScreen extends StatelessWidget {
                     builder: (context, provider, child) {
                       return Column(
                         children: [
-                          // Show error message
                           if (provider.error != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -98,60 +95,33 @@ class SignupScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-
-                          SizedBox(
+                          CustomButton(
                             width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.secondary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                              ),
-                              onPressed: provider.loading
-                                  ? null
-                                  : () async {
-                                      final ok = await provider.signup(
-                                        email.text,
-                                        password.text,
-                                        name.text,
-                                        location.text,
-                                        phone.text,
+                            label: 'Sign Up',
+                            backgroundColor: AppColors.secondary,
+                            loading: provider.loading,
+                            onPressed: provider.loading
+                                ? null
+                                : () async {
+                                    final ok = await provider.signup(
+                                      email.text,
+                                      password.text,
+                                      name.text,
+                                      location.text,
+                                      phone.text,
+                                    );
+
+                                    if (ok) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => TeffBottomNavPage(),
+                                        ),
                                       );
-
-                                      if (ok) {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => TeffBottomNavPage(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                              child: provider.loading
-                                  ? const SizedBox(
-                                      height: 18,
-                                      width: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      "Sign Up",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17,
-                                      ),
-                                    ),
-                            ),
+                                    }
+                                  },
                           ),
-
                           const SizedBox(height: 15),
-
                           TextButton(
                             onPressed: provider.loading
                                 ? null
@@ -162,7 +132,7 @@ class SignupScreen extends StatelessWidget {
                                     );
                                   },
                             child: const Text(
-                              "Create an account",
+                              "Already have an account? Login",
                               style: TextStyle(color: AppColors.primary),
                             ),
                           ),
@@ -170,64 +140,6 @@ class SignupScreen extends StatelessWidget {
                       );
                     },
                   ),
-// Japi&2020
-                /*   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () async {
-                      final value = await provider.signup(
-                        email.text,
-                        password.text,
-                        name.text,
-                        location.text,
-                        phone.text,
-                      );
-
-                      if (value) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => HomeView()),
-                        );
-                      }
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 40,
-                      ),
-                      child: Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: AppColors.background,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  if (provider.error != null)
-                    Text(
-                      provider.error!,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        AppRouter.animatedRoute(LoginScreen()),
-                      );
-                    },
-                    child: const Text(
-                      "Already have an account? Login",
-                      style: TextStyle(color: AppColors.primary),
-                    ),
-                  ), */
                 ],
               ),
             ),

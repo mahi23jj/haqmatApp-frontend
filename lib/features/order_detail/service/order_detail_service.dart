@@ -7,10 +7,7 @@ import 'package:haqmate/features/orders/model/order.dart';
 import 'package:http/http.dart' as Http;
 
 class OrdersDetailRepository {
-
-
-
-   Future<OrderDetails> fetchOrdersdetail(String id)async {
+  Future<OrderModel> fetchOrderDetail(String id) async {
      String? token = await getToken();
 
     try {
@@ -27,23 +24,17 @@ class OrdersDetailRepository {
       print(response.statusCode);
 
       if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
 
-         final body = jsonDecode(response.body);
+        final productsJson = body["data"] ?? body;
 
+        print('productsJson: $productsJson');
 
-      // If API returns { "data": [...] }
-      final productsJson = body["data"] ?? body;
+        final orderDetail = OrderModel.fromJson(productsJson);
 
-      print('productsJson: $productsJson');
+        print('ordersdetail: $orderDetail');
 
-    
-
-      final ordersdetail = OrderDetails.fromJson(productsJson);
-
-      print('ordersdetail: $ordersdetail');
-         
-
-      return ordersdetail;
+        return orderDetail;
 
 
       } else {

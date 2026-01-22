@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/order_detail/model/order_model.dart';
+import 'package:haqmate/features/orders/model/order.dart';
+import 'package:haqmate/features/orders/widgets/status_badge.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:provider/provider.dart';
 import '../viewmodel/order_viewmodel.dart';
 
@@ -51,32 +54,26 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           children: [
             SizedBox(height: 16),
             _buildOrderId(vm),
+            SizedBox(height: 16),
+            _buildPaymentSection(vm),
             SizedBox(height: 20),
             _buildTrackingSection(vm),
             SizedBox(height: 20),
             _buildOrderItems(vm),
             SizedBox(height: 20),
+            _buildRefundSection(vm),
+            SizedBox(height: 20),
             _buildAddress(vm),
             // SizedBox(height: 20),
             // _buildAddress(vm),
             SizedBox(height: 25),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
+            CustomButton(
+              label: 'Contact Sellers',
               onPressed: () {
                 vm.callSeller('+251985272557');
               },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 50),
-                child: Text(
-                  "Contact Sellers",
-                  style: TextStyle(color: AppColors.background, fontSize: 17),
-                ),
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 50),
+              borderRadius: BorderRadius.circular(14),
             ),
             SizedBox(height: 16),
           ],
@@ -88,7 +85,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget _buildOrderId(OrderdetailViewModel vm) {
     return FadeIn(
       child: Text(
-        "Order Id - ${vm.order!.orderId}",
+        "Order Id - ${vm.order!.merchOrderId}",
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
@@ -191,7 +188,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 Text(
-                  "${vm.order!.deliveryFee}",
+                  "${vm.order!.totalDeliveryFee}",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ],
@@ -217,7 +214,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  Widget _itemCard(OrderItem item) {
+  Widget _itemCard(OrderItems item) {
     return SlideIn(
       child: Column(
         children: [
@@ -261,7 +258,103 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ),
             SizedBox(height: 10),
             Text('+251 ${vm.order!.phoneNumber}'),
-            Text(vm.order!.address),
+            // Text(vm.order!.areaId),
+            if (vm.deliveryDateFormatted != null) ...[
+              SizedBox(height: 8),
+              Text(
+                'Scheduled delivery: ${vm.deliveryDateFormatted}',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentSection(OrderdetailViewModel vm) {
+    final order = vm.order!;
+    return FadeIn(
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: _boxDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Payment',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                // Always show current payment status
+                StatusBadge(label: order.paymentStatus.label),
+                // TO_BE_DELIVERED: show CONFIRMED and delivery status tag
+                if (vm.showConfirmedPaymentTag)
+                  StatusBadge(label: PaymentStatus.confirmed.label),
+                if (vm.deliveryStatusTagLabel != null)
+                  StatusBadge(label: vm.deliveryStatusTagLabel!),
+                // CANCELLED + DECLINED
+                if (order.status == OrderStatus.cancelled &&
+                    order.paymentStatus == PaymentStatus.declined)
+                  StatusBadge(label: PaymentStatus.declined.label),
+                // REFUNDED: show RefundStatus tag alongside payment tag
+                if (vm.showRefundTag)
+                  StatusBadge(label: order.refundStatus.label),
+              ],
+            ),
+            if (vm.showPaymentProof) ...[
+              SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  order.paymentProofUrl!,
+                  height: 160,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+            if (vm.showDeclineReason) ...[
+              SizedBox(height: 8),
+              Text(
+                'Reason: ${order.paymentDeclineReason}',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRefundSection(OrderdetailViewModel vm) {
+    final order = vm.order!;
+    if (!vm.showRefundTag && !vm.showRefundRejectReason)
+      return SizedBox.shrink();
+
+    return FadeIn(
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: _boxDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Refund',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            if (vm.showRefundTag) StatusBadge(label: order.refundStatus.label),
+            if (vm.showRefundRejectReason) ...[
+              SizedBox(height: 8),
+              Text(
+                'Reason: ${order.cancelReason}',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ],
           ],
         ),
       ),

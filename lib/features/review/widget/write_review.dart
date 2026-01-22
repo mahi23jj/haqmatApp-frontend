@@ -1,8 +1,11 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/startInpute.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 
 class WriteReviewSheet extends StatefulWidget {
   final String productId;
@@ -99,21 +102,23 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton(
+                child: CustomButton(
                   onPressed: _submitting ? null : () => _submit(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD8B384),
+                  label: _submitting ? 'Submitting...' : 'Submit Review',
+                  backgroundColor: const Color(0xFFD8B384),
+                  loading: _submitting,
+                  loadingChild: Shimmer.fromColors(
+                    baseColor: Colors.white70,
+                    highlightColor: Colors.white,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.auto_awesome, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text('Submitting...', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
                   ),
-                  child: _submitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text('Submit Review'),
                 ),
               ),
             ],
@@ -133,33 +138,29 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
       return;
     }
     
-    // setState(() => _submitting = true);
+    setState(() => _submitting = true);
     final vm = context.read<ReviewViewModel>();
 
-    await vm.submitReview(widget.productId, _controller.text.trim(), _rating);
+    try {
+      await vm.submitReview(widget.productId, _controller.text.trim(), _rating);
 
-    // context.read<ProductViewModel>().load(widget.productId);
+      // Refresh product detail so latest reviews/aggregates appear.
+      await context.read<ProductViewModel>().load(widget.productId);
 
-    Navigator.of(context).pop();
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$vm.review'),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    // try {
-
-    // } catch (e) {
-    //   _showError(e.toString());
-    // } finally {
-    //   if (mounted) setState(() => _submitting = false);
-    // }
+      // Close sheet with a success result; parent will show Flushbar
+      Navigator.of(context).pop('review_success');
+    } catch (e) {
+      if (!mounted) return;
+      _showFlushbar(
+        context,
+        message: e.toString(),
+        color: Colors.red.shade600,
+      );
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   // Future<void> _submit(BuildContext context) async {
@@ -194,6 +195,21 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
   // }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    _showFlushbar(
+      context,
+      message: msg,
+      color: Colors.red.shade600,
+    );
+  }
+
+  void _showFlushbar(BuildContext context,
+      {required String message, required Color color}) {
+    Flushbar(
+      message: message,
+      backgroundColor: color,
+      duration: const Duration(seconds: 2),
+      margin: const EdgeInsets.all(12),
+      borderRadius: BorderRadius.circular(12),
+    ).show(context);
   }
 }

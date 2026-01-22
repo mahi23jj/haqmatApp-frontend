@@ -14,57 +14,52 @@ class PaymentMethod {
 
 class PaymentIntentModel {
   final String id;
-  final String clientSecret;
-  final String status;
-  final double amount;
-  final String currency;
-  final PaymentMetadata metadata;
-  final DateTime createdAt;
 
-  PaymentIntentModel({
-    required this.id,
-    required this.clientSecret,
-    required this.status,
-    required this.amount,
-    required this.currency,
-    required this.metadata,
-    required this.createdAt,
-  });
+  final double amount;
+
+  PaymentIntentModel({required this.id, required this.amount});
 
   factory PaymentIntentModel.fromJson(Map<String, dynamic> json) {
+    final dynamic totalAmount = json['totalAmount'];
+    final dynamic amountField = json['amount'];
+
+    double parsedAmount = 0.0;
+    if (totalAmount is num) {
+      parsedAmount = totalAmount.toDouble();
+    } else if (amountField is num) {
+      parsedAmount = amountField.toDouble();
+    } else if (amountField is String) {
+      parsedAmount = double.tryParse(amountField) ?? 0.0;
+    } else if (totalAmount is String) {
+      parsedAmount = double.tryParse(totalAmount) ?? 0.0;
+    }
+
+    DateTime parsedCreatedAt;
+    final dynamic createdAtInput = json['created_at'] ?? json['createdAt'];
+    if (createdAtInput is String) {
+      parsedCreatedAt = DateTime.tryParse(createdAtInput) ?? DateTime.now();
+    } else if (createdAtInput is int) {
+      parsedCreatedAt = DateTime.fromMillisecondsSinceEpoch(createdAtInput);
+    } else {
+      parsedCreatedAt = DateTime.now();
+    }
+
     return PaymentIntentModel(
-      id: json['id'] as String,
-      clientSecret: json['clientSecret'] as String,
-      status: json['status'] as String,
-      amount: (json['amount'] as num).toDouble(),
-      currency: json['currency'] as String,
-      metadata: PaymentMetadata.fromJson(json['metadata'] ?? {}),
-      createdAt: DateTime.parse(json['created_at']),
+      id: (json['id'] ?? '').toString(),
+      amount: parsedAmount,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'clientSecret': clientSecret,
-      'status': status,
-      'amount': amount,
-      'currency': currency,
-      'metadata': metadata.toJson(),
-      'created_at': createdAt.toIso8601String(),
-    };
+    return {'id': id, 'totalAmount': amount};
   }
 }
-
 
 class PaymentMetadata {
   final String txRef;
   final String idempotencyKey;
 
-  PaymentMetadata({
-    required this.txRef,
-    required this.idempotencyKey,
-  });
+  PaymentMetadata({required this.txRef, required this.idempotencyKey});
 
   factory PaymentMetadata.fromJson(Map<String, dynamic> json) {
     return PaymentMetadata(
@@ -74,9 +69,6 @@ class PaymentMetadata {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'txRef': txRef,
-      'idempotencyKey': idempotencyKey,
-    };
+    return {'txRef': txRef, 'idempotencyKey': idempotencyKey};
   }
 }

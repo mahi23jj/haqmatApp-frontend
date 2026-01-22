@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/product_detail/service/product_detail_repo.dart';
+import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 
 class ProductViewModel extends ChangeNotifier {
   final ProductDetailRepo _repo;
@@ -18,28 +19,60 @@ class ProductViewModel extends ChangeNotifier {
   int selectedImageIndex = 0;
   int quantity = 1;
   int selectedWeightIndex = 0;
+  bool addingToCart = false;
 
   // Temporary variable to hold custom weight
-String? customWeight;
+  String? customWeight;
 
   ProductViewModel(this._repo);
 
+  void selectWeight(int idx, {String? customValue}) {
+    if (product == null) return;
 
-void selectWeight(int idx, {String? customValue}) {
-  if (product == null) return;
+    if (idx < weights.length) {
+      selectedWeightIndex = idx;
+      customWeight = null;
+    } else {
+      final value = customValue?.trim();
+      if (value == null || value.isEmpty) return;
+      customWeight = value;
+      selectedWeightIndex = -1; // Use -1 for custom
+    }
 
-  if (idx < weights.length) {
-    // Predefined weight
-    selectedWeightIndex = idx;
-    customWeight = null;
-  } else {
-    // Custom weight selected
-    customWeight = customValue;
-    selectedWeightIndex = -1; // Use -1 for custom
+    notifyListeners();
   }
 
-  notifyListeners();
-}
+  double get _customWeightAsDouble {
+    final parsed = double.tryParse(customWeight ?? '');
+    if (parsed == null || parsed <= 0) return 1;
+    return parsed;
+  }
+
+  double get selectedWeightMultiplier {
+    if (selectedWeightIndex == -1) {
+      return _customWeightAsDouble;
+    }
+
+    if (selectedWeightIndex >= 0 && selectedWeightIndex < weights.length) {
+      return weights[selectedWeightIndex].multiplier.toDouble();
+    }
+
+    return 1;
+  }
+
+  int get selectedPackagingSize => selectedWeightMultiplier.round();
+
+  String get selectedWeightLabel {
+    if (selectedWeightIndex == -1 && customWeight?.isNotEmpty == true) {
+      return '${customWeight!.trim()} kg';
+    }
+
+    if (selectedWeightIndex >= 0 && selectedWeightIndex < weights.length) {
+      return weights[selectedWeightIndex].label;
+    }
+
+    return weights.first.label;
+  }
 
 
   Future<void> load(String id) async {
@@ -98,25 +131,34 @@ void selectWeight(int idx, {String? customValue}) {
   // }
 
   double get price {
-  if (product == null) return 0.0;
+    if (product == null) return 0.0;
 
-  // Determine multiplier safely
-  double multiplier;
+    final base = product!.basePrice * selectedWeightMultiplier;
 
-  if (selectedWeightIndex == -1 && customWeight != null) {
-    multiplier = double.tryParse(customWeight!) ?? 1;
-  } else {
-    multiplier = weights[selectedWeightIndex].multiplier.toDouble();
+    final priceAfterDiscount = product!.discountPercent != null
+        ? base * (1 - product!.discountPercent! / 100)
+        : base;
+
+    return priceAfterDiscount * quantity;
   }
 
-  final base = product!.basePrice * multiplier;
+  Future<void> addToCart(CartViewModel cartVm) async {
+    if (product == null || addingToCart) return;
 
-  final priceAfterDiscount = product!.discountPercent != null
-      ? base * (1 - product!.discountPercent! / 100)
-      : base;
+    addingToCart = true;
+    notifyListeners();
 
-  return priceAfterDiscount * quantity;
-}
+    try {
+      await cartVm.addToCart(
+        productId: product!.id,
+        quantity: quantity,
+        packagingSize: selectedPackagingSize,
+      );
+    } finally {
+      addingToCart = false;
+      notifyListeners();
+    }
+  }
 
 }
 

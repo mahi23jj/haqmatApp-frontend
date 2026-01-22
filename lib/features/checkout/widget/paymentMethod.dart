@@ -35,7 +35,7 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
             const SizedBox(height: 12),
 
             // Chapa
-            RadioListTile<String>(
+            /* RadioListTile<String>(
               value: "Chapa",
               groupValue: selectedMethod,
               title: const Text("Chapa"),
@@ -58,7 +58,7 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
                 });
                 widget.onSelected(value!);
               },
-            ),
+            ), */
 
             // Send Screenshot
             RadioListTile<String>(
