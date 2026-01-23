@@ -565,21 +565,57 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     builder: (context) {
                       final controller = TextEditingController();
                       return AlertDialog(
-                        title: Text('Enter custom weight (kg)'),
+                        backgroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        title: const Text(
+                          'Custom Weight',
+                          style: TextStyle(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         content: TextField(
                           controller: controller,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(hintText: 'e.g., 100'),
+                          decoration: InputDecoration(
+                            hintText: 'Enter weight in kg',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: AppColors.textLight.withOpacity(0.3),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                          ),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: Text('Cancel'),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: AppColors.textLight),
+                            ),
                           ),
                           TextButton(
                             onPressed: () =>
                                 Navigator.pop(context, controller.text),
-                            child: Text('OK'),
+                            child: Text(
+                              'Save',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ],
                       );

@@ -9,52 +9,60 @@ import 'package:haqmate/features/orders/widgets/order_card.dart';
 import 'package:provider/provider.dart';
 
 class OrdersPage extends StatelessWidget {
-  const OrdersPage({super.key});
+  OrdersPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => OrdersViewModel(),
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          title: const Text(
-            "My Orders",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+        elevation: 0,
+        title: const Text(
+          "My Orders",
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: Consumer<OrdersViewModel>(
-          builder: (context, vm, child) {
-            if (vm.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      ),
+      body: Consumer<OrdersViewModel>(
+        builder: (context, vm, child) {
+          if (vm.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            return Column(
-              children: [
-                SizedBox(height: 10),
+          return Column(
+            children: [
+              SizedBox(height: 10),
 
-                // 🔥 FILTER TABS
-                buildFilterTabs(context),
+              // 🔥 FILTER TABS
+              buildFilterTabs(context),
 
-                SizedBox(height: 12),
+              SizedBox(height: 12),
 
-                // 🔥 ORDER LIST
-                Expanded(
-                  child: vm.filtered.isEmpty
-                      ? Center(child: Text("No orders found"))
-                      : ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: vm.filtered.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 16),
-                          itemBuilder: (context, index) {
-                            final order = vm.filtered[index];
-                            final config = vm.uiConfigFor(order);
-                            return OrderCard(
+              // 🔥 ORDER LIST
+              Expanded(
+                child: vm.filtered.isEmpty
+                    ? Center(child: Text("No orders found"))
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: vm.filtered.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final order = vm.filtered[index];
+                          final config = vm.uiConfigFor(order);
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      OrderDetailPage(orderId: order.id),
+                                ),
+                              );
+                            },
+                            child: OrderCard(
                               order: order,
                               config: config,
+                              isCancelling: vm.isCancelling(order.id),
                               onAction: (action) {
                                 if (action == OrderAction.track) {
                                   Navigator.push(
@@ -73,34 +81,37 @@ class OrdersPage extends StatelessWidget {
                                       ),
                                     ),
                                   );
+                                } else if (action == OrderAction.cancel) {
+                                  vm.cancelOrder(context, order.id);
                                 } else {
                                   vm.handleAction(action, order);
                                 }
                               },
-                            );
-                          },
-                        ),
-                ),
-              ],
-            );
-          },
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Consumer<OrdersViewModel>(
-          builder: (context, vm, child) {
-            return SizedBox(
-              width: 260,
-              child: CustomButton(
-                label: 'Contact Seller',
-                borderRadius: BorderRadius.circular(14),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                onPressed: () => vm.contactSeller('+251985272557'),
+                            ),
+                          );
+                        },
+                      ),
               ),
-            );
-          },
-        ),
+            ],
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Consumer<OrdersViewModel>(
+        builder: (context, vm, child) {
+          return SizedBox(
+            width: 260,
+            child: CustomButton(
+              label: 'Contact Seller',
+              borderRadius: BorderRadius.circular(14),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              onPressed: () => vm.contactSeller('+251985272557'),
+            ),
+          );
+        },
+      ),
 
-        /*  body: Consumer<OrdersViewModel>(
+      /*  body: Consumer<OrdersViewModel>(
           builder: (context, vm, child) {
             if (vm.loading) {
               return const Center(child: CircularProgressIndicator());
@@ -117,7 +128,6 @@ class OrdersPage extends StatelessWidget {
             );
           },
         ), */
-      ),
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_edit_viewmodel.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:provider/provider.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class ProductOptionBottomSheet extends StatefulWidget {
   final CartModel cartitem;
@@ -15,142 +17,700 @@ class ProductOptionBottomSheet extends StatefulWidget {
 }
 
 class _ProductOptionBottomSheetState extends State<ProductOptionBottomSheet> {
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   Provider.of<ProductOptionViewModel>(context, listen: false).initFromCartItem(widget.cartitem);
-  //   // Provider.of<ProductOptionViewModel>(context, listen: false).loadOptions(widget.cartitem.productId);
-  // }
-
-  // const ProductOptionBottomSheet({super.key, required this.productId});
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) {
         final vm = ProductOptionViewModel();
-        vm.initFromCartItem(widget.cartitem); // 👈 Initialize here
-        vm.loadOptions(widget.cartitem.productId); // 👈 Also load here
+        vm.initFromCartItem(widget.cartitem);
+        vm.loadOptions(widget.cartitem.productId);
         return vm;
       },
       child: Consumer<ProductOptionViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading || vm.options == null) {
-            return SizedBox(
+            return Container(
               height: 300,
-              child: Center(child: CircularProgressIndicator()),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+              ),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
             );
           }
 
-          final productname = vm.options!
+          final productName = vm.options!
               .map((e) => e.id == vm.selectedTeffTypeId ? e.name : '')
               .firstWhere((element) => element.isNotEmpty);
 
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // display original product name
-                Text(
-                  productname,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          return FractionallySizedBox(
+            heightFactor: 0.6,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
                 ),
-
-                // 🔥 TEFF TYPE DROPDOWN
-                Text(
-                  "Teff Type",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-
-                DropdownButton<String>(
-                  value: vm.selectedTeffTypeId,
-                  isExpanded: true,
-                  items: vm.options!.map((t) {
-                    return DropdownMenuItem(value: t.id, child: Text(t.name));
-                  }).toList(),
-                  onChanged: (value) => vm.selectTeffType(value!),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 🔥 PACKAGING SIZE (weight options)
-                Text(
-                  "Packaging Size",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-
-                Wrap(
-                  spacing: 10,
-                  children: vm.weights.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final w = entry.value;
-
-                    final isSelected = vm.selectedWeightIndex == index;
-
-                    return ChoiceChip(
-                      label: Text(w.label),
-                      selected: isSelected,
-                      onSelected: (_) => vm.selectWeight(index),
-                    );
-                  }).toList(),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 🔥 QUANTITY
-                Text(
-                  "Quantity",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: vm.prevQuantity,
-                      icon: Icon(Icons.remove),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header with drag handle
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.textLight.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                    Text(
-                      vm.quantity.toString(),
-                      style: TextStyle(fontSize: 18),
+                  ),
+
+                  // Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Product name header
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.textDark.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.shopping_bag_outlined,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    productName,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textDark,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Teff Type Section
+                          _buildSectionHeader(
+                            title: "Teff Type",
+                            subtitle: "Select the type of teff",
+                          ),
+                          const SizedBox(height: 12),
+
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.textDark.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: vm.selectedTeffTypeId,
+                                isExpanded: true,
+                                dropdownColor: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: AppColors.textLight,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textDark,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                items: vm.options!.map((t) {
+                                  return DropdownMenuItem(
+                                    value: t.id,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      child: Text(
+                                        t.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: AppColors.textDark,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) => vm.selectTeffType(value!),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Packaging Size Section
+                          _buildSectionHeader(
+                            title: "Packaging Size",
+                            subtitle: "Choose or customize the weight",
+                          ),
+                          const SizedBox(height: 12),
+
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.textDark.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    children: List.generate(vm.weights.length + 1, (
+                                      i,
+                                    ) {
+                                      final isCustom = i == vm.weights.length;
+                                      final isSelected = isCustom
+                                          ? vm.selectedWeightIndex == -1
+                                          : vm.selectedWeightIndex == i;
+
+                                      final label = isCustom
+                                          ? (vm.customWeight != null
+                                                ? '${vm.customWeight} kg'
+                                                : 'Custom')
+                                          : vm.weights[i].label;
+
+                                      return _buildWeightChip(
+                                        label: label,
+                                        isSelected: isSelected,
+                                        isCustom: isCustom,
+                                        onTap: () async {
+                                          if (isCustom) {
+                                            final controller =
+                                                TextEditingController(
+                                                  text: vm.customWeight ?? '',
+                                                );
+                                            final custom = await showDialog<String>(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  backgroundColor:
+                                                      AppColors.background,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          20,
+                                                        ),
+                                                  ),
+                                                  title: const Text(
+                                                    'Custom Weight',
+                                                    style: TextStyle(
+                                                      color: AppColors.textDark,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  content: TextField(
+                                                    controller: controller,
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    decoration: InputDecoration(
+                                                      hintText:
+                                                          'Enter weight in kg',
+                                                      filled: true,
+                                                      fillColor: Colors.white,
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              12,
+                                                            ),
+                                                        borderSide: BorderSide(
+                                                          color: AppColors
+                                                              .textLight
+                                                              .withOpacity(0.3),
+                                                        ),
+                                                      ),
+                                                      focusedBorder:
+                                                          OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  12,
+                                                                ),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                  color: AppColors
+                                                                      .primary,
+                                                                  width: 2,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                          ),
+                                                      child: const Text(
+                                                        'Cancel',
+                                                        style: TextStyle(
+                                                          color: AppColors
+                                                              .textLight,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                            controller.text
+                                                                .trim(),
+                                                          ),
+                                                      child: Text(
+                                                        'Save',
+                                                        style: TextStyle(
+                                                          color:
+                                                              AppColors.primary,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+
+                                            if (custom != null &&
+                                                custom.trim().isNotEmpty) {
+                                              vm.selectWeight(
+                                                i,
+                                                customValue: custom,
+                                              );
+                                            }
+                                          } else {
+                                            vm.selectWeight(i);
+                                          }
+                                        },
+                                      );
+                                    }),
+                                  ),
+                                  if (vm.customWeight != null &&
+                                      vm.selectedWeightIndex == -1)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 12),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withOpacity(
+                                            0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.primary
+                                                .withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text(
+                                              'Custom Weight:',
+                                              style: TextStyle(
+                                                color: AppColors.textDark,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${vm.customWeight} kg',
+                                              style: TextStyle(
+                                                color: AppColors.primary,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Quantity Section
+                          _buildSectionHeader(
+                            title: "Quantity",
+                            subtitle: "Select how many you need",
+                          ),
+                          const SizedBox(height: 12),
+
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.textDark.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildQuantityButton(
+                                    icon: Icons.remove,
+                                    onTap: vm.prevQuantity,
+                                    isEnabled: vm.quantity > 1,
+                                  ),
+                                  Container(
+                                    width: 60,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      vm.quantity.toString(),
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ),
+                                  ),
+                                  _buildQuantityButton(
+                                    icon: Icons.add,
+                                    onTap: vm.nextQuantity,
+                                    isEnabled: true,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Current Selection Summary
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Current Selection',
+                                      style: TextStyle(
+                                        color: AppColors.textLight,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      productName,
+                                      style: const TextStyle(
+                                        color: AppColors.textDark,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${vm.selectedPackagingSize} kg',
+                                      style: const TextStyle(
+                                        color: AppColors.textDark,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      '× ${vm.quantity}',
+                                      style: TextStyle(
+                                        color: AppColors.textLight,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
-                    IconButton(
-                      onPressed: vm.nextQuantity,
-                      icon: Icon(Icons.add),
+                  ),
+
+                  // Apply Button Section
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.textDark.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total Price',
+                              style: TextStyle(
+                                color: AppColors.textDark,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '\$${(widget.cartitem.totalprice * vm.quantity).toStringAsFixed(2)}',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        CustomButton(
+                          label: 'Apply Changes',
+                          width: double.infinity,
+                          height: 56,
+                          backgroundColor: AppColors.primary,
+                          borderRadius: BorderRadius.circular(16),
+                          onPressed: () async {
+                            try {
+                              await context.read<CartViewModel>().updateItem(
+                                id: widget.cartitem.id,
+                                productId: vm.selectedTeffTypeId,
+                                quantity: vm.quantity,
+                                packagingSize: vm.selectedPackagingSize,
+                              );
 
-                const SizedBox(height: 30),
+                              if (!mounted) return;
+                              await Flushbar(
+                                message: 'Cart updated successfully',
+                                duration: const Duration(seconds: 2),
+                                backgroundColor: Colors.green.shade600,
+                                margin: const EdgeInsets.all(12),
+                                borderRadius: BorderRadius.circular(12),
+                              ).show(context);
 
-                // 🔥 APPLY BUTTON
-                CustomButton(
-                  label: 'Apply Changes',
-                  onPressed: () async {
-                    await context.read<CartViewModel>().updateItem(
-                      id: widget.cartitem.id,
-                      productId: vm.selectedTeffTypeId,
-                      quantity: vm.quantity,
-                      packagingSize:
-                          vm.weights[vm.selectedWeightIndex].multiplier,
-                    );
-
-                    Navigator.pop(context, {
-                      "teffTypeId": vm.selectedTeffTypeId,
-                      "weight": vm.weights[vm.selectedWeightIndex].multiplier,
-                      "quantity": vm.quantity,
-                    });
-                  },
-                ),
-              ],
+                              if (mounted) {
+                                Navigator.pop(context, {
+                                  "teffTypeId": vm.selectedTeffTypeId,
+                                  "weight": vm.selectedPackagingSize,
+                                  "quantity": vm.quantity,
+                                });
+                              }
+                            } catch (e) {
+                              if (!mounted) return;
+                              Flushbar(
+                                message: e.toString(),
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.red.shade600,
+                                margin: const EdgeInsets.all(12),
+                                borderRadius: BorderRadius.circular(12),
+                              ).show(context);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({required String title, String? subtitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 13, color: AppColors.textLight),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildWeightChip({
+    required String label,
+    required bool isSelected,
+    required bool isCustom,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary
+              : isCustom
+              ? AppColors.accent.withOpacity(0.1)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : isCustom
+                ? AppColors.accent.withOpacity(0.3)
+                : AppColors.textLight.withOpacity(0.2),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : AppColors.textDark,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuantityButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool isEnabled,
+  }) {
+    return GestureDetector(
+      onTap: isEnabled ? onTap : null,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: isEnabled
+              ? AppColors.primary.withOpacity(0.1)
+              : AppColors.textLight.withOpacity(0.1),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isEnabled
+                ? AppColors.primary.withOpacity(0.3)
+                : AppColors.textLight.withOpacity(0.2),
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: isEnabled ? AppColors.primary : AppColors.textLight,
+          size: 20,
+        ),
       ),
     );
   }

@@ -6,6 +6,58 @@ import 'package:haqmate/features/orders/model/order.dart';
 import 'package:http/http.dart' as Http;
 
 class OrdersRepository {
+  Future<void> cancelOrder(String orderId) async {
+    final token = await getToken();
+    try {
+      final response = await Http.patch(
+        Uri.parse('${Constants.baseurl}/api/order/$orderId/cancel'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Cancel error: $e');
+    }
+  }
+
+  Future<void> requestRefund({
+    required String orderId,
+    required String accountName,
+    required String accountNumber,
+    required String reason,
+  }) async {
+    final token = await getToken();
+    try {
+      final response = await Http.post(
+        Uri.parse('${Constants.baseurl}/api/pay/orders/$orderId/refund'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'accountName': accountName,
+          'accountNumber': accountNumber,
+          'reason': reason,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Refund error: $e');
+    }
+  }
+
   Future<List<OrderModel>> fetchOrders() async {
     String? token = await getToken();
 
@@ -34,8 +86,8 @@ class OrdersRepository {
         }
 
         final orders = productsJson
-          .map<OrderModel>((json) => OrderModel.fromJson(json))
-          .toList();
+            .map<OrderModel>((json) => OrderModel.fromJson(json))
+            .toList();
 
         print(orders);
 
@@ -49,35 +101,4 @@ class OrdersRepository {
       throw Exception('Login error: $e');
     }
   }
-
-
-
-  /* Future<List<OrderItem>> fetchOrders() async {
-    await Future.delayed(Duration(milliseconds: 800));
-
-    return [
-      OrderItem(
-        id: "TF2024-1189",
-        amount: 5400,
-        stage: 4,
-        status: "Delivered",
-        date: DateTime(2025, 10, 28),
-        imageUrls: [
-          "assets/images/teff.jpg",
-          "assets/images/injera.jpg",
-        ],
-      ),
-      OrderItem(
-        id: "TF2024-0945",
-        amount: 2700,
-        stage: 1,
-        status: "Pending",
-        date: DateTime(2025, 10, 2),
-        imageUrls: [
-          "assets/images/teff.jpg",
-        ],
-      )
-    ];
-  }
- */
 }

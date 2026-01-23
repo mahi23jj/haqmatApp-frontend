@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/order_detail/service/order_detail_service.dart';
-import 'package:haqmate/features/orders/model/order.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../model/order_model.dart';
 
 class OrderdetailViewModel extends ChangeNotifier {
   final OrdersDetailRepository orderdetail = OrdersDetailRepository();
 
-  OrderModel? _order;
+  OrderData? _order;
   bool _loading = false;
   String? _error;
 
-  OrderModel? get order => _order;
+  OrderData? get order => _order;
   bool get loading => _loading;
   String? get error => _error;
+
+  OrderStatus? get _statusEnum => _parseOrderStatus(_order?.status);
+  PaymentStatus? get _paymentStatusEnum => _parsePaymentStatus(_order?.paymentstatus);
+  DeliveryStatus? get _deliveryStatusEnum => _parseDeliveryStatus(_order?.deliverystatus);
+  RefundStatus? get _refundStatusEnum => _parseRefundStatus(_order?.refundstatus);
 
   // -------------------------
   // FETCH CART ITEMS
@@ -50,20 +54,20 @@ class OrderdetailViewModel extends ChangeNotifier {
   bool get showPaymentProof {
     final o = _order;
     return o != null &&
-        o.paymentStatus == PaymentStatus.screenshotSent &&
-        (o.paymentProofUrl?.isNotEmpty ?? false);
+        _paymentStatusEnum == PaymentStatus.SCREENSHOT_SENT &&
+        (o.paymentProofUrl.isNotEmpty);
   }
 
   bool get showConfirmedPaymentTag {
     final o = _order;
-    return o != null && o.status == OrderStatus.toBeDelivered;
+    return o != null && _statusEnum == OrderStatus.TO_BE_DELIVERED;
   }
 
   String? get deliveryStatusTagLabel {
     final o = _order;
     if (o == null) return null;
-    if (o.status == OrderStatus.toBeDelivered) {
-      return o.deliveryStatus.label;
+    if (_statusEnum == OrderStatus.TO_BE_DELIVERED) {
+      return o.deliverystatus;
     }
     return null;
   }
@@ -71,8 +75,8 @@ class OrderdetailViewModel extends ChangeNotifier {
   String? get deliveryDateFormatted {
     final o = _order;
     if (o == null) return null;
-    if (o.deliveryStatus == DeliveryStatus.scheduled && o.deliveryDate != null) {
-      return _formatDate(o.deliveryDate!);
+    if (_deliveryStatusEnum == DeliveryStatus.SCHEDULED && o.deliveryDate != null) {
+      return _formatDate(DateTime.parse(o.deliveryDate!));
     }
     return null;
   }
@@ -80,21 +84,21 @@ class OrderdetailViewModel extends ChangeNotifier {
   bool get showDeclineReason {
     final o = _order;
     return o != null &&
-        o.status == OrderStatus.cancelled &&
-        o.paymentStatus == PaymentStatus.declined &&
-        (o.paymentDeclineReason?.isNotEmpty ?? false);
+        _statusEnum == OrderStatus.CANCELLED &&
+        _paymentStatusEnum == PaymentStatus.DECLINED &&
+        (o.cancelReason.isNotEmpty);
   }
 
   bool get showRefundTag {
     final o = _order;
-    return o != null && o.paymentStatus == PaymentStatus.refunded;
+    return o != null && _paymentStatusEnum == PaymentStatus.REFUNDED;
   }
 
   bool get showRefundRejectReason {
     final o = _order;
     return o != null &&
-        o.refundStatus == RefundStatus.rejected &&
-        (o.cancelReason?.isNotEmpty ?? false);
+        _refundStatusEnum == RefundStatus.REJECTED &&
+        (o.cancelReason.isNotEmpty);
   }
 
   String _formatDate(DateTime d) {
@@ -108,4 +112,104 @@ class OrderdetailViewModel extends ChangeNotifier {
     if (diff.inHours > 0) return '${diff.inHours}h ago';
     return 'just now';
   }
+
+  String _normalize(String? value) {
+    if (value == null || value.trim().isEmpty) return '';
+    return value.trim().replaceAll('-', '_').toUpperCase();
+  }
+
+  OrderStatus _parseOrderStatus(String? value) {
+    switch (_normalize(value)) {
+      case 'PENDING_PAYMENT':
+        return OrderStatus.PENDING_PAYMENT;
+      case 'TO_BE_DELIVERED':
+        return OrderStatus.TO_BE_DELIVERED;
+      case 'COMPLETED':
+        return OrderStatus.COMPLETED;
+      case 'CANCELLED':
+        return OrderStatus.CANCELLED;
+      default:
+        return OrderStatus.UNKNOWN;
+    }
+  }
+
+  PaymentStatus _parsePaymentStatus(String? value) {
+    switch (_normalize(value)) {
+      case 'PENDING':
+        return PaymentStatus.PENDING;
+      case 'SCREENSHOT_SENT':
+        return PaymentStatus.SCREENSHOT_SENT;
+      case 'FAILED':
+        return PaymentStatus.FAILED;
+      case 'CONFIRMED':
+        return PaymentStatus.CONFIRMED;
+      case 'DECLINED':
+        return PaymentStatus.DECLINED;
+      case 'REFUNDED':
+        return PaymentStatus.REFUNDED;
+      default:
+        return PaymentStatus.UNKNOWN;
+    }
+  }
+
+  DeliveryStatus _parseDeliveryStatus(String? value) {
+    switch (_normalize(value)) {
+      case 'NOT_SCHEDULED':
+        return DeliveryStatus.NOT_SCHEDULED;
+      case 'SCHEDULED':
+        return DeliveryStatus.SCHEDULED;
+      case 'DELIVERED':
+        return DeliveryStatus.DELIVERED;
+      default:
+        return DeliveryStatus.UNKNOWN;
+    }
+  }
+
+  RefundStatus _parseRefundStatus(String? value) {
+    switch (_normalize(value)) {
+      case 'NOT_STARTED':
+        return RefundStatus.NOT_STARTED;
+      case 'PENDING':
+        return RefundStatus.PENDING;
+      case 'APPROVED':
+        return RefundStatus.APPROVED;
+      case 'REJECTED':
+        return RefundStatus.REJECTED;
+      default:
+        return RefundStatus.UNKNOWN;
+    }
+  }
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT,
+  TO_BE_DELIVERED,
+  COMPLETED,
+  CANCELLED,
+  UNKNOWN,
+}
+
+enum PaymentStatus {
+  PENDING,
+  SCREENSHOT_SENT,
+  FAILED,
+  CONFIRMED,
+  DECLINED,
+  REFUNDED,
+  UNKNOWN,
+}
+
+enum DeliveryStatus {
+  NOT_SCHEDULED,
+  SCHEDULED,
+  DELIVERED,
+  UNKNOWN,
+}
+
+enum RefundStatus {
+  NOT_STARTED,
+  PENDING,
+  APPROVED,
+  REJECTED,
+  UNKNOWN,
 }

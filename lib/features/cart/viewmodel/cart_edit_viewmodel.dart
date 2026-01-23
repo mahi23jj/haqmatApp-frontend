@@ -20,6 +20,7 @@ class ProductOptionViewModel extends ChangeNotifier {
 
   int quantity = 1;
   int selectedWeightIndex = 0;
+  String? customWeight;
 
   /// Initialize from a cart item if available
   void initFromCartItem(CartModel cartItem) {
@@ -30,7 +31,13 @@ class ProductOptionViewModel extends ChangeNotifier {
       final weightIdx = weights.indexWhere(
         (w) => w.multiplier == cartItem.packaging,
       );
-      selectedWeightIndex = weightIdx != -1 ? weightIdx : 0;
+      if (weightIdx != -1) {
+        selectedWeightIndex = weightIdx;
+        customWeight = null;
+      } else {
+        selectedWeightIndex = -1;
+        customWeight = cartItem.packaging.toString();
+      }
 
       quantity = cartItem.quantity;
     } else {
@@ -38,6 +45,7 @@ class ProductOptionViewModel extends ChangeNotifier {
       selectedTeffTypeId = null;
       selectedWeightIndex = 0;
       quantity = 1;
+      customWeight = null;
     }
 
     notifyListeners();
@@ -52,11 +60,40 @@ class ProductOptionViewModel extends ChangeNotifier {
   void nextQuantity() => setQuantity(quantity + 1);
   void prevQuantity() => setQuantity(quantity - 1);
 
-  void selectWeight(int idx) {
-    if (idx < 0 || idx >= weights.length) return;
-    selectedWeightIndex = idx;
+  void selectWeight(int idx, {String? customValue}) {
+    if (idx < 0) return;
+
+    // preset option
+    if (idx < weights.length) {
+      selectedWeightIndex = idx;
+      customWeight = null;
+      notifyListeners();
+      return;
+    }
+
+    // custom option
+    final value = customValue?.trim();
+    if (value == null || value.isEmpty) return;
+    customWeight = value;
+    selectedWeightIndex = -1;
     notifyListeners();
   }
+
+  double get _customWeightAsDouble {
+    final parsed = double.tryParse(customWeight ?? '');
+    if (parsed == null || parsed <= 0) return 1;
+    return parsed;
+  }
+
+  double get selectedWeightMultiplier {
+    if (selectedWeightIndex == -1) return _customWeightAsDouble;
+    if (selectedWeightIndex >= 0 && selectedWeightIndex < weights.length) {
+      return weights[selectedWeightIndex].multiplier.toDouble();
+    }
+    return 1;
+  }
+
+  int get selectedPackagingSize => selectedWeightMultiplier.round();
 
   Future<void> loadOptions(String productId) async {
     isLoading = true;

@@ -23,6 +23,10 @@ class OrdersViewModel extends ChangeNotifier {
     load();
   }
 
+  // Per-order cancel loading state for button feedback
+  final Map<String, bool> _cancelLoading = {};
+  bool isCancelling(String orderId) => _cancelLoading[orderId] == true;
+
   Future<void> load() async {
     _loading = true;
     _error = null;
@@ -116,8 +120,164 @@ class OrdersViewModel extends ChangeNotifier {
   }
 
   void handleAction(OrderAction action, OrderModel order) {
-    // Placeholder for future integration with payment/cancellation flows.
     debugPrint('Order action: ${action.name} for order ${order.id}');
+  }
+
+  Future<void> cancelOrder(BuildContext context, String orderId) async {
+    _cancelLoading[orderId] = true;
+    notifyListeners();
+
+    try {
+      await _repo.cancelOrder(orderId);
+      await load();
+      _cancelLoading[orderId] = false;
+      notifyListeners();
+
+      // Success dialog asking for refund
+      final shouldRequest = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const Text('Order canceled'),
+            content: const Text('Successful canceled. Do you want to request a refund?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Yes'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldRequest == true) {
+        await _showRefundDialog(context, orderId);
+      }
+    } catch (e) {
+      _cancelLoading[orderId] = false;
+      notifyListeners();
+
+      // Error dialog with try again
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const Text('Cancellation Failed'),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Close'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  cancelOrder(context, orderId);
+                },
+                child: const Text('Try Again'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> _showRefundDialog(BuildContext context, String orderId) async {
+    final accNameCtrl = TextEditingController();
+    final accNumberCtrl = TextEditingController();
+    final reasonCtrl = TextEditingController();
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            bool submitting = false;
+            return AlertDialog(
+              title: const Text('Request Refund'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: accNameCtrl,
+                      decoration: const InputDecoration(labelText: 'Account Name'),
+                    ),
+                    TextField(
+                      controller: accNumberCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Account Number'),
+                    ),
+                    TextField(
+                      controller: reasonCtrl,
+                      decoration: const InputDecoration(labelText: 'Reason'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (accNameCtrl.text.trim().isEmpty ||
+                        accNumberCtrl.text.trim().isEmpty ||
+                        reasonCtrl.text.trim().isEmpty) {
+                      // simple validation
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please fill all fields')),
+                      );
+                      return;
+                    }
+                    setState(() => submitting = true);
+                    try {
+                      await _repo.requestRefund(
+                        orderId: orderId,
+                        accountName: accNameCtrl.text.trim(),
+                        accountNumber: accNumberCtrl.text.trim(),
+                        reason: reasonCtrl.text.trim(),
+                      );
+                      setState(() => submitting = false);
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Refund requested successfully')),
+                      );
+                      await load();
+                    } catch (e) {
+                      setState(() => submitting = false);
+                      showDialog<void>(
+                        context: context,
+                        builder: (ctx2) => AlertDialog(
+                          title: const Text('Refund Failed'),
+                          content: Text(e.toString()),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx2),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Refund'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }
 

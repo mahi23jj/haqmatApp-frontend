@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/order_detail/model/order_model.dart';
-import 'package:haqmate/features/orders/model/order.dart';
+import 'package:haqmate/features/orders/model/order.dart'
+    hide PaymentStatus, OrderStatus;
 import 'package:haqmate/features/orders/widgets/status_badge.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
@@ -144,7 +145,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  step.date,
+                  step.date ?? '',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
@@ -188,7 +189,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 Text(
-                  "${vm.order!.totalDeliveryFee}",
+                  "${vm.order!.deliveryFee}",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ],
@@ -258,7 +259,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ),
             SizedBox(height: 10),
             Text('+251 ${vm.order!.phoneNumber}'),
-            // Text(vm.order!.areaId),
+            SizedBox(height: 8),
+            Text(vm.order!.location),
             if (vm.deliveryDateFormatted != null) ...[
               SizedBox(height: 8),
               Text(
@@ -282,7 +284,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Payment',
+              'Payment Status',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 10),
@@ -291,19 +293,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               runSpacing: 6,
               children: [
                 // Always show current payment status
-                StatusBadge(label: order.paymentStatus.label),
+                StatusBadge(label: order.paymentstatus),
                 // TO_BE_DELIVERED: show CONFIRMED and delivery status tag
-                if (vm.showConfirmedPaymentTag)
-                  StatusBadge(label: PaymentStatus.confirmed.label),
+             /*    if (vm.showConfirmedPaymentTag)
+                  StatusBadge(label: PaymentStatus.CONFIRMED.name), */
                 if (vm.deliveryStatusTagLabel != null)
                   StatusBadge(label: vm.deliveryStatusTagLabel!),
                 // CANCELLED + DECLINED
-                if (order.status == OrderStatus.cancelled &&
-                    order.paymentStatus == PaymentStatus.declined)
-                  StatusBadge(label: PaymentStatus.declined.label),
+                if (order.status == OrderStatus.CANCELLED &&
+                    order.paymentstatus == PaymentStatus.DECLINED.name)
+                  StatusBadge(label: PaymentStatus.DECLINED.name),
                 // REFUNDED: show RefundStatus tag alongside payment tag
-                if (vm.showRefundTag)
-                  StatusBadge(label: order.refundStatus.label),
+                if (vm.showRefundTag) StatusBadge(label: order.refundstatus),
               ],
             ),
             if (vm.showPaymentProof) ...[
@@ -311,7 +312,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  order.paymentProofUrl!,
+                  order.paymentProofUrl,
                   height: 160,
                   fit: BoxFit.cover,
                 ),
@@ -320,7 +321,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             if (vm.showDeclineReason) ...[
               SizedBox(height: 8),
               Text(
-                'Reason: ${order.paymentDeclineReason}',
+                'Reason: ${order.cancelReason}',
                 style: TextStyle(color: Colors.grey[700]),
               ),
             ],
@@ -347,7 +348,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 10),
-            if (vm.showRefundTag) StatusBadge(label: order.refundStatus.label),
+            if (vm.showRefundTag) StatusBadge(label: order.refundstatus),
             if (vm.showRefundRejectReason) ...[
               SizedBox(height: 8),
               Text(

@@ -188,4 +188,26 @@ class CartService {
       throw Exception('Login error: $e');
     }
   }
+
+  Future<void> removeFromCart(String cartId) async {
+    final token = await getToken();
+
+    try {
+      final response = await Http.delete(
+        Uri.parse('${Constants.baseurl}/api/cart/$cartId/remove'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Login error: $e');
+    }
+  }
 }

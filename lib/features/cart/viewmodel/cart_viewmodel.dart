@@ -2,9 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
-
-import 'package:flutter/material.dart';
-import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/cart/service/cart_repo.dart';
 
 
@@ -150,6 +147,42 @@ void updateQuantityDebounced({
     );
   });
 }
+
+
+  Future<void> removeItem(CartModel item) async {
+    if (_cartItems == null) return;
+
+    final previousItems = List<CartModel>.from(_cartItems!.items);
+    final updatedItems = List<CartModel>.from(previousItems)
+      ..removeWhere((c) => c.id == item.id);
+
+    final updatedTotal = updatedItems.fold<int>(
+      0,
+      (sum, cart) => sum + cart.totalprice,
+    );
+
+    _cartItems = _cartItems!.copyWith(
+      items: updatedItems,
+      totalPrice: updatedTotal,
+    );
+
+    notifyListeners();
+
+    try {
+      await _cartService.removeFromCart(item.id);
+    } catch (e) {
+      _cartItems = _cartItems!.copyWith(
+        items: previousItems,
+        totalPrice: previousItems.fold<int>(
+          0,
+          (sum, cart) => sum + cart.totalprice,
+        ),
+      );
+
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
 
 
  Future<void> updateItem({

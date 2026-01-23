@@ -9,11 +9,13 @@ class OrderCard extends StatelessWidget {
   final OrderModel order;
   final OrderUiConfig config;
   final ValueChanged<OrderAction> onAction;
+  final bool isCancelling;
 
   const OrderCard({
     required this.order,
     required this.config,
     required this.onAction,
+    this.isCancelling = false,
   });
 
   @override
@@ -167,9 +169,11 @@ class OrderCard extends StatelessWidget {
   Widget _secondaryActionButton(OrderAction action) {
     final label = _actionLabel(action);
     final isPrimary = action == OrderAction.pay;
+    final isCancelButton = action == OrderAction.cancel;
+    final loading = isCancelButton && isCancelling;
 
     return OutlinedButton(
-      onPressed: () => onAction(action),
+      onPressed: loading ? null : () => onAction(action),
       style: OutlinedButton.styleFrom(
         backgroundColor: isPrimary
             ? AppColors.primary.withOpacity(0.15)
@@ -179,7 +183,13 @@ class OrderCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(vertical: 12),
       ),
-      child: Text(label),
+      child: loading
+          ? SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(label),
     );
   }
 
