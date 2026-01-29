@@ -56,7 +56,7 @@ class _CartScreenState extends State<CartScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        CheckoutView(cart: cart, orderrecived: 'Pickup'),
+                        CheckoutView(cart: cart, orderType: 'Pickup'),
                   ),
                 );
               },
@@ -70,7 +70,7 @@ class _CartScreenState extends State<CartScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        CheckoutView(cart: cart, orderrecived: 'Delivery'),
+                        CheckoutView(cart: cart, orderType: 'Delivery'),
                   ),
                 );
               },

@@ -12,6 +12,7 @@ import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:haqmate/features/product_detail/service/product_detail_repo.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/views/product_view.dart';
+import 'package:haqmate/features/profile/view_model/profile_viewmodel.dart';
 import 'package:haqmate/features/review/service/review_service.dart';
 import 'package:haqmate/features/review/view/review_screen.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
@@ -20,9 +21,8 @@ import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
 
 import 'features/auth/view/login_screen.dart';
 
-void main() async{
-
-    // Important: Add this line
+void main() async {
+  // Important: Add this line
   /* idgetsFlutterBinding.ensureInitialized();
   
   // Initialize InAppWebView
@@ -35,10 +35,9 @@ void main() async{
       initialUrlRequest: URLRequest(url: WebUri('about:blank')),
     );
   } */
-  
+
   runApp(const TeffApp());
 }
-
 
 // void _initializeWebView() {
 //   if (WebViewPlatform.instance == null) {
@@ -54,7 +53,6 @@ void main() async{
 //   // For Flutter 3.0+
 //   return WebViewPlatform.instance ?? const WebViewPlatform();
 // }
-
 
 class TeffApp extends StatelessWidget {
   const TeffApp({super.key});
@@ -80,6 +78,10 @@ class TeffApp extends StatelessWidget {
 
         ChangeNotifierProvider<OrdersViewModel>(
           create: (_) => OrdersViewModel()..load(),
+        ),
+
+        ChangeNotifierProvider<ProfileViewModel>(
+          create: (_) => ProfileViewModel(),
         ),
 
         ChangeNotifierProvider<OrderdetailViewModel>(

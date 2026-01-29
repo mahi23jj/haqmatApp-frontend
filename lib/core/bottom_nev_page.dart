@@ -5,6 +5,7 @@ import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
 import 'package:haqmate/features/home/views/home_view.dart';
 import 'package:haqmate/features/orders/view/order_screen.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
+import 'package:haqmate/features/profile/view/profile_view.dart';
 import 'package:provider/provider.dart';
 
 class TeffBottomNavPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _TeffBottomNavPageState extends State<TeffBottomNavPage> {
     HomeView(),      // Replace with your actual pages
     OrdersPage(),
     CartScreen(),
-    HomeView()
+    ProfileView()
     // ProfilePage(),
   ];
 

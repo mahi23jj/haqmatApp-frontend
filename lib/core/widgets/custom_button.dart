@@ -8,7 +8,10 @@ class CustomButton extends StatelessWidget {
   final double? width;
   final double? height;
   final Color? backgroundColor;
+  final Color? foregroundColor;
   final Color? textColor;
+  final Widget? icon;
+  final int? elevation;
   final EdgeInsetsGeometry? padding;
   final BorderRadiusGeometry? borderRadius;
   final Widget? leading;
@@ -22,9 +25,12 @@ class CustomButton extends StatelessWidget {
     this.width,
     this.height,
     this.backgroundColor,
+    this.foregroundColor,
     this.textColor,
     this.padding,
     this.borderRadius,
+    this.icon,
+    this.elevation,
     this.leading,
     this.loadingChild,
   });
@@ -33,22 +39,19 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = loading
         ? loadingChild ??
-            const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
         : Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: 8),
-              ],
+              if (leading != null) ...[leading!, const SizedBox(width: 8)],
               Text(
                 label,
                 style: TextStyle(
@@ -65,14 +68,17 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.primary,
-          foregroundColor: textColor ?? Colors.white,
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          foregroundColor: foregroundColor ?? textColor ?? Colors.white,
+          padding:
+              padding ??
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? BorderRadius.circular(12),
           ),
+          elevation: elevation?.toDouble(),
         ),
         onPressed: loading ? null : onPressed,
-        child: child,
+        child: icon ?? child,
       ),
     );
   }
