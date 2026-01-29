@@ -44,6 +44,31 @@ class OrdersViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  // loadorder
+  // Future<void> loadOrder(String orderId) async {
+  //   _loading = true;
+  //   _error = null;
+  //   notifyListeners();
+
+  //   try {
+  //     final order = await _repo.fetchOrder(orderId);
+  //     final index = orders.indexWhere((o) => o.id == orderId);
+  //     if (index != -1) {
+  //       orders[index] = order;
+  //     } else {
+  //       orders.add(order);
+  //     }
+  //     applyFilter(activeFilter);
+  //     notifyListeners();
+  //   } catch (e) {
+  //     _error = e.toString();
+  //   }
+
+  //   _loading = false;
+  //   notifyListeners();  
+  // }
+
   void applyFilter(OrderStatus? filter) {
     activeFilter = filter;
 

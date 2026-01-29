@@ -9,7 +9,7 @@ import 'package:haqmate/features/orders/widgets/order_card.dart';
 import 'package:provider/provider.dart';
 
 class OrdersPage extends StatelessWidget {
-  OrdersPage({super.key});
+  const OrdersPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,116 +18,255 @@ class OrdersPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: const Text(
-          "My Orders",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          "የእኔ ትዕዛዞች",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+            fontSize: 20,
+          ),
         ),
+        centerTitle: true,
       ),
       body: Consumer<OrdersViewModel>(
         builder: (context, vm, child) {
+          // Loading state
           if (vm.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildLoadingState();
           }
 
-          return Column(
-            children: [
-              SizedBox(height: 10),
+          // Error state
+          if (vm.error != null) {
+            return _buildErrorState(vm);
+          }
 
-              // 🔥 FILTER TABS
-              buildFilterTabs(context),
+          // Empty state
+          if (vm.filtered.isEmpty) {
+            return _buildEmptyState(vm);
+          }
 
-              SizedBox(height: 12),
-
-              // 🔥 ORDER LIST
-              Expanded(
-                child: vm.filtered.isEmpty
-                    ? Center(child: Text("No orders found"))
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: vm.filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 16),
-                        itemBuilder: (context, index) {
-                          final order = vm.filtered[index];
-                          final config = vm.uiConfigFor(order);
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      OrderDetailPage(orderId: order.id),
-                                ),
-                              );
-                            },
-                            child: OrderCard(
-                              order: order,
-                              config: config,
-                              isCancelling: vm.isCancelling(order.id),
-                              onAction: (action) {
-                                if (action == OrderAction.track) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          OrderDetailPage(orderId: order.id),
-                                    ),
-                                  );
-                                } else if (action == OrderAction.pay) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ManualPaymentScreen(
-                                        orderId: order.id,
-                                      ),
-                                    ),
-                                  );
-                                } else if (action == OrderAction.cancel) {
-                                  vm.cancelOrder(context, order.id);
-                                } else {
-                                  vm.handleAction(action, order);
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          );
+          // Success state with data
+          return _buildSuccessState(context, vm);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Consumer<OrdersViewModel>(
         builder: (context, vm, child) {
-          return SizedBox(
-            width: 260,
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            width: double.infinity,
             child: CustomButton(
-              label: 'Contact Seller',
+              label: 'አሸናፊ ያነጋግሩ',
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               onPressed: () => vm.contactSeller('+251985272557'),
             ),
           );
         },
       ),
+    );
+  }
 
-      /*  body: Consumer<OrdersViewModel>(
-          builder: (context, vm, child) {
-            if (vm.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 2,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'ትዕዛዞች በመጫን ላይ...',
+            style: TextStyle(
+              color: AppColors.textLight,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            return ListView.separated(
+  Widget _buildErrorState(OrdersViewModel vm) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: AppColors.accent,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'አልተሳካም!',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              vm.error!,
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 14,
+                // textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            CustomButton(
+              label: 'እንደገና ይሞክሩ',
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              onPressed: () => vm.load(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(OrdersViewModel vm) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.shopping_bag_outlined,
+              color: AppColors.textLight,
+              size: 72,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'ምንም ትዕዛዝ የለም',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              vm.activeFilter == null
+                  ? 'እስካሁን ምንም ትዕዛዝ አላቀረቡም።'
+                  : 'በዚህ ሁኔታ ምንም ትዕዛዝ የለም።',
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 14,
+                // textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (vm.activeFilter != null)
+              CustomButton(
+                label: 'ሁሉንም ትዕዛዞች ይመልከቱ',
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                onPressed: () => vm.applyFilter(null),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuccessState(BuildContext context, OrdersViewModel vm) {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+
+        // 🔥 FILTER TABS
+        buildFilterTabs(context),
+
+        const SizedBox(height: 12),
+
+        // Order count indicator
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Text(
+                '${vm.filtered.length} ትዕዛዝ${vm.filtered.length == 1 ? '' : 'ዎች'} ተገኝተዋል',
+                style: TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // 🔥 ORDER LIST
+        Expanded(
+          child: RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              await vm.load();
+            },
+            child: ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: vm.orders.length,
+              itemCount: vm.filtered.length,
               separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
-                final order = vm.orders[index];
-                return OrderCard(order: order);
+                final order = vm.filtered[index];
+                final config = vm.uiConfigFor(order);
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            OrderDetailPage(orderId: order.id),
+                      ),
+                    );
+                  },
+                  child: OrderCard(
+                    order: order,
+                    config: config,
+                    isCancelling: vm.isCancelling(order.id),
+                    onAction: (action) {
+                      if (action == OrderAction.track) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                OrderDetailPage(orderId: order.id),
+                          ),
+                        );
+                      } else if (action == OrderAction.pay) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ManualPaymentScreen(
+                              orderId: order.id,
+                            ),
+                          ),
+                        );
+                      } else if (action == OrderAction.cancel) {
+                        vm.cancelOrder(context, order.id);
+                      } else {
+                        vm.handleAction(action, order);
+                      }
+                    },
+                  ),
+                );
               },
-            );
-          },
-        ), */
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
