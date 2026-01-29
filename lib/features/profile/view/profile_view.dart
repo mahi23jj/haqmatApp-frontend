@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/features/auth/view/login_screen.dart';
 import 'package:haqmate/features/profile/view/change_password.dart';
 import 'package:haqmate/features/profile/view_model/profile_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +53,29 @@ class _ProfileBody extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Retry', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (viewModel.profile == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Profile data unavailable',
+              style: TextStyle(color: AppColors.textLight),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: viewModel.loadProfile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Reload', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -206,7 +230,7 @@ class _ProfileInformation extends StatelessWidget {
           _ProfileField(
             label: 'Email Address',
             value: profile.email,
-            isEditing: isEditing,
+            isEditing: !isEditing,
             icon: Icons.email,
             onChanged: (value) => viewModel.updateField('email', value),
           ),
@@ -225,13 +249,92 @@ class _ProfileInformation extends StatelessWidget {
           const SizedBox(height: 20),
           
           // Address Field
-          _ProfileField(
-            label: 'Address',
-            value: profile.address,
-            isEditing: isEditing,
-            icon: Icons.location_on,
-            maxLines: 2,
-            onChanged: (value) => viewModel.updateField('address', value),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.location_on, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Address',
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (isEditing) ...[
+                TextField(
+                  controller: viewModel.locationController,
+                  decoration: InputDecoration(
+                    hintText: 'Search location...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: AppColors.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.all(16),
+                    suffixIcon: viewModel.loadingSuggestions
+                        ? const Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                  onChanged: viewModel.searchLocations,
+                ),
+                if (viewModel.suggestions.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    constraints: const BoxConstraints(maxHeight: 150),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: viewModel.suggestions.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, idx) {
+                        final loc = viewModel.suggestions[idx];
+                        return ListTile(
+                          title: Text(loc.name),
+                          subtitle: Text('Delivery: ${loc.deliveryFee}'),
+                          onTap: () => viewModel.selectLocation(loc),
+                        );
+                      },
+                    ),
+                  ),
+              ] else
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    profile.address.name,
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+            ],
           ),
           
           // Save/Cancel Buttons when editing
@@ -307,7 +410,6 @@ class _ProfileField extends StatelessWidget {
   final String value;
   final bool isEditing;
   final IconData icon;
-  final int maxLines;
   final ValueChanged<String> onChanged;
 
   const _ProfileField({
@@ -316,7 +418,6 @@ class _ProfileField extends StatelessWidget {
     required this.value,
     required this.isEditing,
     required this.icon,
-    this.maxLines = 1,
     required this.onChanged,
   }) : super(key: key);
 
@@ -343,7 +444,7 @@ class _ProfileField extends StatelessWidget {
         isEditing
             ? TextFormField(
                 initialValue: value,
-                maxLines: maxLines,
+            maxLines: 1,
                 onChanged: onChanged,
                 decoration: InputDecoration(
                   filled: true,
@@ -454,8 +555,11 @@ class _ProfileActions extends StatelessWidget {
             onPressed: () async {
               Navigator.pop(context);
               await viewModel.logout();
-              // Navigate to login screen or home
-              // Navigator.pushReplacementNamed(context, '/login');
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+                (route) => false,
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
