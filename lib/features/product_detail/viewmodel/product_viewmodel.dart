@@ -1,27 +1,29 @@
+
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/product_detail/service/product_detail_repo.dart';
 import 'package:haqmate/features/cart/viewmodel/cart_viewmodel.dart';
+import 'package:haqmate/core/constants.dart';
 
 class ProductViewModel extends ChangeNotifier {
   final ProductDetailRepo _repo;
   Product? product;
 
   List<WeightOption> get weights => [
-    WeightOption(label: '1 kg', multiplier: 1),
-    WeightOption(label: '5 kg', multiplier: 5),
-    WeightOption(label: '10 kg', multiplier: 10),
+    WeightOption(label: '1 ኪ.ግ', multiplier: 1),
+    WeightOption(label: '5 ኪ.ግ', multiplier: 5),
+    WeightOption(label: '10 ኪ.ግ', multiplier: 10),
   ];
 
   bool loading = false;
   String? error;
+  bool isRefreshing = false;
 
   int selectedImageIndex = 0;
   int quantity = 1;
   int selectedWeightIndex = 0;
   bool addingToCart = false;
 
-  // Temporary variable to hold custom weight
   String? customWeight;
 
   ProductViewModel(this._repo);
@@ -36,7 +38,7 @@ class ProductViewModel extends ChangeNotifier {
       final value = customValue?.trim();
       if (value == null || value.isEmpty) return;
       customWeight = value;
-      selectedWeightIndex = -1; // Use -1 for custom
+      selectedWeightIndex = -1;
     }
 
     notifyListeners();
@@ -64,7 +66,7 @@ class ProductViewModel extends ChangeNotifier {
 
   String get selectedWeightLabel {
     if (selectedWeightIndex == -1 && customWeight?.isNotEmpty == true) {
-      return '${customWeight!.trim()} kg';
+      return '${customWeight!.trim()} ኪ.ግ';
     }
 
     if (selectedWeightIndex >= 0 && selectedWeightIndex < weights.length) {
@@ -74,24 +76,41 @@ class ProductViewModel extends ChangeNotifier {
     return weights.first.label;
   }
 
-
-  Future<void> load(String id) async {
-    loading = true; // FIXED
+  Future<void> load(String id, {bool isRefresh = false}) async {
+    if (isRefresh) {
+      isRefreshing = true;
+    } else {
+      loading = true;
+    }
     error = null;
-    // product = null; // IMPORTANT FIX
     notifyListeners();
 
     try {
       product = await _repo.fetchProductById(id);
-      print('view model $product');
-
-      notifyListeners();
+      error = null;
     } catch (e) {
       error = e.toString();
-      print('error in product viewmodel: $error');
+      if (isRefresh) {
+        // For refresh, we keep the old data but show error
+        // Don't set product to null on refresh error
+      }
     }
 
     loading = false;
+    isRefreshing = false;
+    notifyListeners();
+  }
+
+  void reload(String id) {
+    load(id, isRefresh: true);
+  }
+
+  void resetState() {
+    selectedImageIndex = 0;
+    quantity = 1;
+    selectedWeightIndex = 0;
+    addingToCart = false;
+    customWeight = null;
     notifyListeners();
   }
 
@@ -106,29 +125,8 @@ class ProductViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void nextQuantity() => setQuantity(quantity + 1);
-  void prevQuantity() => setQuantity(quantity - 1);
-
-  // void selectWeight(int idx) {
-  //   if (product == null) return;
-  //   if (idx < 0 || idx >= weights.length) return;
-  //   selectedWeightIndex = idx;
-  //   notifyListeners();
-  // }
-
-
-
-
-
-
-  // double get price {
-  //   if (product == null) return 0.0;
-  //   final base = product!.basePrice * weights[selectedWeightIndex].multiplier;
-  //   final priceAfterDiscount = product!.discountPercent != null
-  //       ? base * (1 - product!.discountPercent! / 100)
-  //       : base;
-  //   return priceAfterDiscount * quantity;
-  // }
+  void incrementQuantity() => setQuantity(quantity + 1);
+  void decrementQuantity() => setQuantity(quantity - 1);
 
   double get price {
     if (product == null) return 0.0;
@@ -140,6 +138,10 @@ class ProductViewModel extends ChangeNotifier {
         : base;
 
     return priceAfterDiscount * quantity;
+  }
+
+  String get formattedPrice {
+    return price.toStringAsFixed(2);
   }
 
   Future<void> addToCart(CartViewModel cartVm) async {
@@ -159,41 +161,4 @@ class ProductViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 }
-
-
-// class ProductViewModel extends ChangeNotifier {
-//   final ProductDetailRepo _repo;
-//   Product? product;
-//   List<WeightOption> get weights => [WeightOption(label: '1 kg', multiplier: 1), WeightOption(label: '5 kg', multiplier: 5), WeightOption(label: '10 kg', multiplier: 10)];
-//   bool loading = true;
-//   String? error;
-
-//   // UI state
-//   int selectedImageIndex = 0;
-//   int quantity = 1;
-//   int selectedWeightIndex = 0;
-
-//   ProductViewModel(this._repo);
-
-//   void load(String id) async{
-//     loading = false;
-//     error = null;
-//     notifyListeners();
-
-//     try {
-//       product = await _repo.fetchProductById(id);
-
-//       print('viewmodel $product');
-//       loading = false;
-//       notifyListeners();
-//     } catch (e) {
-//       loading = false;
-//       error = e.toString();
-//       notifyListeners();
-//     }
-//   }
-
- 
-// }

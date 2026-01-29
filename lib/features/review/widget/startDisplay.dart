@@ -1,9 +1,13 @@
-// -----------------------------
 import 'package:flutter/material.dart';
 
 class StarDisplay extends StatelessWidget {
   final int value; // 0..5
-  const StarDisplay({Key? key, this.value = 0}) : super(key: key);
+  final double size;
+  const StarDisplay({
+    Key? key, 
+    this.value = 0,
+    this.size = 20,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +17,8 @@ class StarDisplay extends StatelessWidget {
         5,
         (i) => Icon(
           i < value ? Icons.star : Icons.star_border,
-          color: const Color(0xFFD8B384),
-          size: 18,
+          color: const Color(0xFFFFC107),
+          size: size,
         ),
       ),
     );

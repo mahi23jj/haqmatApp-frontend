@@ -1,13 +1,92 @@
+// import 'package:flutter/material.dart';
+// import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
+// import 'package:haqmate/features/review/widget/review_list.dart';
+// import 'package:haqmate/features/review/widget/review_summery_card.dart';
+// import 'package:haqmate/features/review/widget/write_review.dart';
+// import 'package:provider/provider.dart';
+
+// class ReviewsPage extends StatefulWidget {
+//   final String productid;
+//   const ReviewsPage({super.key, required this.productid});
+
+//   @override
+//   State<ReviewsPage> createState() => _ReviewsPageState();
+// }
+
+// class _ReviewsPageState extends State<ReviewsPage> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     print('product id in detail page in review : ${widget.productid}');
+//     // Run AFTER the first frame so notifyListeners is safe
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       context.read<ReviewViewModel>().loadReviews(widget.productid);
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final vm = context.watch<ReviewViewModel>();
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: Colors.transparent,
+//         elevation: 0,
+//         leading: IconButton(
+//           icon: const Icon(Icons.arrow_back, color: Color(0xFF7B4B27)),
+//           onPressed: () {
+//             // back
+//             Navigator.pop(context);
+//           },
+//         ),
+//         title: const Text(
+//           'Reviews & Ratings',
+//           style: TextStyle(color: Color(0xFF7B4B27)),
+//         ),
+//         centerTitle: true,
+//       ),
+//       body: SafeArea(
+//         child: vm.loading
+//             ? const Center(child: CircularProgressIndicator())
+//             : Padding(
+//                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//                 child: Column(
+//                   children: [
+//                     // const SizedBox(height: 8),
+//                     ReviewSummaryCard(productId: widget.productid),
+//                     const SizedBox(height: 12),
+//                     Expanded(child: ReviewsList()),
+//                   ],
+//                 ),
+//               ),
+//       ),
+//       /*   floatingActionButton: FloatingActionButton.extended(
+//         onPressed: () => _openWriteReviewSheet(context),
+//         backgroundColor: const Color(0xFFD8B384),
+//         label: const Text(
+//           'Write a Review',
+//           style: TextStyle(color: Colors.white),
+//         ),
+//         icon: const Icon(Icons.add, color: Colors.white),
+//       ), */
+//       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+//     );
+//   }
+// }
+
+
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/review_list.dart';
 import 'package:haqmate/features/review/widget/review_summery_card.dart';
 import 'package:haqmate/features/review/widget/write_review.dart';
 import 'package:provider/provider.dart';
+import 'package:haqmate/core/widgets/custom_button.dart';
 
 class ReviewsPage extends StatefulWidget {
-  final String productid;
-  const ReviewsPage({super.key, required this.productid});
+  final String productId;
+  const ReviewsPage({super.key, required this.productId});
 
   @override
   State<ReviewsPage> createState() => _ReviewsPageState();
@@ -17,11 +96,40 @@ class _ReviewsPageState extends State<ReviewsPage> {
   @override
   void initState() {
     super.initState();
-    print('product id in detail page in review : ${widget.productid}');
-    // Run AFTER the first frame so notifyListeners is safe
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ReviewViewModel>().loadReviews(widget.productid);
+      context.read<ReviewViewModel>().loadReviews(widget.productId);
     });
+  }
+
+  void _openWriteReviewSheet(BuildContext context) async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (ctx) => Padding(
+        padding: MediaQuery.of(ctx).viewInsets,
+        child: WriteReviewSheet(productId: widget.productId),
+      ),
+    );
+
+    if (result == 'review_success' && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('ግምገማ ተልኳል!'),
+          backgroundColor: Colors.green.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      // Reload reviews after submission
+      context.read<ReviewViewModel>().loadReviews(widget.productId);
+    }
   }
 
   @override
@@ -29,47 +137,214 @@ class _ReviewsPageState extends State<ReviewsPage> {
     final vm = context.watch<ReviewViewModel>();
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF7B4B27)),
-          onPressed: () {
-            // back
-            Navigator.pop(context);
-          },
+          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Reviews & Ratings',
-          style: TextStyle(color: Color(0xFF7B4B27)),
+        title: Text(
+          'ግምገማዎች እና ደረጃዎች',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+          ),
         ),
         centerTitle: true,
+        actions: [
+          if (!vm.loading && vm.error == null)
+            IconButton(
+              icon: Icon(Icons.refresh, color: AppColors.primary),
+              onPressed: () => vm.loadReviews(widget.productId),
+            ),
+        ],
       ),
-      body: SafeArea(
-        child: vm.loading
-            ? const Center(child: CircularProgressIndicator())
-            : Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    // const SizedBox(height: 8),
-                    ReviewSummaryCard(productId: widget.productid),
-                    const SizedBox(height: 12),
-                    Expanded(child: ReviewsList()),
-                  ],
-                ),
+      body: _buildBody(context, vm),
+      floatingActionButton: !vm.loading && vm.error == null && vm.reviews != null
+          ? FloatingActionButton.extended(
+              onPressed: () => _openWriteReviewSheet(context),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('ግምገማ ይጻፉ'),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildBody(BuildContext context, ReviewViewModel vm) {
+    if (vm.loading && vm.reviews == null) {
+      return _buildLoadingState();
+    }
+
+    if (vm.error != null && vm.reviews == null) {
+      return _buildErrorState(vm);
+    }
+
+    if (vm.reviews == null || vm.reviews!.reviews.isEmpty) {
+      return _buildEmptyState(vm);
+    }
+
+    return _buildSuccessState(context, vm);
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 2,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'ግምገማዎች በመጫን ላይ...',
+            style: TextStyle(
+              color: AppColors.textLight,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ReviewViewModel vm) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: AppColors.accent,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'አልተሳካም!',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
               ),
-      ),
-      /*   floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openWriteReviewSheet(context),
-        backgroundColor: const Color(0xFFD8B384),
-        label: const Text(
-          'Write a Review',
-          style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              vm.error!,
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 14,
+                // textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            CustomButton(
+              label: 'እንደገና ይሞክሩ',
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              onPressed: () => vm.loadReviews(widget.productId),
+            ),
+          ],
         ),
-        icon: const Icon(Icons.add, color: Colors.white),
-      ), */
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ReviewViewModel vm) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.reviews_outlined,
+              color: AppColors.textLight,
+              size: 72,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'ምንም ግምገማ የለም',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'ይህን ምርት የመጀመሪያው ግምገማ የምትሰጡ ይሁኑ!',
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 14,
+                // textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            CustomButton(
+              label: 'ግምገማ ይጻፉ',
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              onPressed: () => _openWriteReviewSheet(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuccessState(BuildContext context, ReviewViewModel vm) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        children: [
+          // Review Summary Card
+          ReviewSummaryCard(productId: widget.productId),
+          
+          const SizedBox(height: 12),
+          
+          // Review Count
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  '${vm.reviews!.reviews.length} ግምገማ${vm.reviews!.reviews.length == 1 ? '' : 'ዎች'}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'አማካኝ: ${vm.reviews!.averageRating.toStringAsFixed(1)}',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Reviews List
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ReviewsList(),
+          ),
+          
+          const SizedBox(height: 80), // Space for FAB
+        ],
+      ),
     );
   }
 }

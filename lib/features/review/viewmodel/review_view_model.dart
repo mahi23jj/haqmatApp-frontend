@@ -31,6 +31,17 @@ class ReviewViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  //rating counts
+  Map<int, int> get ratingCounts {
+    final Map<int, int> counts = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
+    if (reviews != null) {
+      for (var review in reviews!.reviews) {
+        counts[review.rating] = (counts[review.rating] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
+
   Future<void> submitReview(String productid, String text, int rating) async {
     loading = true;
     error = null;
