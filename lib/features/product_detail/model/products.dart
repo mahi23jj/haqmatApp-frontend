@@ -12,6 +12,8 @@ final int reviewsCount;
  final double? discountPercent; // nullable
 final List<Review> reviews;
 final Review? myReview;
+final String teffType;
+final String? quality;
 
 
 Product({
@@ -26,6 +28,8 @@ required this.reviewsCount,
 required this.reviews,
  this.discountPercent,
  this.myReview,
+  required this.teffType,
+  this.quality,
 });
 
 
@@ -49,6 +53,8 @@ factory Product.fromJson(Map<String, dynamic> json) {
     rating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
 
     reviewsCount: json['totalRatings'] ?? 0,
+    teffType: json['teffType'] ?? "",
+    quality: json['quality'] ?? "",
 
     reviews: json['feedback'] != null
         ? (json['feedback'] as List<dynamic>)
@@ -59,6 +65,7 @@ factory Product.fromJson(Map<String, dynamic> json) {
     discountPercent: json['discount'] != null
         ? (json['discount'] as num?)?.toDouble()
         : null,
+    
   );
 }
 
@@ -76,6 +83,8 @@ Product copyWith({
   List<Review>? reviews,
   double? discountPercent,
   Review? myReview, 
+  String? teffType,
+  String? quality,
 } 
 ) {
   return Product(
@@ -88,6 +97,8 @@ Product copyWith({
     rating: rating ?? this.rating,
     reviewsCount: reviewsCount ?? this.reviewsCount,
     reviews: reviews ?? this.reviews,
+    teffType: teffType ?? this.teffType,
+    quality: quality ?? this.quality,
   );
 }
 

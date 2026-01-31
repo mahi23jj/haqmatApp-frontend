@@ -8,10 +8,8 @@ import '../models/product.dart';
 
 class ProductsRepository {
   // Simulate network latency and
-   Future<List<ProductModel>> searchFeatured(String param) async {
-
+  Future<List<ProductModel>> searchFeatured(String param) async {
     print(param);
-
 
     try {
       final response = await Http.get(
@@ -24,26 +22,23 @@ class ProductsRepository {
       print(response.statusCode);
 
       if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        print(body);
 
-         final body = jsonDecode(response.body);
-         print(body);
+        // If API returns { "data": [...] }
+        final productsJson = body["data"] ?? body;
 
-      // If API returns { "data": [...] }
-      final productsJson = body["data"] ?? body;
+        if (productsJson is! List) {
+          throw Exception("Invalid data format");
+        }
 
-      if (productsJson is! List) {
-        throw Exception("Invalid data format");
-      }
+        final products = productsJson
+            .map<ProductModel>((json) => ProductModel.fromJson(json))
+            .toList();
 
-      final products = productsJson
-          .map<ProductModel>((json) => ProductModel.fromJson(json))
-          .toList();
+        print(products);
 
-          print(products);
-
-      return products;
-
-
+        return products;
       } else {
         final body = jsonDecode(response.body);
         final message = ErrorParser.parse(body);
@@ -52,11 +47,49 @@ class ProductsRepository {
     } catch (e) {
       throw Exception('Login error: $e');
     }
-   }
+  }
 
-   
   // return demo data
   Future<List<ProductModel>> fetchFeatured() async {
+    try {
+      final response = await Http.get(
+        Uri.parse('${Constants.baseurl}/api/products/popular'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print(response.body);
+
+      print(response.statusCode);
+
+      if (response.statusCode == 201) {
+        final body = jsonDecode(response.body);
+        print(body);
+
+        // If API returns { "data": [...] }
+        final productsJson = body["data"] ?? body;
+
+        if (productsJson is! List) {
+          throw Exception("Invalid data format");
+        }
+
+        final products = productsJson
+            .map<ProductModel>((json) => ProductModel.fromJson(json))
+            .toList();
+
+        print(products);
+
+        return products;
+      } else {
+        final body = jsonDecode(response.body);
+        final message = ErrorParser.parse(body);
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('Login error: $e');
+    }
+  }
+
+  Future<List<ProductModel>> fetchAll() async {
     try {
       final response = await Http.get(
         Uri.parse('${Constants.baseurl}/api/products'),
@@ -68,26 +101,23 @@ class ProductsRepository {
       print(response.statusCode);
 
       if (response.statusCode == 201) {
+        final body = jsonDecode(response.body);
+        print(body);
 
-         final body = jsonDecode(response.body);
-         print(body);
+        // If API returns { "data": [...] }
+        final productsJson = body["data"] ?? body;
 
-      // If API returns { "data": [...] }
-      final productsJson = body["data"] ?? body;
+        if (productsJson is! List) {
+          throw Exception("Invalid data format");
+        }
 
-      if (productsJson is! List) {
-        throw Exception("Invalid data format");
-      }
+        final products = productsJson
+            .map<ProductModel>((json) => ProductModel.fromJson(json))
+            .toList();
 
-      final products = productsJson
-          .map<ProductModel>((json) => ProductModel.fromJson(json))
-          .toList();
+        print(products);
 
-          print(products);
-
-      return products;
-
-
+        return products;
       } else {
         final body = jsonDecode(response.body);
         final message = ErrorParser.parse(body);
@@ -96,13 +126,7 @@ class ProductsRepository {
     } catch (e) {
       throw Exception('Login error: $e');
     }
-
-
-
-    
   }
-
-   
 
   //   Future<AuthModel> login(String email, String password) async {
   //   try {

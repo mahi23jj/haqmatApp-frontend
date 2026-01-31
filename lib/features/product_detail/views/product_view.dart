@@ -820,6 +820,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    context.read<ProductViewModel>().resetState();
     super.dispose();
   }
 

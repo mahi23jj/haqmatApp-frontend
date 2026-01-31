@@ -106,7 +106,6 @@ class FlashSaleItem extends StatelessWidget {
         );
       },
       child: Container(
-        
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -137,7 +136,7 @@ class FlashSaleItem extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-               /*  Positioned(
+                /*  Positioned(
                   top: 8,
                   right: 8,
                   child: Container(
@@ -199,7 +198,17 @@ class FlashSaleItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-
+                  Text(
+                    product.teffType,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                      height: 1,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
                   // Price
                   Row(
                     children: [
@@ -212,7 +221,7 @@ class FlashSaleItem extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                     /*  if (product.price != null)
+                      /*  if (product.price != null)
                         Text(
                           'ብር${product.price!.toStringAsFixed(2)}',
                           style: TextStyle(
@@ -227,7 +236,7 @@ class FlashSaleItem extends StatelessWidget {
                   // const SizedBox(height: 8),
 
                   // Rating
-                 /*  Row(
+                  /*  Row(
                     children: [
                       /*   Icon(
                         Icons.star,

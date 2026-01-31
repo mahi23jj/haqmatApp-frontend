@@ -578,11 +578,13 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void dispose() {
     _scrollDebounce?.cancel();
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    if (!mounted) return;
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 200) {

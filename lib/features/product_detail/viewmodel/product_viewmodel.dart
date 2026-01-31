@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:haqmate/features/product_detail/model/products.dart';
 // import 'package:haqmate/features/product_detail/service/product_detail_repo.dart';
@@ -172,10 +171,7 @@ class WeightOption {
   final String label;
   final double multiplier;
 
-  WeightOption({
-    required this.label,
-    required this.multiplier,
-  });
+  WeightOption({required this.label, required this.multiplier});
 }
 
 class ProductViewModel extends ChangeNotifier {
@@ -213,12 +209,10 @@ class ProductViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void selectImage(int idx) {
     selectedImageIndex = idx;
     notifyListeners();
   }
-
 
   /// Set or replace custom weight
   void setCustomWeight(double value) {
@@ -239,8 +233,7 @@ class ProductViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  int get selectedPackagingSize =>
-      selectedWeight.multiplier.round();
+  int get selectedPackagingSize => selectedWeight.multiplier.round();
 
   String get selectedWeightLabel => selectedWeight.label;
 
@@ -311,8 +304,7 @@ class ProductViewModel extends ChangeNotifier {
   double get price {
     if (product == null) return 0;
 
-    final basePrice =
-        product!.basePrice * selectedWeight.multiplier;
+    final basePrice = product!.basePrice * selectedWeight.multiplier;
 
     final discounted = product!.discountPercent != null
         ? basePrice * (1 - product!.discountPercent! / 100)
@@ -337,11 +329,23 @@ class ProductViewModel extends ChangeNotifier {
       await cartVm.addToCart(
         productId: product!.id,
         quantity: quantity,
-        packagingSize: selectedPackagingSize,
+        packaging: selectedPackagingSize,
+        imageUrl: product!.images.isNotEmpty ? product!.images[0] : '',
+        name: product!.name,
+        tefftype: product!.teffType,
+        quality: product!.quality ?? '',
+        totalPrice: price.toInt(),
       );
     } finally {
       addingToCart = false;
       notifyListeners();
     }
+  }
+
+  // vm dispose
+  @override
+  void dispose() {
+    
+    super.dispose();
   }
 }

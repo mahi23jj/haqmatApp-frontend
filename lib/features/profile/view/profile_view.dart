@@ -1367,38 +1367,6 @@ class ChangePasswordView extends StatefulWidget {
 class _ChangePasswordViewState extends State<ChangePasswordView> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _codeController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  bool _codeSent = false;
-  bool _codeVerified = false;
-  bool _passwordVisible = false;
-  bool _confirmPasswordVisible = false;
-
-  int _resendSeconds = 60;
-  bool _canResend = false;
-  Timer? _resendTimer;
-
-  void _startResendTimer() {
-    _canResend = false;
-    _resendSeconds = 60;
-    _resendTimer?.cancel();
-    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_resendSeconds == 0) {
-        timer.cancel();
-        if (mounted) {
-          setState(() => _canResend = true);
-        }
-      } else {
-        if (mounted) {
-          setState(() => _resendSeconds--);
-        } else {
-          timer.cancel();
-        }
-      }
-    });
-  }
 
   @override
   void initState() {
@@ -1409,10 +1377,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   @override
   void dispose() {
     _emailController.dispose();
-    _codeController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
-    _resendTimer?.cancel();
     super.dispose();
   }
 
@@ -1454,7 +1418,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 style: TextStyle(fontSize: 16, color: AppColors.textLight),
               ),
               const SizedBox(height: 32),
-
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -1476,319 +1439,483 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   }
                   return null;
                 },
-                readOnly: _codeSent,
               ),
               const SizedBox(height: 20),
-
-              if (!_codeSent)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: viewModel.isLoading
-                        ? null
-                        : () async {
-                            if (_formKey.currentState!.validate()) {
-                              try {
-                                await viewModel.sendPasswordResetCode(
-                                  _emailController.text,
-                                );
-                                setState(() => _codeSent = true);
-                                _startResendTimer();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('ማረጋገጫ ኮድ ወደ ኢሜይልዎ ተልኳል'),
-                                    backgroundColor: Colors.green,
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await viewModel.sendPasswordResetCode(
+                                _emailController.text.trim(),
+                              );
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('ማረጋገጫ ኮድ ወደ ኢሜይልዎ ተልኳል'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChangePasswordCodeView(
+                                    email: _emailController.text.trim(),
                                   ),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('ኮድ መላክ አልተሳካም: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
+                                ),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('ኮድ መላክ አልተሳካም: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
                             }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: viewModel.isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'ማረጋገጫ ኮድ ላክ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Ethiopia',
-                            ),
-                          ),
-                  ),
-                ),
-
-              if (_codeSent) ...[
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _codeController,
-                  decoration: InputDecoration(
-                    labelText: 'ማረጋገጫ ኮድ',
-                    labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
-                    prefixIcon: Icon(Icons.code, color: AppColors.primary),
-                    border: OutlineInputBorder(
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'እባክዎ ማረጋገጫ ኮድ ያስገቡ';
-                    }
-                    if (value.length != 6) {
-                      return 'ኮድ 6 አሃዝ መሆን አለበት';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                if (!_codeVerified)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: viewModel.isLoading
-                          ? null
-                          : () async {
-                              if (_formKey.currentState!.validate()) {
-                                final success = await viewModel.verifyOtp(
-                                  _emailController.text.trim(),
-                                  _codeController.text.trim(),
-                                );
-
-                                if (success && context.mounted) {
-                                  setState(() => _codeVerified = true);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('ኮድ በተሳካ ሁኔታ ተረጋግጧል'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                } else if (context.mounted &&
-                                    viewModel.errorMessage.isNotEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(viewModel.errorMessage),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: viewModel.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'ኮድ አረጋግጥ',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Ethiopia',
-                              ),
-                            ),
-                    ),
-                  ),
-                const SizedBox(height: 12),
-
-                Center(
-                  child: _canResend
-                      ? TextButton(
-                          onPressed: viewModel.isLoading
-                              ? null
-                              : () async {
-                                  await viewModel.sendPasswordResetCode(
-                                    _emailController.text.trim(),
-                                  );
-                                  _startResendTimer();
-
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("ማረጋገጫ ኮድ እንደገና ተልኳል"),
-                                      ),
-                                    );
-                                  }
-                                },
-                          child: const Text(
-                            "ኮድ እንደገና ላክ",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                              fontFamily: 'Ethiopia',
-                            ),
+                  child: viewModel.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
                           ),
                         )
-                      : Text(
-                          "እንደገና ለመላክ በ $_resendSeconds ሰከንድ ይጠብቁ",
-                          style: const TextStyle(color: Colors.grey),
+                      : const Text(
+                          'ማረጋገጫ ኮድ ላክ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Ethiopia',
+                          ),
                         ),
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-                if (_codeVerified) ...[
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _newPasswordController,
-                    obscureText: !_passwordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'አዲስ የይለፍ ቃል',
-                      labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
-                      prefixIcon: Icon(Icons.lock, color: AppColors.primary),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: AppColors.primary,
-                        ),
-                        onPressed: () {
-                          setState(() => _passwordVisible = !_passwordVisible);
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'እባክዎ አዲስ የይለፍ ቃል ያስገቡ';
-                      }
-                      if (value.length < 6) {
-                        return 'የይለፍ ቃል ቢያንስ 6 ቁምፊ መሆን አለበት';
-                      }
-                      return null;
-                    },
+class ChangePasswordCodeView extends StatefulWidget {
+  final String email;
+
+  const ChangePasswordCodeView({Key? key, required this.email})
+    : super(key: key);
+
+  @override
+  State<ChangePasswordCodeView> createState() => _ChangePasswordCodeViewState();
+}
+
+class _ChangePasswordCodeViewState extends State<ChangePasswordCodeView> {
+  final _formKey = GlobalKey<FormState>();
+  final _codeController = TextEditingController();
+
+  int _resendSeconds = 60;
+  bool _canResend = false;
+  Timer? _resendTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startResendTimer();
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _resendTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startResendTimer() {
+    _canResend = false;
+    _resendSeconds = 60;
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendSeconds == 0) {
+        timer.cancel();
+        if (mounted) setState(() => _canResend = true);
+      } else {
+        if (mounted) {
+          setState(() => _resendSeconds--);
+        } else {
+          timer.cancel();
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<ProfileViewModel>();
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          'ማረጋገጫ ኮድ',
+          style: TextStyle(fontFamily: 'Ethiopia'),
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'ኮድ ያስገቡ',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                  fontFamily: 'Ethiopia',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'ወደ ${widget.email} የተላከውን ኮድ ያስገቡ',
+                style: TextStyle(fontSize: 16, color: AppColors.textLight),
+              ),
+              const SizedBox(height: 32),
+              TextFormField(
+                controller: _codeController,
+                decoration: InputDecoration(
+                  labelText: 'ማረጋገጫ ኮድ',
+                  labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                  prefixIcon: Icon(Icons.code, color: AppColors.primary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 20),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'እባክዎ ማረጋገጫ ኮድ ያስገቡ';
+                  }
+                  if (value.length != 6) {
+                    return 'ኮድ 6 አሃዝ መሆን አለበት';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () async {
+                          if (_formKey.currentState!.validate()) {
+                            final success = await viewModel.verifyOtp(
+                              widget.email.trim(),
+                              _codeController.text.trim(),
+                            );
 
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: !_confirmPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'አዲሱን የይለፍ ቃል ያረጋግጡ',
-                      labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: AppColors.primary,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _confirmPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: AppColors.primary,
-                        ),
-                        onPressed: () {
-                          setState(
-                            () => _confirmPasswordVisible =
-                                !_confirmPasswordVisible,
-                          );
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('ኮድ በተሳካ ሁኔታ ተረጋግጧል'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChangePasswordNewPasswordView(
+                                    email: widget.email.trim(),
+                                    code: _codeController.text.trim(),
+                                  ),
+                                ),
+                              );
+                            } else if (context.mounted &&
+                                viewModel.errorMessage.isNotEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(viewModel.errorMessage),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
                         },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'እባክዎ የይለፍ ቃልዎን ያረጋግጡ';
-                      }
-                      if (value != _newPasswordController.text) {
-                        return 'የይለፍ ቃሎች አንድ ዓይነት አይደሉም';
-                      }
-                      return null;
-                    },
                   ),
-                  const SizedBox(height: 32),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: viewModel.isLoading
-                          ? null
-                          : () async {
-                              if (_formKey.currentState!.validate()) {
-                                final request = ChangePasswordRequest(
-                                  email: _emailController.text.trim(),
-                                  code: _codeController.text.trim(),
-                                  newPassword: _newPasswordController.text,
+                  child: viewModel.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'ኮድ አረጋግጥ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Ethiopia',
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: _canResend
+                    ? TextButton(
+                        onPressed: viewModel.isLoading
+                            ? null
+                            : () async {
+                                await viewModel.sendPasswordResetCode(
+                                  widget.email.trim(),
                                 );
+                                _startResendTimer();
 
-                                final success = await viewModel.changePassword(
-                                  request,
-                                );
-                                if (success && context.mounted) {
+                                if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል!'),
-                                      backgroundColor: Colors.green,
+                                      content: Text("ማረጋገጫ ኮድ እንደገና ተልኳል"),
                                     ),
                                   );
-                                  Navigator.pop(context);
                                 }
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                              },
+                        child: const Text(
+                          "ኮድ እንደገና ላክ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            fontFamily: 'Ethiopia',
+                          ),
                         ),
+                      )
+                    : Text(
+                        "እንደገና ለመላክ በ $_resendSeconds ሰከንድ ይጠብቁ",
+                        style: const TextStyle(color: Colors.grey),
                       ),
-                      child: viewModel.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'የይለፍ ቃል ቀይር',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Ethiopia',
-                              ),
-                            ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ChangePasswordNewPasswordView extends StatefulWidget {
+  final String email;
+  final String code;
+
+  const ChangePasswordNewPasswordView({
+    Key? key,
+    required this.email,
+    required this.code,
+  }) : super(key: key);
+
+  @override
+  State<ChangePasswordNewPasswordView> createState() =>
+      _ChangePasswordNewPasswordViewState();
+}
+
+class _ChangePasswordNewPasswordViewState
+    extends State<ChangePasswordNewPasswordView> {
+  final _formKey = GlobalKey<FormState>();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
+
+  @override
+  void dispose() {
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<ProfileViewModel>();
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          'አዲስ የይለፍ ቃል',
+          style: TextStyle(fontFamily: 'Ethiopia'),
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'አዲስ የይለፍ ቃል ያስገቡ',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                  fontFamily: 'Ethiopia',
+                ),
+              ),
+              const SizedBox(height: 32),
+              TextFormField(
+                controller: _newPasswordController,
+                obscureText: !_passwordVisible,
+                decoration: InputDecoration(
+                  labelText: 'አዲስ የይለፍ ቃል',
+                  labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                  prefixIcon: Icon(Icons.lock, color: AppColors.primary),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () {
+                      setState(() => _passwordVisible = !_passwordVisible);
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'እባክዎ አዲስ የይለፍ ቃል ያስገቡ';
+                  }
+                  if (value.length < 6) {
+                    return 'የይለፍ ቃል ቢያንስ 6 ቁምፊ መሆን አለበት';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: !_confirmPasswordVisible,
+                decoration: InputDecoration(
+                  labelText: 'አዲሱን የይለፍ ቃል ያረጋግጡ',
+                  labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                  prefixIcon: Icon(Icons.lock_outline, color: AppColors.primary),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _confirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () {
+                      setState(
+                        () =>
+                            _confirmPasswordVisible =
+                                !_confirmPasswordVisible,
+                      );
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'እባክዎ የይለፍ ቃልዎን ያረጋግጡ';
+                  }
+                  if (value != _newPasswordController.text) {
+                    return 'የይለፍ ቃሎች አንድ ዓይነት አይደሉም';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: viewModel.isLoading
+                      ? null
+                      : () async {
+                          if (_formKey.currentState!.validate()) {
+                            final request = ChangePasswordRequest(
+                              email: widget.email.trim(),
+                              code: widget.code.trim(),
+                              newPassword: _newPasswordController.text,
+                            );
+
+                            final success = await viewModel.changePassword(
+                              request,
+                            );
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ],
-              ],
+                  child: viewModel.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'የይለፍ ቃል ቀይር',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Ethiopia',
+                          ),
+                        ),
+                ),
+              ),
             ],
           ),
         ),

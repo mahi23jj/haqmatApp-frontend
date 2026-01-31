@@ -10,6 +10,7 @@ class HomeViewModel extends ChangeNotifier {
   String? _error;
   // List<Product> featured = [];
   List<ProductModel> flashSale = [];
+  List<ProductModel> allProducts = [];
   List<ProductModel> result = [];
 
   bool get loading => _loading;
@@ -35,6 +36,29 @@ class HomeViewModel extends ChangeNotifier {
       notifyListeners();
 
       return flashSale;
+    } catch (e) {
+      _error = 'Failed to load data';
+      return [];
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+    Future<List<ProductModel>> loadall() async {
+    _loading = false;
+    _error = null;
+    notifyListeners();
+
+    try {
+      allProducts = await _repo.fetchFeatured();
+
+      print(allProducts.length);
+
+      _loading = false;
+      notifyListeners();
+
+      return allProducts;
     } catch (e) {
       _error = 'Failed to load data';
       return [];
