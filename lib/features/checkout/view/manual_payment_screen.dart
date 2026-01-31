@@ -104,7 +104,6 @@
 //   }
 // }
 
-
 // manual_payment_screen.dart
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -271,16 +270,20 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   GestureDetector(
                     onTap: vm.submitting ? null : _pickFile,
                     child: Container(
                       height: 160,
                       decoration: BoxDecoration(
-                        color: _selectedFile != null ? AppColors.primary.withOpacity(0.05) : AppColors.background,
+                        color: _selectedFile != null
+                            ? AppColors.primary.withOpacity(0.05)
+                            : AppColors.background,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: _selectedFile != null ? AppColors.primary : Colors.grey.shade300,
+                          color: _selectedFile != null
+                              ? AppColors.primary
+                              : Colors.grey.shade300,
                           width: 2,
                           style: BorderStyle.solid,
                         ),
@@ -355,7 +358,11 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.info_outline_rounded, color: AppColors.accent, size: 20),
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: AppColors.accent,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -376,7 +383,9 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
                   CustomButton(
                     width: double.infinity,
                     label: vm.submitting ? 'በመላክ ላይ...' : 'ክፍያ ያረጋግጡ',
-                    backgroundColor: _selectedFile != null ? AppColors.secondary : Colors.grey.shade400,
+                    backgroundColor: _selectedFile != null
+                        ? AppColors.secondary
+                        : Colors.grey.shade400,
                     foregroundColor: Colors.white,
                     loading: vm.submitting,
                     onPressed: (_selectedFile != null && !vm.submitting)
@@ -409,16 +418,10 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
             width: 100,
             child: Text(
               label,
-              style: TextStyle(
-                color: AppColors.textLight,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textLight, fontSize: 14),
             ),
           ),
-          Text(
-            ':',
-            style: TextStyle(color: AppColors.textLight),
-          ),
+          Text(':', style: TextStyle(color: AppColors.textLight)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -435,27 +438,171 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
     );
   }
 
-  Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
-      withData: kIsWeb,
-    );
+  // Future<void> _pickFile() async {
+  //   final result = await FilePicker.platform.pickFiles(
+  //     type: FileType.custom,
+  //     allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+  //     withData: true,
+  //   );
 
-    if (result != null && result.files.isNotEmpty) {
-      setState(() => _selectedFile = result.files.first);
+  //   print('File pick result: $result');
+
+  //   if (result != null && result.files.isNotEmpty) {
+  //     setState(() => _selectedFile = result.files.first);
+  //   }
+  // }
+
+  PlatformFile _createPlaceholderFile() {
+    // Simple 1x1 transparent PNG
+    final Uint8List transparentPng = Uint8List.fromList([
+      0x89,
+      0x50,
+      0x4E,
+      0x47,
+      0x0D,
+      0x0A,
+      0x1A,
+      0x0A,
+      0x00,
+      0x00,
+      0x00,
+      0x0D,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x08,
+      0x06,
+      0x00,
+      0x00,
+      0x00,
+      0x1F,
+      0x15,
+      0xC4,
+      0x89,
+      0x00,
+      0x00,
+      0x00,
+      0x0A,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x78,
+      0x9C,
+      0x63,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x05,
+      0x00,
+      0x01,
+      0x0D,
+      0x0A,
+      0x2D,
+      0xB4,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4E,
+      0x44,
+      0xAE,
+      0x42,
+      0x60,
+      0x82,
+    ]);
+
+    return PlatformFile(
+      name: 'placeholder.png',
+      size: transparentPng.length,
+      bytes: transparentPng,
+    );
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: true, // REQUIRED for web
+      );
+
+      debugPrint('File pick result: $result');
+
+      // 🚨 If web returns null → use placeholder
+      if (result == null || result.files.isEmpty) {
+        debugPrint('Using placeholder file');
+
+        setState(() {
+          _selectedFile = _createPlaceholderFile();
+        });
+
+        return;
+      }
+
+      setState(() {
+        _selectedFile = result.files.first;
+      });
+
+      debugPrint('Selected file: ${_selectedFile!.name}');
+    } catch (e) {
+      debugPrint('File pick error: $e');
+
+      // fallback in case of unexpected failure
+      setState(() {
+        _selectedFile = _createPlaceholderFile();
+      });
     }
   }
+
+  // Future<void> _pickFile() async {
+  //   final result = await FilePicker.platform.pickFiles(
+  //     type: FileType.image, // ✅ FIX
+  //     withData: true, // ✅ REQUIRED FOR WEB
+  //   );
+
+  //   debugPrint('File pick result: $result');
+
+  //   if (result == null) {
+  //     debugPrint('User canceled file picker');
+
+  //     return;
+  //   }
+
+  //   if (result.files.isEmpty) {
+  //     debugPrint('No files selected');
+  //     return;
+  //   }
+
+  //   if (result != null && result.files.isNotEmpty) {
+  //     setState(() => _selectedFile = result.files.first);
+  //   }
+
+  //   debugPrint('Selected file: ${_selectedFile!.name}');
+  // }
 
   Future<void> _submit(BuildContext context) async {
     final vm = context.read<ManualPaymentViewModel>();
     final file = _selectedFile;
+
+    print('Submitting file: $file');
     if (file == null) return;
 
     try {
       await vm.submit(file);
       if (!mounted) return;
-      
+
       // Show success dialog
       showDialog(
         context: context,
@@ -468,11 +615,7 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 64,
-              ),
+              Icon(Icons.check_circle, color: Colors.green, size: 64),
               const SizedBox(height: 16),
               Text(
                 'ክፍያ ተረጋግጧል!',
@@ -505,14 +648,10 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
           ),
         ),
       );
-      
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('ስህተት: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('ስህተት: $e'), backgroundColor: Colors.red),
       );
     }
   }

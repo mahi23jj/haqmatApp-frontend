@@ -15,7 +15,7 @@ class OrdersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      /* appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
         title: Text(
@@ -27,7 +27,7 @@ class OrdersPage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-      ),
+      ), */
       body: Consumer<OrdersViewModel>(
         builder: (context, vm, child) {
           // Loading state
@@ -38,11 +38,6 @@ class OrdersPage extends StatelessWidget {
           // Error state
           if (vm.error != null) {
             return _buildErrorState(vm);
-          }
-
-          // Empty state
-          if (vm.filtered.isEmpty) {
-            return _buildEmptyState(vm);
           }
 
           // Success state with data
@@ -56,7 +51,7 @@ class OrdersPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             width: double.infinity,
             child: CustomButton(
-              label: 'አሸናፊ ያነጋግሩ',
+              label: 'ድርጅቱን ያነጋግሩ',
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               borderRadius: BorderRadius.circular(14),
@@ -183,6 +178,35 @@ class OrdersPage extends StatelessWidget {
   Widget _buildSuccessState(BuildContext context, OrdersViewModel vm) {
     return Column(
       children: [
+          Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              color: AppColors.background,
+              child: Row(
+                children: [
+                  /* IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
+                    onPressed: () => Navigator.pop(context),
+                  ), */
+                  const SizedBox(width: 8),
+                  Text(
+                    "የእኔ ትዕዛዞች",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.refresh, color: AppColors.primary),
+                    onPressed: () => vm.load(),
+                    tooltip: 'አደስ',
+                  ),
+                ],
+              ),
+            ),
+
+
         const SizedBox(height: 10),
 
         // 🔥 FILTER TABS
@@ -208,63 +232,65 @@ class OrdersPage extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        // 🔥 ORDER LIST
+        // 🔥 ORDER LIST / EMPTY STATE
         Expanded(
-          child: RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () async {
-              await vm.load();
-            },
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: vm.filtered.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final order = vm.filtered[index];
-                final config = vm.uiConfigFor(order);
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            OrderDetailPage(orderId: order.id),
-                      ),
-                    );
+          child: vm.filtered.isEmpty
+              ? _buildEmptyState(vm)
+              : RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: () async {
+                    await vm.load();
                   },
-                  child: OrderCard(
-                    order: order,
-                    config: config,
-                    isCancelling: vm.isCancelling(order.id),
-                    onAction: (action) {
-                      if (action == OrderAction.track) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                OrderDetailPage(orderId: order.id),
-                          ),
-                        );
-                      } else if (action == OrderAction.pay) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ManualPaymentScreen(
-                              orderId: order.id,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    itemCount: vm.filtered.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final order = vm.filtered[index];
+                      final config = vm.uiConfigFor(order);
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderDetailPage(orderId: order.id),
                             ),
-                          ),
-                        );
-                      } else if (action == OrderAction.cancel) {
-                        vm.cancelOrder(context, order.id);
-                      } else {
-                        vm.handleAction(action, order);
-                      }
+                          );
+                        },
+                        child: OrderCard(
+                          order: order,
+                          config: config,
+                          isCancelling: vm.isCancelling(order.id),
+                          onAction: (action) {
+                            if (action == OrderAction.track) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      OrderDetailPage(orderId: order.id),
+                                ),
+                              );
+                            } else if (action == OrderAction.pay) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ManualPaymentScreen(
+                                    orderId: order.id,
+                                  ),
+                                ),
+                              );
+                            } else if (action == OrderAction.cancel) {
+                              vm.cancelOrder(context, order.id);
+                            } else {
+                              vm.handleAction(action, order);
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
-                );
-              },
-            ),
-          ),
+                ),
         ),
       ],
     );

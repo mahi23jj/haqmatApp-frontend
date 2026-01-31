@@ -19,17 +19,17 @@ class _TeffBottomNavPageState extends State<TeffBottomNavPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    HomeView(),      // Replace with your actual pages
+    HomeView(), // Replace with your actual pages
     OrdersPage(),
     CartScreen(),
-    ProfileView()
+    ProfileView(),
     // ProfilePage(),
   ];
 
   void _onTap(int idx) {
     setState(() => _selectedIndex = idx);
 
-    if (idx == 2) {
+      if (idx == 2) {
     // Cart tab clicked
     Future.microtask(() {
       Provider.of<CartViewModel>(context, listen: false).loadCart();
@@ -39,17 +39,13 @@ class _TeffBottomNavPageState extends State<TeffBottomNavPage> {
       Provider.of<OrdersViewModel>(context, listen: false).load();
     });
   }
-
-
+ 
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: TeffBottomNav(
         selectedIndex: _selectedIndex,
         onTap: _onTap,

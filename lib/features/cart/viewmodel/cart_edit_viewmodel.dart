@@ -17,6 +17,7 @@ class ProductOptionViewModel extends ChangeNotifier {
 
   String? selectedTeffTypeId;
   bool isLoading = false;
+  String? error;
 
   int quantity = 1;
   int selectedWeightIndex = 0;
@@ -97,14 +98,17 @@ class ProductOptionViewModel extends ChangeNotifier {
 
   Future<void> loadOptions(String productId) async {
     isLoading = true;
+    error = null;
     notifyListeners();
 
-    options = await _service.fetchFeatured();
-
-    // Default selections if not initialized from cart
-
-    isLoading = false;
-    notifyListeners();
+    try {
+      options = await _service.fetchFeatured();
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   void selectTeffType(String id) {

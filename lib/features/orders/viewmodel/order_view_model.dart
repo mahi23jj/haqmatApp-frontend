@@ -158,6 +158,8 @@ class OrdersViewModel extends ChangeNotifier {
       _cancelLoading[orderId] = false;
       notifyListeners();
 
+      if (!context.mounted) return;
+
       // Success dialog asking for refund
       final shouldRequest = await showDialog<bool>(
         context: context,
@@ -180,12 +182,15 @@ class OrdersViewModel extends ChangeNotifier {
         },
       );
 
+      if (!context.mounted) return;
       if (shouldRequest == true) {
         await _showRefundDialog(context, orderId);
       }
     } catch (e) {
       _cancelLoading[orderId] = false;
       notifyListeners();
+
+      if (!context.mounted) return;
 
       // Error dialog with try again
       await showDialog<void>(
@@ -219,6 +224,7 @@ class OrdersViewModel extends ChangeNotifier {
     final accNumberCtrl = TextEditingController();
     final reasonCtrl = TextEditingController();
 
+    if (!context.mounted) return;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -259,6 +265,7 @@ class OrdersViewModel extends ChangeNotifier {
                         accNumberCtrl.text.trim().isEmpty ||
                         reasonCtrl.text.trim().isEmpty) {
                       // simple validation
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please fill all fields')),
                       );
@@ -274,12 +281,14 @@ class OrdersViewModel extends ChangeNotifier {
                       );
                       setState(() => submitting = false);
                       Navigator.pop(ctx);
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Refund requested successfully')),
                       );
                       await load();
                     } catch (e) {
                       setState(() => submitting = false);
+                      if (!context.mounted) return;
                       showDialog<void>(
                         context: context,
                         builder: (ctx2) => AlertDialog(

@@ -1,6 +1,623 @@
+// import 'package:flutter/material.dart';
+// import 'package:haqmate/core/constants.dart';
+// import 'package:haqmate/features/auth/view/login_screen.dart';
+// import 'package:haqmate/features/profile/view/change_password.dart';
+// import 'package:haqmate/features/profile/view_model/profile_viewmodel.dart';
+// import 'package:provider/provider.dart';
+// import 'about_us_view.dart';
+
+// class ProfileView extends StatelessWidget {
+//   const ProfileView({Key? key}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ChangeNotifierProvider(
+//       create: (context) => ProfileViewModel(),
+//       child: Scaffold(
+//         backgroundColor: AppColors.background,
+//         appBar: AppBar(
+//           title: const Text('Profile'),
+//           backgroundColor: AppColors.primary,
+//           foregroundColor: Colors.white,
+//           elevation: 0,
+//           centerTitle: true,
+//         ),
+//         body: const _ProfileBody(),
+//       ),
+//     );
+//   }
+// }
+
+// class _ProfileBody extends StatelessWidget {
+//   const _ProfileBody({Key? key}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final viewModel = context.watch<ProfileViewModel>();
+
+//     if (viewModel.isLoading && viewModel.profile == null) {
+//       return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+//     }
+
+//     if (viewModel.errorMessage.isNotEmpty && viewModel.profile == null) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Text('Error: ${viewModel.errorMessage}', style: const TextStyle(color: Colors.red)),
+//             const SizedBox(height: 20),
+//             ElevatedButton(
+//               onPressed: viewModel.loadProfile,
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: AppColors.primary,
+//                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//               ),
+//               child: const Text('Retry', style: TextStyle(color: Colors.white)),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+
+//     if (viewModel.profile == null) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             const Text(
+//               'Profile data unavailable',
+//               style: TextStyle(color: AppColors.textLight),
+//             ),
+//             const SizedBox(height: 20),
+//             ElevatedButton(
+//               onPressed: viewModel.loadProfile,
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: AppColors.primary,
+//                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//               ),
+//               child: const Text('Reload', style: TextStyle(color: Colors.white)),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+
+//     return RefreshIndicator(
+//       onRefresh: viewModel.loadProfile,
+//       color: AppColors.primary,
+//       child: SingleChildScrollView(
+//         padding: const EdgeInsets.all(20),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             // Profile Header with Avatar
+//             _ProfileHeader(viewModel: viewModel),
+//             const SizedBox(height: 32),
+
+//             // Profile Information
+//             _ProfileInformation(viewModel: viewModel),
+//             const SizedBox(height: 32),
+
+//             // Action Buttons
+//             _ProfileActions(viewModel: viewModel),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class _ProfileHeader extends StatelessWidget {
+//   final ProfileViewModel viewModel;
+
+//   const _ProfileHeader({Key? key, required this.viewModel}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Column(
+//         children: [
+//           Container(
+//             width: 120,
+//             height: 120,
+//             decoration: BoxDecoration(
+//               shape: BoxShape.circle,
+//               gradient: LinearGradient(
+//                 colors: [AppColors.secondary, AppColors.accent],
+//                 begin: Alignment.topLeft,
+//                 end: Alignment.bottomRight,
+//               ),
+//               boxShadow: [
+//                 BoxShadow(
+//                   color: AppColors.primary.withOpacity(0.3),
+//                   blurRadius: 12,
+//                   offset: const Offset(0, 4),
+//                 ),
+//               ],
+//             ),
+//             child: Center(
+//               child: Text(
+//                 viewModel.profile?.nameInitials ?? 'U',
+//                 style: const TextStyle(
+//                   fontSize: 42,
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.white,
+//                 ),
+//               ),
+//             ),
+//           ),
+//           const SizedBox(height: 16),
+//           Text(
+//             viewModel.profile?.name ?? 'User Name',
+//             style: const TextStyle(
+//               fontSize: 24,
+//               fontWeight: FontWeight.bold,
+//               color: AppColors.textDark,
+//             ),
+//           ),
+//           Text(
+//             viewModel.profile?.email ?? 'user@example.com',
+//             style: const TextStyle(
+//               fontSize: 16,
+//               color: AppColors.textLight,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+// class _ProfileInformation extends StatelessWidget {
+//   final ProfileViewModel viewModel;
+
+//   const _ProfileInformation({Key? key, required this.viewModel}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final profile = viewModel.profile!;
+//     final isEditing = viewModel.isEditing;
+
+//     return Container(
+//       padding: const EdgeInsets.all(24),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(20),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.05),
+//             blurRadius: 20,
+//             offset: const Offset(0, 10),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               const Text(
+//                 'Personal Information',
+//                 style: TextStyle(
+//                   fontSize: 18,
+//                   fontWeight: FontWeight.bold,
+//                   color: AppColors.textDark,
+//                 ),
+//               ),
+//               if (!isEditing)
+//                 IconButton(
+//                   onPressed: viewModel.startEditing,
+//                   icon: Icon(Icons.edit, color: AppColors.primary),
+//                   tooltip: 'Edit Profile',
+//                 ),
+//             ],
+//           ),
+//           const Divider(height: 32),
+
+//           // Name Field
+//           _ProfileField(
+//             label: 'Full Name',
+//             value: profile.name,
+//             isEditing: isEditing,
+//             icon: Icons.person,
+//             onChanged: (value) => viewModel.updateField('name', value),
+//           ),
+
+//           const SizedBox(height: 20),
+
+//           // Email Field
+//           _ProfileField(
+//             label: 'Email Address',
+//             value: profile.email,
+//             isEditing: !isEditing,
+//             icon: Icons.email,
+//             onChanged: (value) => viewModel.updateField('email', value),
+//           ),
+
+//           const SizedBox(height: 20),
+
+//           // Phone Field
+//           _ProfileField(
+//             label: 'Phone Number',
+//             value: profile.phone,
+//             isEditing: isEditing,
+//             icon: Icons.phone,
+//             onChanged: (value) => viewModel.updateField('phone', value),
+//           ),
+
+//           const SizedBox(height: 20),
+
+//           // Address Field
+//           Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Row(
+//                 children: [
+//                   Icon(Icons.location_on, color: AppColors.primary, size: 20),
+//                   const SizedBox(width: 12),
+//                   const Text(
+//                     'Address',
+//                     style: TextStyle(
+//                       color: AppColors.textLight,
+//                       fontSize: 14,
+//                       fontWeight: FontWeight.w500,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 8),
+//               if (isEditing) ...[
+//                 TextField(
+//                   controller: viewModel.locationController,
+//                   decoration: InputDecoration(
+//                     hintText: 'Search location...',
+//                     prefixIcon: const Icon(Icons.search),
+//                     filled: true,
+//                     fillColor: AppColors.background,
+//                     border: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(12),
+//                       borderSide: BorderSide.none,
+//                     ),
+//                     contentPadding: const EdgeInsets.all(16),
+//                     suffixIcon: viewModel.loadingSuggestions
+//                         ? const Padding(
+//                             padding: EdgeInsets.all(12.0),
+//                             child: SizedBox(
+//                               width: 16,
+//                               height: 16,
+//                               child: CircularProgressIndicator(
+//                                 strokeWidth: 2,
+//                               ),
+//                             ),
+//                           )
+//                         : null,
+//                   ),
+//                   onChanged: viewModel.searchLocations,
+//                 ),
+//                 if (viewModel.suggestions.isNotEmpty)
+//                   Container(
+//                     margin: const EdgeInsets.only(top: 8),
+//                     constraints: const BoxConstraints(maxHeight: 150),
+//                     decoration: BoxDecoration(
+//                       border: Border.all(color: Colors.grey.shade300),
+//                       borderRadius: BorderRadius.circular(12),
+//                       color: Colors.white,
+//                     ),
+//                     child: ListView.separated(
+//                       shrinkWrap: true,
+//                       itemCount: viewModel.suggestions.length,
+//                       separatorBuilder: (_, __) => const Divider(height: 1),
+//                       itemBuilder: (_, idx) {
+//                         final loc = viewModel.suggestions[idx];
+//                         return ListTile(
+//                           title: Text(loc.name),
+//                           subtitle: Text('Delivery: ${loc.deliveryFee}'),
+//                           onTap: () => viewModel.selectLocation(loc),
+//                         );
+//                       },
+//                     ),
+//                   ),
+//               ] else
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: AppColors.background,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Text(
+//                     profile.address.name,
+//                     style: const TextStyle(
+//                       color: AppColors.textDark,
+//                       fontSize: 16,
+//                     ),
+//                   ),
+//                 ),
+//             ],
+//           ),
+
+//           // Save/Cancel Buttons when editing
+//           if (isEditing) ...[
+//             const SizedBox(height: 24),
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: OutlinedButton(
+//                     onPressed: () {
+//                       viewModel.cancelEditing();
+//                     },
+//                     style: OutlinedButton.styleFrom(
+//                       padding: const EdgeInsets.symmetric(vertical: 16),
+//                       side: BorderSide(color: AppColors.textLight.withOpacity(0.3)),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                     ),
+//                     child: const Text(
+//                       'Cancel',
+//                       style: TextStyle(color: AppColors.textLight),
+//                     ),
+//                   ),
+//                 ),
+//                 const SizedBox(width: 16),
+//                 Expanded(
+//                   child: ElevatedButton(
+//                     onPressed: viewModel.isSaving ? null : () async {
+//                       final success = await viewModel.saveProfile();
+//                       if (success && context.mounted) {
+//                         ScaffoldMessenger.of(context).showSnackBar(
+//                           const SnackBar(
+//                             content: Text('Profile updated successfully!'),
+//                             backgroundColor: Colors.green,
+//                           ),
+//                         );
+//                       }
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: AppColors.primary,
+//                       padding: const EdgeInsets.symmetric(vertical: 16),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                     ),
+//                     child: viewModel.isSaving
+//                         ? const SizedBox(
+//                             width: 20,
+//                             height: 20,
+//                             child: CircularProgressIndicator(
+//                               strokeWidth: 2,
+//                               color: Colors.white,
+//                             ),
+//                           )
+//                         : const Text(
+//                             'Save Changes',
+//                             style: TextStyle(color: Colors.white),
+//                           ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+// class _ProfileField extends StatelessWidget {
+//   final String label;
+//   final String value;
+//   final bool isEditing;
+//   final IconData icon;
+//   final ValueChanged<String> onChanged;
+
+//   const _ProfileField({
+//     Key? key,
+//     required this.label,
+//     required this.value,
+//     required this.isEditing,
+//     required this.icon,
+//     required this.onChanged,
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Row(
+//           children: [
+//             Icon(icon, color: AppColors.primary, size: 20),
+//             const SizedBox(width: 12),
+//             Text(
+//               label,
+//               style: const TextStyle(
+//                 color: AppColors.textLight,
+//                 fontSize: 14,
+//                 fontWeight: FontWeight.w500,
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: 8),
+//         isEditing
+//             ? TextFormField(
+//                 initialValue: value,
+//             maxLines: 1,
+//                 onChanged: onChanged,
+//                 decoration: InputDecoration(
+//                   filled: true,
+//                   fillColor: AppColors.background,
+//                   border: OutlineInputBorder(
+//                     borderRadius: BorderRadius.circular(12),
+//                     borderSide: BorderSide.none,
+//                   ),
+//                   contentPadding: const EdgeInsets.all(16),
+//                 ),
+//               )
+//             : Container(
+//                 width: double.infinity,
+//                 padding: const EdgeInsets.all(16),
+//                 decoration: BoxDecoration(
+//                   color: AppColors.background,
+//                   borderRadius: BorderRadius.circular(12),
+//                 ),
+//                 child: Text(
+//                   value,
+//                   style: const TextStyle(
+//                     color: AppColors.textDark,
+//                     fontSize: 16,
+//                   ),
+//                 ),
+//               ),
+//       ],
+//     );
+//   }
+// }
+
+// class _ProfileActions extends StatelessWidget {
+//   final ProfileViewModel viewModel;
+
+//   const _ProfileActions({Key? key, required this.viewModel}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.all(24),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(20),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.05),
+//             blurRadius: 20,
+//             offset: const Offset(0, 10),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         children: [
+//           _ActionButton(
+//             icon: Icons.lock_reset,
+//             title: 'Change Password',
+//             color: AppColors.secondary,
+//             onTap: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (context) => ChangePasswordView(
+//                     userEmail: viewModel.profile?.email ?? '',
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//           const Divider(height: 32),
+//           _ActionButton(
+//             icon: Icons.info_outline,
+//             title: 'About Us',
+//             color: AppColors.accent,
+//             onTap: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => const AboutUsView()),
+//               );
+//             },
+//           ),
+//           const Divider(height: 32),
+//           _ActionButton(
+//             icon: Icons.logout,
+//             title: 'Logout',
+//             color: Colors.red,
+//             onTap: () {
+//               _showLogoutDialog(context, viewModel);
+//             },
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   void _showLogoutDialog(BuildContext context, ProfileViewModel viewModel) {
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: const Text('Logout'),
+//         content: const Text('Are you sure you want to logout?'),
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pop(context),
+//             child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+//           ),
+//           ElevatedButton(
+//             onPressed: () async {
+//               Navigator.pop(context);
+//               await viewModel.logout();
+//               if (!context.mounted) return;
+//               Navigator.of(context).pushAndRemoveUntil(
+//                 MaterialPageRoute(builder: (_) => LoginScreen()),
+//                 (route) => false,
+//               );
+//             },
+//             style: ElevatedButton.styleFrom(
+//               backgroundColor: Colors.red,
+//               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//             ),
+//             child: const Text('Logout', style: TextStyle(color: Colors.white)),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+// class _ActionButton extends StatelessWidget {
+//   final IconData icon;
+//   final String title;
+//   final Color color;
+//   final VoidCallback onTap;
+
+//   const _ActionButton({
+//     Key? key,
+//     required this.icon,
+//     required this.title,
+//     required this.color,
+//     required this.onTap,
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       onTap: onTap,
+//       leading: Container(
+//         width: 48,
+//         height: 48,
+//         decoration: BoxDecoration(
+//           color: color.withOpacity(0.1),
+//           borderRadius: BorderRadius.circular(12),
+//         ),
+//         child: Icon(icon, color: color),
+//       ),
+//       title: Text(
+//         title,
+//         style: const TextStyle(
+//           fontWeight: FontWeight.w500,
+//           color: AppColors.textDark,
+//         ),
+//       ),
+//       trailing: const Icon(Icons.chevron_right, color: AppColors.textLight),
+//       contentPadding: EdgeInsets.zero,
+//     );
+//   }
+// }
+
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/auth/view/login_screen.dart';
+import 'package:haqmate/features/profile/model/profile_model.dart';
 import 'package:haqmate/features/profile/view/change_password.dart';
 import 'package:haqmate/features/profile/view_model/profile_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +633,7 @@ class ProfileView extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Profile'),
+          title: const Text('መገለጫ', style: TextStyle(fontFamily: 'Ethiopia')),
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
@@ -34,72 +651,177 @@ class _ProfileBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<ProfileViewModel>();
-    
+
+    // Handle all loading and error states
     if (viewModel.isLoading && viewModel.profile == null) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const _LoadingState();
     }
 
     if (viewModel.errorMessage.isNotEmpty && viewModel.profile == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Error: ${viewModel.errorMessage}', style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: viewModel.loadProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
+      return _ErrorState(
+        message: viewModel.errorMessage,
+        onRetry: viewModel.loadProfile,
       );
     }
 
     if (viewModel.profile == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Profile data unavailable',
-              style: TextStyle(color: AppColors.textLight),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: viewModel.loadProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Reload', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      );
+      return _EmptyState(onReload: viewModel.loadProfile);
     }
 
     return RefreshIndicator(
       onRefresh: viewModel.loadProfile,
       color: AppColors.primary,
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Header with Avatar
             _ProfileHeader(viewModel: viewModel),
             const SizedBox(height: 32),
-            
-            // Profile Information
             _ProfileInformation(viewModel: viewModel),
             const SizedBox(height: 32),
-            
-            // Action Buttons
             _ProfileActions(viewModel: viewModel),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingState extends StatelessWidget {
+  const _LoadingState({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
+          const SizedBox(height: 16),
+          const Text(
+            'መገለጫ በመጫን ላይ...',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.textLight,
+              fontFamily: 'Ethiopia',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorState({Key? key, required this.message, required this.onRetry})
+    : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red.shade400, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'ስህተት ተከስቷል',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+                fontFamily: 'Ethiopia',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textLight, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                'እንደገና ሞክር',
+                style: TextStyle(color: Colors.white, fontFamily: 'Ethiopia'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final VoidCallback onReload;
+
+  const _EmptyState({Key? key, required this.onReload}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_outline,
+              color: AppColors.textLight.withOpacity(0.5),
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'መገለጫ መረጃ አልተገኘም',
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.textLight,
+                fontFamily: 'Ethiopia',
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'እባክዎ እንደገና ይሞክሩ',
+              style: TextStyle(color: AppColors.textLight, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: onReload,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                'እንደገና ጫን',
+                style: TextStyle(color: Colors.white, fontFamily: 'Ethiopia'),
+              ),
+            ),
           ],
         ),
       ),
@@ -137,30 +859,29 @@ class _ProfileHeader extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                viewModel.profile?.nameInitials ?? 'U',
+                viewModel.profile?.nameInitials ?? 'አ',
                 style: const TextStyle(
                   fontSize: 42,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  fontFamily: 'Ethiopia',
                 ),
               ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            viewModel.profile?.name ?? 'User Name',
+            viewModel.profile?.name ?? 'የተጠቃሚ ስም',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
+              fontFamily: 'Ethiopia',
             ),
           ),
           Text(
             viewModel.profile?.email ?? 'user@example.com',
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppColors.textLight,
-            ),
+            style: const TextStyle(fontSize: 16, color: AppColors.textLight),
           ),
         ],
       ),
@@ -171,7 +892,8 @@ class _ProfileHeader extends StatelessWidget {
 class _ProfileInformation extends StatelessWidget {
   final ProfileViewModel viewModel;
 
-  const _ProfileInformation({Key? key, required this.viewModel}) : super(key: key);
+  const _ProfileInformation({Key? key, required this.viewModel})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -198,57 +920,54 @@ class _ProfileInformation extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Personal Information',
+                'የግል መረጃ',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
+                  fontFamily: 'Ethiopia',
                 ),
               ),
               if (!isEditing)
                 IconButton(
                   onPressed: viewModel.startEditing,
                   icon: Icon(Icons.edit, color: AppColors.primary),
-                  tooltip: 'Edit Profile',
+                  tooltip: 'መገለጫ አርትዕ',
                 ),
             ],
           ),
           const Divider(height: 32),
-          
-          // Name Field
+
           _ProfileField(
-            label: 'Full Name',
+            label: 'ሙሉ ስም',
             value: profile.name,
             isEditing: isEditing,
             icon: Icons.person,
             onChanged: (value) => viewModel.updateField('name', value),
           ),
-          
+
           const SizedBox(height: 20),
-          
-          // Email Field
+
           _ProfileField(
-            label: 'Email Address',
+            label: 'ኢሜይል አድራሻ',
             value: profile.email,
-            isEditing: !isEditing,
+            isEditing: false, // Email cannot be edited
             icon: Icons.email,
             onChanged: (value) => viewModel.updateField('email', value),
           ),
-          
+
           const SizedBox(height: 20),
-          
-          // Phone Field
+
           _ProfileField(
-            label: 'Phone Number',
+            label: 'ስልክ ቁጥር',
             value: profile.phone,
             isEditing: isEditing,
             icon: Icons.phone,
             onChanged: (value) => viewModel.updateField('phone', value),
           ),
-          
+
           const SizedBox(height: 20),
-          
-          // Address Field
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -257,11 +976,12 @@ class _ProfileInformation extends StatelessWidget {
                   Icon(Icons.location_on, color: AppColors.primary, size: 20),
                   const SizedBox(width: 12),
                   const Text(
-                    'Address',
+                    'አድራሻ',
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
+                      fontFamily: 'Ethiopia',
                     ),
                   ),
                 ],
@@ -271,7 +991,8 @@ class _ProfileInformation extends StatelessWidget {
                 TextField(
                   controller: viewModel.locationController,
                   decoration: InputDecoration(
-                    hintText: 'Search location...',
+                    hintText: 'አድራሻ ይፈልጉ...',
+                    hintStyle: const TextStyle(fontFamily: 'Ethiopia'),
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: AppColors.background,
@@ -286,9 +1007,7 @@ class _ProfileInformation extends StatelessWidget {
                             child: SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           )
                         : null,
@@ -312,7 +1031,7 @@ class _ProfileInformation extends StatelessWidget {
                         final loc = viewModel.suggestions[idx];
                         return ListTile(
                           title: Text(loc.name),
-                          subtitle: Text('Delivery: ${loc.deliveryFee}'),
+                          // subtitle: Text('የመላኪያ ክፍያ: ${loc.deliveryFee} ብር'),
                           onTap: () => viewModel.selectLocation(loc),
                         );
                       },
@@ -336,8 +1055,7 @@ class _ProfileInformation extends StatelessWidget {
                 ),
             ],
           ),
-          
-          // Save/Cancel Buttons when editing
+
           if (isEditing) ...[
             const SizedBox(height: 24),
             Row(
@@ -349,31 +1067,38 @@ class _ProfileInformation extends StatelessWidget {
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(color: AppColors.textLight.withOpacity(0.3)),
+                      side: BorderSide(
+                        color: AppColors.textLight.withOpacity(0.3),
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: AppColors.textLight),
+                      'ሰርዝ',
+                      style: TextStyle(
+                        color: AppColors.textLight,
+                        fontFamily: 'Ethiopia',
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: viewModel.isSaving ? null : () async {
-                      final success = await viewModel.saveProfile();
-                      if (success && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Profile updated successfully!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: viewModel.isSaving
+                        ? null
+                        : () async {
+                            final success = await viewModel.saveProfile();
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('መገለጫዎ በተሳካ ሁኔታ ተሻሽሏል!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -391,8 +1116,11 @@ class _ProfileInformation extends StatelessWidget {
                             ),
                           )
                         : const Text(
-                            'Save Changes',
-                            style: TextStyle(color: Colors.white),
+                            'ለውጦችን አስቀምጥ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Ethiopia',
+                            ),
                           ),
                   ),
                 ),
@@ -436,6 +1164,7 @@ class _ProfileField extends StatelessWidget {
                 color: AppColors.textLight,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
+                fontFamily: 'Ethiopia',
               ),
             ),
           ],
@@ -444,7 +1173,6 @@ class _ProfileField extends StatelessWidget {
         isEditing
             ? TextFormField(
                 initialValue: value,
-            maxLines: 1,
                 onChanged: onChanged,
                 decoration: InputDecoration(
                   filled: true,
@@ -464,7 +1192,7 @@ class _ProfileField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  value,
+                  value.isNotEmpty ? value : 'የለም',
                   style: const TextStyle(
                     color: AppColors.textDark,
                     fontSize: 16,
@@ -500,7 +1228,7 @@ class _ProfileActions extends StatelessWidget {
         children: [
           _ActionButton(
             icon: Icons.lock_reset,
-            title: 'Change Password',
+            title: 'የይለፍ ቃል ለውጥ',
             color: AppColors.secondary,
             onTap: () {
               Navigator.push(
@@ -516,7 +1244,7 @@ class _ProfileActions extends StatelessWidget {
           const Divider(height: 32),
           _ActionButton(
             icon: Icons.info_outline,
-            title: 'About Us',
+            title: 'ስለ እኛ',
             color: AppColors.accent,
             onTap: () {
               Navigator.push(
@@ -528,7 +1256,7 @@ class _ProfileActions extends StatelessWidget {
           const Divider(height: 32),
           _ActionButton(
             icon: Icons.logout,
-            title: 'Logout',
+            title: 'ውጣ',
             color: Colors.red,
             onTap: () {
               _showLogoutDialog(context, viewModel);
@@ -543,13 +1271,19 @@ class _ProfileActions extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: const Text('ውጣ', style: TextStyle(fontFamily: 'Ethiopia')),
+        content: const Text('እርግጠኛ ነህ መውጣት ትፈልጋለህ?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: const Text(
+              'ሰርዝ',
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontFamily: 'Ethiopia',
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -563,9 +1297,14 @@ class _ProfileActions extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'ውጣ',
+              style: TextStyle(color: Colors.white, fontFamily: 'Ethiopia'),
+            ),
           ),
         ],
       ),
@@ -605,10 +1344,796 @@ class _ActionButton extends StatelessWidget {
         style: const TextStyle(
           fontWeight: FontWeight.w500,
           color: AppColors.textDark,
+          fontFamily: 'Ethiopia',
         ),
       ),
       trailing: const Icon(Icons.chevron_right, color: AppColors.textLight),
       contentPadding: EdgeInsets.zero,
+    );
+  }
+}
+
+// Updated Change Password View in Amharic
+class ChangePasswordView extends StatefulWidget {
+  final String userEmail;
+
+  const ChangePasswordView({Key? key, required this.userEmail})
+    : super(key: key);
+
+  @override
+  State<ChangePasswordView> createState() => _ChangePasswordViewState();
+}
+
+class _ChangePasswordViewState extends State<ChangePasswordView> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _codeController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _codeSent = false;
+  bool _codeVerified = false;
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
+
+  int _resendSeconds = 60;
+  bool _canResend = false;
+  Timer? _resendTimer;
+
+  void _startResendTimer() {
+    _canResend = false;
+    _resendSeconds = 60;
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendSeconds == 0) {
+        timer.cancel();
+        if (mounted) {
+          setState(() => _canResend = true);
+        }
+      } else {
+        if (mounted) {
+          setState(() => _resendSeconds--);
+        } else {
+          timer.cancel();
+        }
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.text = widget.userEmail;
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _codeController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    _resendTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<ProfileViewModel>();
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          'የይለፍ ቃል ለውጥ',
+          style: TextStyle(fontFamily: 'Ethiopia'),
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'መለያዎን ይከልሱ',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                  fontFamily: 'Ethiopia',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'ማረጋገጫ ኮድ ለመቀበል ኢሜይልዎን ያስገቡ',
+                style: TextStyle(fontSize: 16, color: AppColors.textLight),
+              ),
+              const SizedBox(height: 32),
+
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'ኢሜይል አድራሻ',
+                  labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                  prefixIcon: Icon(Icons.email, color: AppColors.primary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'እባክዎ ኢሜይልዎን ያስገቡ';
+                  }
+                  if (!value.contains('@')) {
+                    return 'ትክክለኛ ኢሜይል ያስገቡ';
+                  }
+                  return null;
+                },
+                readOnly: _codeSent,
+              ),
+              const SizedBox(height: 20),
+
+              if (!_codeSent)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () async {
+                            if (_formKey.currentState!.validate()) {
+                              try {
+                                await viewModel.sendPasswordResetCode(
+                                  _emailController.text,
+                                );
+                                setState(() => _codeSent = true);
+                                _startResendTimer();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('ማረጋገጫ ኮድ ወደ ኢሜይልዎ ተልኳል'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('ኮድ መላክ አልተሳካም: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: viewModel.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'ማረጋገጫ ኮድ ላክ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Ethiopia',
+                            ),
+                          ),
+                  ),
+                ),
+
+              if (_codeSent) ...[
+                const SizedBox(height: 32),
+                TextFormField(
+                  controller: _codeController,
+                  decoration: InputDecoration(
+                    labelText: 'ማረጋገጫ ኮድ',
+                    labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                    prefixIcon: Icon(Icons.code, color: AppColors.primary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'እባክዎ ማረጋገጫ ኮድ ያስገቡ';
+                    }
+                    if (value.length != 6) {
+                      return 'ኮድ 6 አሃዝ መሆን አለበት';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                if (!_codeVerified)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: viewModel.isLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                final success = await viewModel.verifyOtp(
+                                  _emailController.text.trim(),
+                                  _codeController.text.trim(),
+                                );
+
+                                if (success && context.mounted) {
+                                  setState(() => _codeVerified = true);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('ኮድ በተሳካ ሁኔታ ተረጋግጧል'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } else if (context.mounted &&
+                                    viewModel.errorMessage.isNotEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(viewModel.errorMessage),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: viewModel.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'ኮድ አረጋግጥ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Ethiopia',
+                              ),
+                            ),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+
+                Center(
+                  child: _canResend
+                      ? TextButton(
+                          onPressed: viewModel.isLoading
+                              ? null
+                              : () async {
+                                  await viewModel.sendPasswordResetCode(
+                                    _emailController.text.trim(),
+                                  );
+                                  _startResendTimer();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("ማረጋገጫ ኮድ እንደገና ተልኳል"),
+                                      ),
+                                    );
+                                  }
+                                },
+                          child: const Text(
+                            "ኮድ እንደገና ላክ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                              fontFamily: 'Ethiopia',
+                            ),
+                          ),
+                        )
+                      : Text(
+                          "እንደገና ለመላክ በ $_resendSeconds ሰከንድ ይጠብቁ",
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                ),
+
+                if (_codeVerified) ...[
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _newPasswordController,
+                    obscureText: !_passwordVisible,
+                    decoration: InputDecoration(
+                      labelText: 'አዲስ የይለፍ ቃል',
+                      labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                      prefixIcon: Icon(Icons.lock, color: AppColors.primary),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          setState(() => _passwordVisible = !_passwordVisible);
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'እባክዎ አዲስ የይለፍ ቃል ያስገቡ';
+                      }
+                      if (value.length < 6) {
+                        return 'የይለፍ ቃል ቢያንስ 6 ቁምፊ መሆን አለበት';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: !_confirmPasswordVisible,
+                    decoration: InputDecoration(
+                      labelText: 'አዲሱን የይለፍ ቃል ያረጋግጡ',
+                      labelStyle: const TextStyle(fontFamily: 'Ethiopia'),
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: AppColors.primary,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _confirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          setState(
+                            () => _confirmPasswordVisible =
+                                !_confirmPasswordVisible,
+                          );
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'እባክዎ የይለፍ ቃልዎን ያረጋግጡ';
+                      }
+                      if (value != _newPasswordController.text) {
+                        return 'የይለፍ ቃሎች አንድ ዓይነት አይደሉም';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: viewModel.isLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                final request = ChangePasswordRequest(
+                                  email: _emailController.text.trim(),
+                                  code: _codeController.text.trim(),
+                                  newPassword: _newPasswordController.text,
+                                );
+
+                                final success = await viewModel.changePassword(
+                                  request,
+                                );
+                                if (success && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  Navigator.pop(context);
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: viewModel.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'የይለፍ ቃል ቀይር',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Ethiopia',
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Updated About Us View in Amharic
+class AboutUsView extends StatelessWidget {
+  const AboutUsView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text('ስለ እኛ', style: TextStyle(fontFamily: 'Ethiopia')),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.business,
+                  size: 60,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            _SectionCard(
+              icon: Icons.history,
+              title: 'የእኛ ታሪክ',
+              content:
+                  'በ 2024 ዓ.ም የተመሠረተው የእኛ ኩባንያ ቀላል አስተሳሰብ ያለው ነበር፡ ግለሰቦችን እና ንግዶችን የሚችሉ ትርጉም ያላቸውን መፍትሄዎች መፍጠር። ከትርፋማ አጀማመር እስከ የሥራ መስክ መሪ መሆን ድረስ ጉዞዎችን አድናቂነት፣ ቁርጠኝነት እና ለብቃት ቁርጠኝነት ተነሳሽነት አድርጓል።',
+            ),
+            const SizedBox(height: 24),
+
+            _SectionCard(
+              icon: Icons.flag,
+              title: 'የእኛ ተልዕኮ',
+              content:
+                  'ሰዎች ከቴክኖሎጂ ጋር የሚገናኙበትን መንገድ ማለወጥ ቀላል፣ ደህንነቱ የተጠበቀ እና ኃይለኛ መፍትሄዎችን በማቅረብ የዕለት ተዕለት ተግባራትን ለማቃለል እና ምርታማነትን ለማሳደግ። መስፈርቶችን ብቻ ሳይሆን ከጠበቀው በላይ የሚሰጡ መሳሪያዎችን መፍጠር እናምናለን።',
+            ),
+            const SizedBox(height: 24),
+
+            _SectionCard(
+              icon: Icons.star,
+              title: 'የእኛ እሴቶች',
+              children: [
+                _ValueItem(
+                  icon: Icons.security,
+                  title: 'ደህንነት',
+                  description: 'የእርስዎ ውሂብ ጥበቃ የእኛ ከፍተኛ ቅድሚያ ነው።',
+                ),
+                _ValueItem(
+                  icon: Icons.people,
+                  title: 'ማህበረሰብ',
+                  description: 'ከተጠቃሚዎቻችን ጋር በጋራ መገንባት',
+                ),
+                _ValueItem(
+                  icon: Icons.thumb_up,
+                  title: 'ብቃት',
+                  description: 'ሁሉንም ነገር ለማሳካት መሞከር',
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            _SectionCard(
+              icon: Icons.contact_mail,
+              title: 'አግኙን',
+              children: [
+                _ContactItem(
+                  icon: Icons.email,
+                  title: 'ኢሜይል',
+                  value: 'ድጋፍ@ኩባንያ.com',
+                  onTap: () => _launchEmail('support@company.com'),
+                ),
+                _ContactItem(
+                  icon: Icons.phone,
+                  title: 'ስልክ',
+                  value: '+251 911 234 567',
+                  onTap: () => _launchPhone('+251911234567'),
+                ),
+                _ContactItem(
+                  icon: Icons.location_on,
+                  title: 'አድራሻ',
+                  value: '123 አድጋ ድሪቭ\nአዲስ አበባ, ኢትዮጵያ',
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            _SectionCard(
+              icon: Icons.developer_mode,
+              title: 'ስለ አበልጻጊው',
+              content:
+                  'ይህ መተግበሪያ ውብ እና ግብረገብ የሆኑ የሞባይል ልምዶችን ለመፍጠር የተለየ የሆኑ የ Flutter አበልጻጊዎች ቡድን አዘጋጀው። በዘመናዊ UI/UX ዲዛይን፣ ንጹህ አርክቴክቸር እና ጠንካራ የበኋላ ማቀፊያ ውህደት እንጠቀማለን።',
+            ),
+            const SizedBox(height: 32),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info, color: AppColors.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'የመተግበሪያ ስሪት',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '1.0.0 • ግንባታ 2024.12.01',
+                          style: const TextStyle(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _launchEmail(String email) {
+    // Implement email launch
+  }
+
+  void _launchPhone(String phone) {
+    // Implement phone launch
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? content;
+  final List<Widget>? children;
+
+  const _SectionCard({
+    Key? key,
+    required this.icon,
+    required this.title,
+    this.content,
+    this.children,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColors.primary),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                  fontFamily: 'Ethiopia',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (content != null)
+            Text(
+              content!,
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.6,
+                color: AppColors.textLight,
+              ),
+            ),
+          if (children != null) ...children!,
+        ],
+      ),
+    );
+  }
+}
+
+class _ValueItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+
+  const _ValueItem({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.description,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.secondary, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                    fontFamily: 'Ethiopia',
+                  ),
+                ),
+                Text(
+                  description,
+                  style: TextStyle(color: AppColors.textLight, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContactItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+  final VoidCallback? onTap;
+
+  const _ContactItem({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.value,
+    this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: AppColors.accent, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 14,
+                      fontFamily: 'Ethiopia',
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
+          ],
+        ),
+      ),
     );
   }
 }

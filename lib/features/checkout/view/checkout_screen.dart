@@ -33,6 +33,12 @@ class _CheckoutViewState extends State<CheckoutView> {
       create: (_) => CheckoutViewModel()..initFromCart(widget.cart),
       child: Consumer<CheckoutViewModel>(
         builder: (context, vm, _) {
+          final deliveryFee =
+              widget.orderType == 'Delivery' ? vm.deliveryFee : 0;
+          final total = widget.orderType == 'Delivery'
+              ? vm.total
+              : vm.subtotal;
+
           return Scaffold(
             backgroundColor: AppColors.background,
             appBar: AppBar(
@@ -164,7 +170,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                           const SizedBox(height: 20),
 
                           // Order Summary
-                          _buildOrderSummary(vm),
+                          _buildOrderSummary(vm, deliveryFee, total),
                         ],
                       ),
                     ),
@@ -199,7 +205,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                               ),
                             ),
                             Text(
-                              'ብር${vm.total}',
+                              'ብር${total}',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -372,13 +378,13 @@ class _CheckoutViewState extends State<CheckoutView> {
                       color: AppColors.primary,
                     ),
                     title: Text(loc.name),
-                    subtitle: Text(
+                    /* subtitle: Text(
                       'የመላኪያ ክፍያ: ብር${loc.deliveryFee}',
                       style: TextStyle(
                         color: AppColors.textLight,
                         fontSize: 12,
                       ),
-                    ),
+                    ), */
                     onTap: () => vm.selectLocation(loc),
                   );
                 },
@@ -415,7 +421,7 @@ class _CheckoutViewState extends State<CheckoutView> {
           CustomButton(
             width: double.infinity,
             label: 'ለወደፊት ትዕዛዞች እንደ ነባር አድራሻ አስቀምጥ',
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.secondary,
             foregroundColor: AppColors.primary,
             onPressed: () {
               if (vm.selectedLocation != null &&
@@ -439,6 +445,8 @@ class _CheckoutViewState extends State<CheckoutView> {
   }
 
   Widget _buildOrderItems(CheckoutViewModel vm) {
+    final items = vm.cart.items;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -471,81 +479,211 @@ class _CheckoutViewState extends State<CheckoutView> {
           ),
           const SizedBox(height: 12),
 
-          SizedBox(
-            height: 220,
-            child: ListView.separated(
-              itemCount: vm.cart.items.length,
-              separatorBuilder: (_, __) => Divider(color: Colors.grey.shade200),
-              itemBuilder: (context, index) {
-                final item = vm.cart.items[index];
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: AppColors.background,
-                          image: item.imageUrl.isNotEmpty
-                              ? DecorationImage(
-                                  image: NetworkImage(item.imageUrl),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                        ),
-                        child: item.imageUrl.isEmpty
-                            ? Icon(
-                                Icons.image_outlined,
-                                color: Colors.grey.shade400,
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: items.length,
+            separatorBuilder: (_, __) => Divider(color: Colors.grey.shade200),
+            itemBuilder: (context, index) {
+              final item = items[index];
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.background,
+                        image: item.imageUrl.isNotEmpty
+                            ? DecorationImage(
+                                image: NetworkImage(item.imageUrl),
+                                fit: BoxFit.cover,
                               )
                             : null,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.name,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                      child: item.imageUrl.isEmpty
+                          ? Icon(
+                              Icons.image_outlined,
+                              color: Colors.grey.shade400,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'ብዛት: ${item.quantity} • አሰራር: ${item.packaging}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textLight,
-                              ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'ብዛት: ${item.quantity} • አሰራር: ${item.packaging}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textLight,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        'ብር${item.totalprice}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
-                        ),
+                    ),
+                    Text(
+                      'ብር${item.totalprice}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
+
+          /// 🔑 NON-SCROLLABLE LIST + FADE
+          /*  ShaderMask(
+            shaderCallback: (rect) {
+              return const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white,
+                  Colors.white,
+                  Colors.white,
+                  Colors.transparent,
+                ],
+                stops: [0.0, 0.7, 0.85, 1.0],
+              ).createShader(rect);
+            },
+            blendMode: BlendMode.dstIn,
+            child: 
+          ), */
         ],
       ),
     );
   }
 
-  Widget _buildOrderSummary(CheckoutViewModel vm) {
+  // Widget _buildOrderItems(CheckoutViewModel vm) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.05),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 4),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Icon(Icons.shopping_bag_outlined, color: AppColors.primary),
+  //             const SizedBox(width: 8),
+  //             Text(
+  //               'የትዕዛዝ ዝርዝር',
+  //               style: TextStyle(
+  //                 fontSize: 16,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: AppColors.textDark,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 12),
+
+  //         SizedBox(
+  //           height: 220,
+  //           child: ListView.separated(
+  //             itemCount: vm.cart.items.length,
+  //             separatorBuilder: (_, __) => Divider(color: Colors.grey.shade200),
+  //             itemBuilder: (context, index) {
+  //               final item = vm.cart.items[index];
+  //               return Container(
+  //                 padding: const EdgeInsets.symmetric(vertical: 8),
+  //                 child: Row(
+  //                   children: [
+  //                     Container(
+  //                       width: 60,
+  //                       height: 60,
+  //                       decoration: BoxDecoration(
+  //                         borderRadius: BorderRadius.circular(12),
+  //                         color: AppColors.background,
+  //                         image: item.imageUrl.isNotEmpty
+  //                             ? DecorationImage(
+  //                                 image: NetworkImage(item.imageUrl),
+  //                                 fit: BoxFit.cover,
+  //                               )
+  //                             : null,
+  //                       ),
+  //                       child: item.imageUrl.isEmpty
+  //                           ? Icon(
+  //                               Icons.image_outlined,
+  //                               color: Colors.grey.shade400,
+  //                             )
+  //                           : null,
+  //                     ),
+  //                     const SizedBox(width: 12),
+  //                     Expanded(
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text(
+  //                             item.name,
+  //                             style: TextStyle(
+  //                               fontWeight: FontWeight.w600,
+  //                               color: AppColors.textDark,
+  //                             ),
+  //                             maxLines: 2,
+  //                             overflow: TextOverflow.ellipsis,
+  //                           ),
+  //                           const SizedBox(height: 4),
+  //                           Text(
+  //                             'ብዛት: ${item.quantity} • አሰራር: ${item.packaging}',
+  //                             style: TextStyle(
+  //                               fontSize: 12,
+  //                               color: AppColors.textLight,
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                     Text(
+  //                       'ብር${item.totalprice}',
+  //                       style: TextStyle(
+  //                         fontWeight: FontWeight.bold,
+  //                         color: AppColors.textDark,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _buildOrderSummary(
+    CheckoutViewModel vm,
+    int deliveryFee,
+    int total,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -577,7 +715,7 @@ class _CheckoutViewState extends State<CheckoutView> {
             children: [
               Text('የመላኪያ ክፍያ', style: TextStyle(color: AppColors.textLight)),
               Text(
-                'ብር${vm.deliveryFee}',
+                'ብር${deliveryFee}',
                 style: TextStyle(color: AppColors.textDark),
               ),
             ],
@@ -606,7 +744,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                 ),
               ),
               Text(
-                'ብር${vm.total}',
+                'ብር${total}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

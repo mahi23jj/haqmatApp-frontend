@@ -10,14 +10,20 @@ import 'package:http/http.dart' as Http;
 class ReviewService {
   // get token from local storage
 
-  Future<ReviewList> fetchReviews(String productid) async {
+  Future<ReviewList> fetchReviews(
+    String productId, {
+    int page = 1,
+    int limit = 20,
+  }) async {
     String? token = await getToken();
     try {
       final response = await Http.get(
-        Uri.parse('${Constants.baseurl}/api/feedback/$productid'),
+        Uri.parse(
+          '${Constants.baseurl}/api/feedback/$productId?page=$page&limit=$limit',
+        ),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${token}',
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -27,8 +33,10 @@ class ReviewService {
         // If API returns { "data": [...] }
         final feedbacksJson = body["data"] ?? body;
 
+        print('feedbacksJson: $feedbacksJson');
+
         final feedbacks = ReviewList.fromJson(feedbacksJson);
-        print('fetched reviews: $feedbacks');
+        // print('fetched reviews: $feedbacks');
 
         return feedbacks;
       } else {
@@ -43,7 +51,6 @@ class ReviewService {
       throw Exception('Login error: $e');
     }
   }
-
 
   Future<String> submitReview(String productid, String text, int rating) async {
     String? token = await getToken();
@@ -72,7 +79,7 @@ class ReviewService {
       }
     } catch (e) {
       print('error in submit review service: $e');
-      throw Exception(e.toString()); // ← correct
+      rethrow;
     }
   }
 }

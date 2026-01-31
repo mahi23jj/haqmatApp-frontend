@@ -15,6 +15,7 @@ class ManualPaymentViewModel extends ChangeNotifier {
   ManualPaymentViewModel({required this.orderId});
 
   Future<void> submit(PlatformFile file) async {
+    print('Submitting manual payment for order: $orderId');
     if (submitting) return;
     submitting = true;
     error = null;

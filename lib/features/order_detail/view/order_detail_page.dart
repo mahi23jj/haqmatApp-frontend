@@ -446,14 +446,26 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       'REFUNDED': 'ተመላሽ ተደርጓል',
       'FAILED': 'አልተሳካም',
       'TO_BE_DELIVERED': 'ለመላክ',
+      'DELIVERY_SCHEDULED': 'የመላኪያ ቀን ተረጋግጣል',
+      'PAYMENT_CONFIRMED': 'የክፍያ ተረጋግጣል',
+      'PAYMENT_SUBMITTED': 'ክፍያ ተሰጥቷል',
     };
     final key = status.toUpperCase();
     return translations[key] ?? status;
   }
 
   // Format date in Amharic style
-  String _formatDate(DateTime? date) {
+  String _formatDate(Object? date) {
     if (date == null) return '';
+    DateTime? parsed;
+    if (date is DateTime) {
+      parsed = date;
+    } else if (date is String) {
+      parsed = DateTime.tryParse(date);
+    } else if (date is int) {
+      parsed = DateTime.fromMillisecondsSinceEpoch(date);
+    }
+    if (parsed == null) return '';
     final monthNames = [
       'ጃንዋሪ',
       'ፈብርዋሪ',
@@ -469,7 +481,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       'ዲሴምበር',
     ];
 
-    return '${date.day} ${monthNames[date.month - 1]} ${date.year}';
+    return '${parsed.day} ${monthNames[parsed.month - 1]} ${parsed.year}';
   }
 
   @override
@@ -771,6 +783,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               final isCompleted = step.completed;
 
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -810,7 +824,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             ),
                             if (step.date != null)
                               Text(
-                                _formatDate(step.date! as DateTime?),
+                                _formatDate(step.date),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textLight,
@@ -1275,7 +1289,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildContactButton(OrderdetailViewModel vm) {
     return CustomButton(
-      label: 'አሸናፊ ያነጋግሩ',
+      label: 'ድርጅቱን ያነጋግሩ',
       backgroundColor: AppColors.secondary,
       foregroundColor: Colors.white,
       onPressed: () => vm.callSeller('+251985272557'),

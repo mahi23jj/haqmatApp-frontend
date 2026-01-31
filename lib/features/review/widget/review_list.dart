@@ -193,7 +193,6 @@
 //   }
 // }
 
-
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
@@ -257,9 +256,7 @@ class ReviewsList extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.grey.shade300,
-                  ),
+                  CircleAvatar(backgroundColor: Colors.grey.shade300),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -279,11 +276,7 @@ class ReviewsList extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    width: 80,
-                    height: 16,
-                    color: Colors.grey.shade300,
-                  ),
+                  Container(width: 80, height: 16, color: Colors.grey.shade300),
                 ],
               ),
               const SizedBox(height: 12),
@@ -314,11 +307,7 @@ class ReviewsList extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red.shade600,
-            size: 48,
-          ),
+          Icon(Icons.error_outline, color: Colors.red.shade600, size: 48),
           const SizedBox(height: 12),
           Text(
             'ግምገማዎችን መጫን አልተሳካም',
@@ -357,11 +346,7 @@ class ReviewsList extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.reviews_outlined,
-            color: AppColors.textLight,
-            size: 64,
-          ),
+          Icon(Icons.reviews_outlined, color: AppColors.textLight, size: 64),
           const SizedBox(height: 16),
           Text(
             'ምንም ግምገማ የለም',
@@ -436,7 +421,7 @@ class _AnimatedReviewCardState extends State<AnimatedReviewCard>
   @override
   Widget build(BuildContext context) {
     final review = widget.review;
-    
+
     return FadeTransition(
       opacity: _opacity,
       child: SlideTransition(
@@ -462,7 +447,9 @@ class _AnimatedReviewCardState extends State<AnimatedReviewCard>
                   CircleAvatar(
                     backgroundColor: AppColors.primary.withOpacity(0.1),
                     child: Text(
-                      review.author.isNotEmpty ? review.author[0].toUpperCase() : '?',
+                      review.author.isNotEmpty
+                          ? review.author[0].toUpperCase()
+                          : '?',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
@@ -509,27 +496,6 @@ class _AnimatedReviewCardState extends State<AnimatedReviewCard>
                   fontSize: 14,
                   height: 1.5,
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.thumb_up_alt_outlined,
-                      color: AppColors.textLight,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'ጠቃሚ',
-                    style: TextStyle(
-                      color: AppColors.textLight,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

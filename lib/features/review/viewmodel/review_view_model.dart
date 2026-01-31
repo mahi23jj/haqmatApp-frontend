@@ -10,24 +10,85 @@ class ReviewViewModel extends ChangeNotifier {
   bool loading = false;
   String? error;
 
+  int _currentPage = 1;
+  final int _pageSize = 5;
+  bool _hasMore = true;
+  bool _loadingMore = false;
+  String? _loadMoreError;
+
   Product? product;
 
   ReviewViewModel({required this.repository});
 
-  Future<void> loadReviews(String productid) async {
+  int get currentPage => _currentPage;
+  bool get hasMore => _hasMore;
+  bool get loadingMore => _loadingMore;
+  String? get loadMoreError => _loadMoreError;
+
+  Future<void> loadReviews(String productid, {bool refresh = false}) async {
     loading = true;
     error = null;
+    if (refresh) {
+      _currentPage = 1;
+      _hasMore = true;
+      _loadMoreError = null;
+    }
     notifyListeners();
     try {
-      final data = await repository.fetchReviews(productid);
+      final data = await repository.fetchReviews(
+        productid,
+        page: 1,
+        limit: _pageSize,
+      );
       print('loaded reviews: $data');
       reviews = data;
+      _currentPage = 1;
+      if (data.totalCount > 0) {
+        _hasMore = data.reviews.length < data.totalCount;
+      } else {
+        _hasMore = data.reviews.length == _pageSize;
+      }
       notifyListeners();
     } catch (e) {
       error = e.toString();
       print('error in review viewmodel: $error');
     }
     loading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadMoreReviews(String productid) async {
+    if (loading || _loadingMore || !_hasMore) return;
+    _loadingMore = true;
+    _loadMoreError = null;
+    notifyListeners();
+
+    try {
+      final nextPage = _currentPage + 1;
+      final data = await repository.fetchReviews(
+        productid,
+        page: nextPage,
+        limit: _pageSize,
+      );
+      final current = reviews?.reviews ?? [];
+      final merged = [...current, ...data.reviews];
+      reviews = ReviewList(
+        reviews: merged,
+        totalCount: data.totalCount,
+        averageRating: data.averageRating,
+      );
+      _currentPage = nextPage;
+      if (data.totalCount > 0) {
+        _hasMore = merged.length < data.totalCount;
+      } else {
+        _hasMore = data.reviews.length == _pageSize;
+      }
+    } catch (e) {
+      _loadMoreError = e.toString();
+      print('error in load more reviews: $_loadMoreError');
+    }
+
+    _loadingMore = false;
     notifyListeners();
   }
 

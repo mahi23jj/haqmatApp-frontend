@@ -333,8 +333,8 @@ class OrderCard extends StatelessWidget {
           ],
 
           // Track Button
-          if (config.actions.contains(OrderAction.track))
-            _trackButton(),
+      /*     if (config.actions.contains(OrderAction.track))
+            _trackButton(), */
         ],
       ),
     );
@@ -461,16 +461,16 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _trackButton() {
-    return CustomButton(
-      label: 'ትዕዛዝ ይከታተሉ',
-      backgroundColor: AppColors.secondary,
-      foregroundColor: Colors.white,
-      onPressed: () => onAction(OrderAction.track),
-      borderRadius: BorderRadius.circular(12),
-      icon: Icon(Icons.track_changes_outlined, size: 18),
-    );
-  }
+  // Widget _trackButton() {
+  //   return CustomButton(
+  //     label: 'ትዕዛዝ ይከታተሉ',
+  //     backgroundColor: AppColors.secondary,
+  //     foregroundColor: Colors.white,
+  //     onPressed: () => onAction(OrderAction.track),
+  //     borderRadius: BorderRadius.circular(12),
+  //     icon: Icon(Icons.track_changes_outlined, size: 18),
+  //   );
+  // }
 
   String _getActionLabel(OrderAction action) {
     switch (action) {

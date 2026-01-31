@@ -688,7 +688,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                               crossAxisCount: 2,
                               mainAxisSpacing: 12,
                               crossAxisSpacing: 12,
-                              childAspectRatio: 0.75,
+                              childAspectRatio: 1, // 🔥 FIX
                             ),
                         itemCount: vm.flashSale.length,
                         itemBuilder: (context, index) {
@@ -699,6 +699,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                     else
                       Container(
                         height: 200,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),

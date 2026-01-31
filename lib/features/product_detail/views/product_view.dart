@@ -302,7 +302,7 @@
 //       /*    if (File(imagePath).existsSync()) {
 //         imageWidget = Image.asset(imagePath), fit: BoxFit.cover);
 //       } else {
-        
+
 //       } */
 //       imageWidget = Image.asset('assets/images/teff.jpg', fit: BoxFit.cover);
 //     } catch (e) {
@@ -760,7 +760,6 @@
 //   } */
 // }
 
-
 // // product_detail_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -828,9 +827,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget build(BuildContext context) {
     final vm = context.watch<ProductViewModel>();
 
-    return Scaffold(
-      body: _buildBody(context, vm),
-    );
+    return Scaffold(body: _buildBody(context, vm));
   }
 
   Widget _buildBody(BuildContext context, ProductViewModel vm) {
@@ -867,17 +864,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: AppColors.primary,
-              strokeWidth: 2,
-            ),
+            CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
             const SizedBox(height: 16),
             Text(
               'ምርት በመጫን ላይ...',
-              style: TextStyle(
-                color: AppColors.textLight,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textLight, fontSize: 14),
             ),
           ],
         ),
@@ -901,11 +892,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                color: AppColors.accent,
-                size: 64,
-              ),
+              Icon(Icons.error_outline, color: AppColors.accent, size: 64),
               const SizedBox(height: 16),
               Text(
                 'አልተሳካም!',
@@ -1026,7 +1013,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new, color: AppColors.textDark),
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      color: AppColors.textDark,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -1062,7 +1052,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.shopping_cart_outlined, color: AppColors.textDark),
+                      icon: Icon(
+                        Icons.shopping_cart_outlined,
+                        color: AppColors.textDark,
+                      ),
                       onPressed: () {},
                     ),
                   ),
@@ -1201,7 +1194,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ),
             ),
-            
+
             // Image pagination dots
             if (images.length > 1)
               Positioned(
@@ -1220,12 +1213,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         width: isActive ? 12 : 8,
                         height: isActive ? 12 : 8,
                         decoration: BoxDecoration(
-                          color: isActive ? AppColors.primary : Colors.white.withOpacity(0.7),
+                          color: isActive
+                              ? AppColors.primary
+                              : Colors.white.withOpacity(0.7),
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 1,
-                          ),
+                          border: Border.all(color: Colors.white, width: 1),
                         ),
                       ),
                     );
@@ -1241,7 +1233,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget _buildHeaderSection(ProductViewModel vm) {
     final product = vm.product!;
     final hasDiscount = product.discountPercent != null;
-    final originalPrice = product.basePrice * vm.selectedWeightMultiplier * vm.quantity;
+    final originalPrice =
+        product.basePrice * vm.selectedWeight.multiplier * vm.quantity;
     final discountedPrice = hasDiscount
         ? originalPrice * (1 - product.discountPercent! / 100)
         : originalPrice;
@@ -1270,18 +1263,33 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       Row(
                         children: List.generate(5, (index) {
                           if (index < product.rating.floor()) {
-                            return Icon(Icons.star, color: Colors.amber, size: 18);
+                            return Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 18,
+                            );
                           } else if (index < product.rating.ceil()) {
-                            return Icon(Icons.star_half, color: Colors.amber, size: 18);
+                            return Icon(
+                              Icons.star_half,
+                              color: Colors.amber,
+                              size: 18,
+                            );
                           } else {
-                            return Icon(Icons.star_border, color: Colors.grey.shade400, size: 18);
+                            return Icon(
+                              Icons.star_border,
+                              color: Colors.grey.shade400,
+                              size: 18,
+                            );
                           }
                         }),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '${product.rating.toStringAsFixed(1)} (${product.reviewsCount} ግምገማዎች)',
-                        style: TextStyle(color: AppColors.textLight, fontSize: 13),
+                        style: TextStyle(
+                          color: AppColors.textLight,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -1293,18 +1301,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               children: [
                 // Quantity selector
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     children: [
-                      _quantityButton(Icons.remove, () => vm.decrementQuantity()),
+                      _quantityButton(
+                        Icons.remove,
+                        () => vm.decrementQuantity(),
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         vm.quantity.toString(),
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       _quantityButton(Icons.add, () => vm.incrementQuantity()),
@@ -1317,9 +1335,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Price section
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1328,7 +1346,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
                       borderRadius: BorderRadius.circular(6),
@@ -1345,10 +1366,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${originalPrice.toStringAsFixed(2)} ብር',
+                    '${product.basePrice.toStringAsFixed(2)} ብር',
                     style: TextStyle(
                       color: AppColors.textLight,
-                      fontSize: 14,
+                      fontSize: 12,
                       decoration: TextDecoration.lineThrough,
                     ),
                   ),
@@ -1368,10 +1389,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 const SizedBox(width: 8),
                 Text(
                   'ለ${vm.selectedWeightLabel}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textLight,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.textLight),
                 ),
               ],
             ),
@@ -1435,7 +1453,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  Widget _buildWeightOptions(BuildContext context, ProductViewModel vm) {
+  /* Widget _buildWeightOptions(BuildContext context, ProductViewModel vm) {
     final weights = vm.weights;
 
     return Column(
@@ -1538,7 +1556,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               if (controller.text.trim().isNotEmpty) {
                                 vm.selectWeight(-1, customValue: controller.text);
                               }
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
+                              Navigator.pop(context, controller.text.trim());
                             },
                             child: const Text('አስገባ'),
                           ),
@@ -1563,6 +1582,115 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 side: BorderSide(
                   color: vm.selectedWeightIndex == -1 ? AppColors.accent : Colors.grey.shade300,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+ */
+
+  Widget _buildWeightOptions(BuildContext context, ProductViewModel vm) {
+    final weights = vm.weights;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'መጠን ይምረጡ',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            color: AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: 15),
+
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            // Existing + Custom-generated weights
+            ...weights.asMap().entries.map((entry) {
+              final index = entry.key;
+              final weight = entry.value;
+              final isSelected = index == vm.selectedWeightIndex;
+
+              return ChoiceChip(
+                label: Text(weight.label),
+                selected: isSelected,
+                onSelected: (_) => vm.selectWeight(index),
+                selectedColor: AppColors.primary,
+                backgroundColor: Colors.white,
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : AppColors.textDark,
+                  fontWeight: FontWeight.w500,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.shade300,
+                  ),
+                ),
+              );
+            }),
+
+            // Custom button (always last)
+            ChoiceChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.edit_outlined, size: 14),
+                  SizedBox(width: 4),
+                  Text('ሌላ መጠን'),
+                ],
+              ),
+              selected: false,
+              onSelected: (_) async {
+                final controller = TextEditingController();
+
+                final result = await showDialog<double>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    title: const Text('የራስህን መጠን አስገባ'),
+                    content: TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(hintText: 'መጠን በኪ.ግ'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('ሰርዝ'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final value = double.tryParse(controller.text.trim());
+                          if (value != null && value > 0) {
+                            Navigator.pop(context, value);
+                          }
+                        },
+                        child: const Text('አስገባ'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (result != null) {
+                  vm.setCustomWeight(result);
+                }
+              },
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(color: AppColors.textDark),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: Colors.grey.shade300),
               ),
             ),
           ],
@@ -1646,6 +1774,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         const SizedBox(height: 9),
         if (product.allReviews.isEmpty)
           Container(
+            alignment: Alignment.center,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1661,9 +1790,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 const SizedBox(height: 12),
                 Text(
                   'ምንም ግምገማ የለም',
-                  style: TextStyle(
-                    color: AppColors.textLight,
-                  ),
+                  style: TextStyle(color: AppColors.textLight),
                 ),
               ],
             ),
@@ -1680,25 +1807,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   return AnimatedReviewCard(review: r, index: index);
                 },
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemCount: product.allReviews.length > 3 ? 3 : product.allReviews.length,
+                itemCount: product.allReviews.length > 3
+                    ? 3
+                    : product.allReviews.length,
               ),
-              if (product.allReviews.length > 3)
-                Center(
-                  child: CustomButton(
-                    label: 'ተጨማሪ ግምገማዎች ይመልከቱ',
-                    backgroundColor: AppColors.background,
-                    foregroundColor: AppColors.primary,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ReviewsPage(productId: product.id),
-                        ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              // if (product.allReviews.length > 3)
+              Center(
+                child: CustomButton(
+                  label: 'ተጨማሪ ግምገማዎች ይመልከቱ',
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: AppColors.primary,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ReviewsPage(productId: product.id),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
                 ),
+              ),
             ],
           ),
       ],

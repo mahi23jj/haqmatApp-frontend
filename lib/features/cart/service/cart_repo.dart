@@ -11,14 +11,19 @@ import 'package:http/http.dart' as Http;
 class CartService {
   // get token from local storage
 
-  Future<CartModelList> fetchcart() async {
+  Future<CartModelList> fetchcart(
+    {
+    int page = 1,
+    int limit = 10,
+  }
+  ) async {
     String? token = await getToken();
 
     print(token);
 
     try {
       final response = await Http.get(
-        Uri.parse('${Constants.baseurl}/api/cart'),
+        Uri.parse('${Constants.baseurl}/api/cart?page=$page&limit=$limit'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

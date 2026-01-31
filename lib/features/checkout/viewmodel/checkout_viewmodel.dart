@@ -18,9 +18,7 @@ class CheckoutViewModel extends ChangeNotifier {
   // Location + phone
   LocationModel? selectedLocation;
 
-     PaymentIntentModel? value;
-
-  
+  PaymentIntentModel? value;
 
   // Search UI state
   List<LocationModel> suggestions = [];
@@ -34,21 +32,32 @@ class CheckoutViewModel extends ChangeNotifier {
   Map<String, dynamic>? lastOrderResponse;
 
   // Computed fees
-  int get subtotal => cart.totalPrice;
+  int get subtotal => cart.subtotalPrice;
 
-  int get deliveryFee =>
-      selectedLocation?.deliveryFee ?? cart.location.deliveryFee;
+  int get deliveryFee => cart.deliveryFee;
 
-  int get total => subtotal + deliveryFee;
+  // set delivery fee
+  set deliveryFee(int value) {
+    cart = cart.copyWith(
+      deliveryFee: value,
+      totalPrice: cart.subtotalPrice + value,
+    );
+    notifyListeners();
+  }
+
+  int get total => cart.totalPrice;
+
+  // set total fee 
+  set total(int value) {
+    cart = cart.copyWith(totalPrice: value);
+    notifyListeners();
+  }
 
   String get error => _error ?? "";
 
-
-
-//  final PaymentService _service = PaymentService();
+  //  final PaymentService _service = PaymentService();
 
   bool loading = false;
-
 
   // Future<void> createPayment({
   //   required String orderId,
@@ -106,7 +115,7 @@ class CheckoutViewModel extends ChangeNotifier {
   // SAVE DEFAULT
   // ------------------------------------
   Future<void> saveDefault(String locationId, String phone) async {
-      print("saveDefault, $locationId, $phone");
+    print("saveDefault, $locationId, $phone");
 
     try {
       await service.updateuserstatus(locationId, phone);
@@ -153,7 +162,9 @@ class CheckoutViewModel extends ChangeNotifier {
     String orderReceived,
     String paymentMethod,
   ) async {
-    print('created order $products, $locationid, $phoneNumber, $orderReceived, $paymentMethod');
+    print(
+      'created order $products, $locationid, $phoneNumber, $orderReceived, $paymentMethod',
+    );
     loading = true;
     _error = null;
     notifyListeners();
@@ -179,7 +190,6 @@ class CheckoutViewModel extends ChangeNotifier {
     return value;
   }
 
-
   // Future<void> createChapaPayment({
   //   required String orderId,
   //   required String email,
@@ -204,7 +214,6 @@ class CheckoutViewModel extends ChangeNotifier {
   //   // loading = false;
   //   notifyListeners();
   // }
-
 
   // ------------------------------------
   // DISPOSE

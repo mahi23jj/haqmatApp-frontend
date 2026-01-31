@@ -106,6 +106,7 @@ class FlashSaleItem extends StatelessWidget {
         );
       },
       child: Container(
+        
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -119,6 +120,7 @@ class FlashSaleItem extends StatelessWidget {
           border: Border.all(color: Colors.grey.withOpacity(0.1)),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image with favorite button
@@ -135,7 +137,7 @@ class FlashSaleItem extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-                Positioned(
+               /*  Positioned(
                   top: 8,
                   right: 8,
                   child: Container(
@@ -155,7 +157,7 @@ class FlashSaleItem extends StatelessWidget {
                       },
                     ),
                   ),
-                ),
+                ), */
                 // Discount badge
                 /*   if (product.discount != null && product.discount! > 0)
                   Positioned(
@@ -210,7 +212,7 @@ class FlashSaleItem extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      if (product.price != null)
+                     /*  if (product.price != null)
                         Text(
                           'ብር${product.price!.toStringAsFixed(2)}',
                           style: TextStyle(
@@ -218,14 +220,14 @@ class FlashSaleItem extends StatelessWidget {
                             color: Colors.grey.shade500,
                             decoration: TextDecoration.lineThrough,
                           ),
-                        ),
+                        ), */
                     ],
                   ),
 
-                  const SizedBox(height: 8),
+                  // const SizedBox(height: 8),
 
                   // Rating
-                  Row(
+                 /*  Row(
                     children: [
                       /*   Icon(
                         Icons.star,
@@ -260,7 +262,7 @@ class FlashSaleItem extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
+                  ), */
                 ],
               ),
             ),

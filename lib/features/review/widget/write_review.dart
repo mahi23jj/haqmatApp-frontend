@@ -137,7 +137,7 @@
 //       _showError('Please write your review');
 //       return;
 //     }
-    
+
 //     setState(() => _submitting = true);
 //     final vm = context.read<ReviewViewModel>();
 
@@ -214,7 +214,6 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
@@ -265,7 +264,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // Title
           Text(
             'ግምገማ ይጻፉ',
@@ -276,7 +275,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Rating
           Text(
             'ደረጃ ይስጡ',
@@ -292,7 +291,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
             onChanged: (v) => setState(() => _rating = v),
           ),
           const SizedBox(height: 20),
-          
+
           // Review text
           Text(
             'ግምገማዎ',
@@ -327,13 +326,15 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Buttons
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _submitting ? null : () => Navigator.of(context).pop(),
+                  onPressed: _submitting
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -360,7 +361,9 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
                   loading: _submitting,
                   borderRadius: BorderRadius.circular(12),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  icon: _submitting ? null : const Icon(Icons.send_outlined, size: 20),
+                  icon: _submitting
+                      ? null
+                      : const Icon(Icons.send_outlined, size: 20),
                 ),
               ),
             ],
@@ -380,24 +383,29 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
       _showError('እባክዎ ግምገማዎን ይጻፉ');
       return;
     }
-    
+
     setState(() => _submitting = true);
     final reviewVm = context.read<ReviewViewModel>();
     final productVm = context.read<ProductViewModel>();
 
     try {
-      await reviewVm.submitReview(widget.productId, _controller.text.trim(), _rating);
-      
+      await reviewVm.submitReview(
+        widget.productId,
+        _controller.text.trim(),
+        _rating,
+      );
+
       // Refresh both product and reviews
       await Future.wait([
         productVm.load(widget.productId),
-        reviewVm.loadReviews(widget.productId),
+        reviewVm.loadReviews(widget.productId, refresh: true),
       ]);
 
       if (!mounted) return;
       Navigator.of(context).pop('review_success');
     } catch (e) {
       if (!mounted) return;
+       Navigator.of(context).pop();
       _showError(e.toString());
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -411,9 +419,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
         backgroundColor: Colors.red.shade600,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );

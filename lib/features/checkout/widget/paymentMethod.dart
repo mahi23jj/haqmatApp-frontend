@@ -95,7 +95,7 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
   String? selectedMethod;
 
   final List<Map<String, dynamic>> _paymentMethods = [
-    {
+    /*  {
       'id': 'bank_transfer',
       'title': 'ወደ ባንክ ማስተላለፍ',
       'description': 'በባንክ ተለዋዋጭ ክፍያ',
@@ -108,9 +108,9 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
       'description': 'በሞባይል ማንኛውንም ስፍራ',
       'icon': Icons.phone_android_outlined,
       'color': AppColors.secondary,
-    },
+    }, */
     {
-      'id': 'cash_on_delivery',
+      'id': 'Send Screenshot',
       'title': 'በመድረሻ ክፍያ',
       'description': 'ትዕዛዙ በደረሰ ጊዜ ይክፈሉ',
       'icon': Icons.money_outlined,
@@ -151,9 +151,9 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Payment Methods
             ..._paymentMethods.map((method) {
               final isSelected = selectedMethod == method['id'];
@@ -162,15 +162,15 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
                   setState(() {
                     selectedMethod = method['id'];
                   });
-                  widget.onSelected(method['title']);
+                  widget.onSelected(method['id']);
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSelected 
-                      ? method['color'].withOpacity(0.1)
-                      : AppColors.background,
+                    color: isSelected
+                        ? method['color'].withOpacity(0.1)
+                        : AppColors.background,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? method['color'] : Colors.transparent,
@@ -185,10 +185,7 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
                           color: method['color'].withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          method['icon'],
-                          color: method['color'],
-                        ),
+                        child: Icon(method['icon'], color: method['color']),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -222,7 +219,7 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
                           setState(() {
                             selectedMethod = value;
                           });
-                          widget.onSelected(method['title']);
+                          widget.onSelected(method['id']);
                         },
                       ),
                     ],
@@ -230,9 +227,9 @@ class _PaymentMethodCardState extends State<PaymentMethodCard> {
                 ),
               );
             }).toList(),
-            
+
             const SizedBox(height: 8),
-            
+
             // Payment Note
             Container(
               padding: const EdgeInsets.all(12),

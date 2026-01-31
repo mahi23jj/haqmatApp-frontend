@@ -11,6 +11,7 @@ class CartModel {
   final String productId;
   final int totalprice;
 
+
   CartModel({
     required this.id,
     required this.name,
@@ -21,6 +22,7 @@ class CartModel {
     required this.quality,
     required this.productId,
     required this.totalprice,
+
   });
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class CartModel {
       quality: json['product']?['quality']?.toString() ?? '',
       productId: json['product']?['id']?.toString() ?? '',
       totalprice: (json['totalPrice'] as num?)?.toInt() ?? 0,
+      
     );
   }
 
@@ -50,6 +53,7 @@ class CartModel {
       'quality': quality,
       'productId': productId,
       'totalprice': totalprice,
+     
     };
   }
 
@@ -63,6 +67,7 @@ class CartModel {
     String? quality,
     String? productId,
     int? totalprice,
+    // int? deliveryFee,
   }) {
     return CartModel(
       id: id ?? this.id,
@@ -74,6 +79,7 @@ class CartModel {
       quality: quality ?? this.quality,
       productId: productId ?? this.productId,
       totalprice: totalprice ?? this.totalprice,
+      // deliveryFee: deliveryFee ?? this.deliveryFee,
     );
   }
 }
@@ -83,12 +89,16 @@ class CartModelList {
   final LocationModel location;
   final String phoneNumber;
   final int totalPrice;
+  final int deliveryFee;
+  final int subtotalPrice;
 
   CartModelList({
     required this.items,
     required this.location,
     required this.phoneNumber,
     required this.totalPrice,
+    this.deliveryFee = 0,
+    this.subtotalPrice = 0,
   });
 
   factory CartModelList.fromJson(Map<String, dynamic> json) {
@@ -101,7 +111,9 @@ class CartModelList {
       items: cartItems,
       location: LocationModel.fromJson(json['area'] ?? {}),
       phoneNumber: json['phoneNumber']?.toString() ?? '',
-      totalPrice: (json['subtotalPrice'] as num?)?.toInt() ?? 0,
+      totalPrice: (json['totalPrice'] as num?)?.toInt() ?? 0,
+      deliveryFee: (json['deliveryFee'] as num?)?.toInt() ?? 0,
+      subtotalPrice: (json['subtotalPrice'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -111,12 +123,16 @@ class CartModelList {
     LocationModel? location,
     String? phoneNumber,
     int? totalPrice,
+    int? deliveryFee,
+    int? subtotalPrice,
   }) {
     return CartModelList(
       items: items ?? this.items,
       location: location ?? this.location,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       totalPrice: totalPrice ?? this.totalPrice,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      subtotalPrice: subtotalPrice ?? this.subtotalPrice,
     );
   }
 }
@@ -124,19 +140,19 @@ class CartModelList {
 class LocationModel {
   final String id;
   final String name;
-  final int deliveryFee;
+  // final int deliveryFee;
 
   LocationModel({
     required this.id,
     required this.name,
-    required this.deliveryFee,
+    // required this.deliveryFee,
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      deliveryFee: (json['baseFee'] as num?)?.toInt() ?? 0,
+      // deliveryFee: (json['baseFee'] as num?)?.toInt() ?? 0,
     );
   }
 }

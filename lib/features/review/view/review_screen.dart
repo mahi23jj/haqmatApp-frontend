@@ -75,6 +75,8 @@
 // }
 
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
@@ -93,12 +95,35 @@ class ReviewsPage extends StatefulWidget {
 }
 
 class _ReviewsPageState extends State<ReviewsPage> {
+  late final ScrollController _scrollController;
+  Timer? _scrollDebounce;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ReviewViewModel>().loadReviews(widget.productId);
+      context.read<ReviewViewModel>().loadReviews(widget.productId, refresh: true);
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollDebounce?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      _scrollDebounce?.cancel();
+      _scrollDebounce = Timer(const Duration(milliseconds: 200), () {
+        if (!mounted) return;
+        context.read<ReviewViewModel>().loadMoreReviews(widget.productId);
+      });
+    }
   }
 
   void _openWriteReviewSheet(BuildContext context) async {
@@ -128,7 +153,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
         ),
       );
       // Reload reviews after submission
-      context.read<ReviewViewModel>().loadReviews(widget.productId);
+      context.read<ReviewViewModel>().loadReviews(widget.productId, refresh: true);
     }
   }
 
@@ -158,7 +183,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
           if (!vm.loading && vm.error == null)
             IconButton(
               icon: Icon(Icons.refresh, color: AppColors.primary),
-              onPressed: () => vm.loadReviews(widget.productId),
+              onPressed: () => vm.loadReviews(widget.productId, refresh: true),
             ),
         ],
       ),
@@ -249,7 +274,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
               label: 'እንደገና ይሞክሩ',
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              onPressed: () => vm.loadReviews(widget.productId),
+              onPressed: () => vm.loadReviews(widget.productId, refresh: true),
             ),
           ],
         ),
@@ -302,6 +327,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
 
   Widget _buildSuccessState(BuildContext context, ReviewViewModel vm) {
     return SingleChildScrollView(
+      controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
@@ -341,10 +367,39 @@ class _ReviewsPageState extends State<ReviewsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ReviewsList(),
           ),
+
+          const SizedBox(height: 16),
+          _buildLoadMoreSection(vm),
           
           const SizedBox(height: 80), // Space for FAB
         ],
       ),
     );
+  }
+
+  Widget _buildLoadMoreSection(ReviewViewModel vm) {
+    if (vm.loadingMore) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
+          strokeWidth: 2,
+        ),
+      );
+    }
+
+    if (vm.loadMoreError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: CustomButton(
+          label: 'እንደገና ይሞክሩ',
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          onPressed: () => vm.loadMoreReviews(widget.productId),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
