@@ -14,7 +14,7 @@ class AppColors {
 }
 
 class Constants {
-  static const baseurl = 'http://localhost:3000';
+  static const baseurl = 'https://haqmate-project.onrender.com';
 }
 
 Future<void> saveToken(String token) async {
