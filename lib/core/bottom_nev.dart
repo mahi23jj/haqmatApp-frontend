@@ -100,7 +100,7 @@ class TeffBottomNav extends StatelessWidget {
     return Container(
       // ... existing UI code ...
 
-       margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(12),
       height: 72,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -117,26 +117,26 @@ class TeffBottomNav extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _NavItem(
-            icon: Icons.home,
-            label: 'Home',
+            icon: Icons.home_outlined,
+            label: 'ቤት',
             active: selectedIndex == 0,
             onTap: () => onTap(0),
           ),
           _NavItem(
-            icon: Icons.shopping_bag_outlined,
-            label: 'Bag',
+            icon: Icons.receipt_long_outlined,
+            label: 'ትእዛዞች',
             active: selectedIndex == 1,
             onTap: () => onTap(1),
           ),
           _NavItem(
-            icon: Icons.favorite_border,
-            label: 'Wishlist',
+            icon: Icons.shopping_cart_outlined,
+            label: 'ቋት',
             active: selectedIndex == 2,
             onTap: () => onTap(2),
           ),
           _NavItem(
             icon: Icons.person_outline,
-            label: 'Profile',
+            label: 'መገለጫ',
             active: selectedIndex == 3,
             onTap: () => onTap(3),
           ),
