@@ -546,6 +546,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/loading_state.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/cart/view/cart_edit_page.dart';
@@ -570,8 +571,10 @@ class _CartScreenState extends State<CartScreen> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CartViewModel>(context, listen: false)
-          .loadCart(refresh: true);
+      Provider.of<CartViewModel>(
+        context,
+        listen: false,
+      ).loadCart(refresh: true);
     });
   }
 
@@ -606,22 +609,6 @@ class _CartScreenState extends State<CartScreen> {
       builder: (ctx) => Padding(
         padding: MediaQuery.of(ctx).viewInsets,
         child: ProductOptionBottomSheet(cartitem: cartmodel),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-          const SizedBox(height: 16),
-          Text(
-            'ትዕዛዞች በመጫን ላይ...',
-            style: TextStyle(color: AppColors.textLight, fontSize: 14),
-          ),
-        ],
       ),
     );
   }
@@ -700,7 +687,7 @@ class _CartScreenState extends State<CartScreen> {
         builder: (context, vm, _) {
           // Loading State
           if (vm.loading) {
-            return _buildLoadingState();
+            return const LoadingState();
           }
 
           // Error State
@@ -828,6 +815,18 @@ class _CartScreenState extends State<CartScreen> {
                     icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
                     onPressed: () => Navigator.pop(context),
                   ), */
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset(
+                      'assets/images/logo2.png',
+                      height: 60,
+                      width: 60,
+                    ),
+                  ),
+
                   const SizedBox(width: 8),
                   Text(
                     "የግዢ ቋትዎ",
@@ -889,12 +888,7 @@ class _CartScreenState extends State<CartScreen> {
     if (vm.loadingMore) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: CircularProgressIndicator(
-            color: AppColors.primary,
-            strokeWidth: 2,
-          ),
-        ),
+        child: Center(child: const LoadingState()),
       );
     }
 
@@ -1019,8 +1013,8 @@ class _CartScreenState extends State<CartScreen> {
                 // Product Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/images/teff.jpg',
+                  child: Image.network(
+                    cartModel.imageUrl,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,

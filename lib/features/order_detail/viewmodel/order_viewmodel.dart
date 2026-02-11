@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/order_detail/data/order_detail_local_data_source.dart';
 import 'package:haqmate/features/order_detail/service/order_detail_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../model/order_model.dart';
 
 class OrderdetailViewModel extends ChangeNotifier {
   final OrdersDetailRepository orderdetail = OrdersDetailRepository();
+  final OrderDetailLocalDataSource _localDataSource =
+      OrderDetailLocalDataSource();
 
   OrderData? _order;
   bool _loading = false;
@@ -15,20 +18,50 @@ class OrderdetailViewModel extends ChangeNotifier {
   String? get error => _error;
 
   OrderStatus? get _statusEnum => _parseOrderStatus(_order?.status);
-  PaymentStatus? get _paymentStatusEnum => _parsePaymentStatus(_order?.paymentstatus);
-  DeliveryStatus? get _deliveryStatusEnum => _parseDeliveryStatus(_order?.deliverystatus);
-  RefundStatus? get _refundStatusEnum => _parseRefundStatus(_order?.refundstatus);
+  PaymentStatus? get _paymentStatusEnum =>
+      _parsePaymentStatus(_order?.paymentstatus);
+  DeliveryStatus? get _deliveryStatusEnum =>
+      _parseDeliveryStatus(_order?.deliverystatus);
+  RefundStatus? get _refundStatusEnum =>
+      _parseRefundStatus(_order?.refundstatus);
 
   // -------------------------
-  // FETCH CART ITEMS
+  // CACHE HELPERS
   // -------------------------
-  Future<void> loadorderdetail(String id) async {
-    _loading = true;
+  Future<void> _saveCache(String id) async {
+    final order = _order;
+    if (order == null) return;
+    await _localDataSource.saveOrder(id, order);
+  }
+
+  Future<OrderData?> _readCache(String id) async {
+    return _localDataSource.readOrder(id);
+  }
+
+  Future<void> clearCache(String id) async {
+    await _localDataSource.clearOrder(id);
+  }
+
+  // -------------------------
+  // FETCH ORDER ITEMS
+  // -------------------------
+  Future<void> loadorderdetail(String id, {bool refresh = false}) async {
+    if (!refresh) {
+      final cached = await _readCache(id);
+      if (cached != null) {
+        _order = cached;
+        _error = null;
+        notifyListeners();
+      }
+    }
+
+    _loading = refresh || _order == null;
     _error = null;
     notifyListeners();
 
     try {
       _order = await orderdetail.fetchOrderDetail(id);
+      await _saveCache(id);
       print('order_item $_order');
       notifyListeners();
     } catch (e) {
@@ -75,7 +108,8 @@ class OrderdetailViewModel extends ChangeNotifier {
   String? get deliveryDateFormatted {
     final o = _order;
     if (o == null) return null;
-    if (_deliveryStatusEnum == DeliveryStatus.SCHEDULED && o.deliveryDate != null) {
+    if (_deliveryStatusEnum == DeliveryStatus.SCHEDULED &&
+        o.deliveryDate != null) {
       return _formatDate(DateTime.parse(o.deliveryDate!));
     }
     return null;
@@ -199,17 +233,6 @@ enum PaymentStatus {
   UNKNOWN,
 }
 
-enum DeliveryStatus {
-  NOT_SCHEDULED,
-  SCHEDULED,
-  DELIVERED,
-  UNKNOWN,
-}
+enum DeliveryStatus { NOT_SCHEDULED, SCHEDULED, DELIVERED, UNKNOWN }
 
-enum RefundStatus {
-  NOT_STARTED,
-  PENDING,
-  APPROVED,
-  REJECTED,
-  UNKNOWN,
-}
+enum RefundStatus { NOT_STARTED, PENDING, APPROVED, REJECTED, UNKNOWN }

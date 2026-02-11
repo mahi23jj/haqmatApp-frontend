@@ -61,7 +61,7 @@ class ProductsRepository {
 
       print(response.statusCode);
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final body = jsonDecode(response.body);
         print(body);
 
@@ -80,8 +80,12 @@ class ProductsRepository {
 
         return products;
       } else {
+
         final body = jsonDecode(response.body);
         final message = ErrorParser.parse(body);
+        if (message != null) {
+          print("API Error: $message");
+        }
         throw Exception(message);
       }
     } catch (e) {
@@ -100,12 +104,14 @@ class ProductsRepository {
 
       print(response.statusCode);
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final body = jsonDecode(response.body);
         print(body);
 
         // If API returns { "data": [...] }
         final productsJson = body["data"] ?? body;
+
+        print('Products JSON: $productsJson');
 
         if (productsJson is! List) {
           throw Exception("Invalid data format");
@@ -121,6 +127,9 @@ class ProductsRepository {
       } else {
         final body = jsonDecode(response.body);
         final message = ErrorParser.parse(body);
+             if (message != null) {
+          print("API Error: $message");
+        }
         throw Exception(message);
       }
     } catch (e) {

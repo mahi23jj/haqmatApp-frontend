@@ -93,6 +93,7 @@ class ManualPaymentService {
     final body = await response.stream.bytesToString();
 
     if (response.statusCode != 200 && response.statusCode != 201) {
+      print('Upload failed with status ${response.statusCode}: $body');
       throw Exception('Upload failed: $body');
     }
   }

@@ -1,18 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/cart/data/cart_local_data_source.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
 import 'package:haqmate/features/cart/service/cart_repo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CartViewModel extends ChangeNotifier {
-  CartViewModel({CartService? cartService})
-    : _cartService = cartService ?? CartService();
+  CartViewModel({
+    CartService? cartService,
+    CartLocalDataSource? localDataSource,
+  }) : _cartService = cartService ?? CartService(),
+       _localDataSource = localDataSource ?? CartLocalDataSource();
 
   final CartService _cartService;
-
-  static const String _cacheKey = 'cart_cache_v1';
+  final CartLocalDataSource _localDataSource;
 
   CartModelList? _cartItems;
   bool _loading = false;
@@ -40,26 +41,15 @@ class CartViewModel extends ChangeNotifier {
   // -------------------------
   Future<void> _saveCache() async {
     if (_cartItems == null) return;
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(_cartToCacheJson(_cartItems!));
-    await prefs.setString(_cacheKey, encoded);
+    await _localDataSource.saveCart(_cartItems!);
   }
 
   Future<CartModelList?> _readCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_cacheKey);
-    if (raw == null || raw.isEmpty) return null;
-    try {
-      final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      return _cartFromCacheJson(decoded);
-    } catch (_) {
-      return null;
-    }
+    return _localDataSource.readCart();
   }
 
   Future<void> clearCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_cacheKey);
+    await _localDataSource.clearCart();
   }
 
   // -------------------------
@@ -372,70 +362,6 @@ class CartViewModel extends ChangeNotifier {
       subtotalPrice: subtotal,
       deliveryFee: deliveryFee,
       totalPrice: total,
-    );
-  }
-
-  // -------------------------
-  // CACHE SERIALIZATION
-  // -------------------------
-  Map<String, dynamic> _cartToCacheJson(CartModelList cart) {
-    return {
-      'items': cart.items.map(_cartItemToCacheJson).toList(),
-      'location': {'id': cart.location.id, 'name': cart.location.name},
-      'phoneNumber': cart.phoneNumber,
-      'subtotalPrice': cart.subtotalPrice,
-      'deliveryFee': cart.deliveryFee,
-      'totalPrice': cart.totalPrice,
-    };
-  }
-
-  CartModelList _cartFromCacheJson(Map<String, dynamic> json) {
-    final itemsJson = (json['items'] as List?) ?? [];
-    final items = itemsJson
-        .map((e) => _cartItemFromCacheJson(e as Map<String, dynamic>))
-        .toList();
-
-    final locationJson = (json['location'] as Map<String, dynamic>?) ?? {};
-    final location = LocationModel(
-      id: locationJson['id']?.toString() ?? '',
-      name: locationJson['name']?.toString() ?? '',
-    );
-
-    return CartModelList(
-      items: items,
-      location: location,
-      phoneNumber: json['phoneNumber']?.toString() ?? '',
-      subtotalPrice: (json['subtotalPrice'] as num?)?.toInt() ?? 0,
-      deliveryFee: (json['deliveryFee'] as num?)?.toInt() ?? 0,
-      totalPrice: (json['totalPrice'] as num?)?.toInt() ?? 0,
-    );
-  }
-
-  Map<String, dynamic> _cartItemToCacheJson(CartModel item) {
-    return {
-      'id': item.id,
-      'productId': item.productId,
-      'name': item.name,
-      'imageUrl': item.imageUrl,
-      'quantity': item.quantity,
-      'packaging': item.packaging,
-      'tefftype': item.tefftype,
-      'quality': item.quality,
-      'totalprice': item.totalprice,
-    };
-  }
-
-  CartModel _cartItemFromCacheJson(Map<String, dynamic> json) {
-    return CartModel(
-      id: json['id']?.toString() ?? '',
-      productId: json['productId']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      imageUrl: json['imageUrl']?.toString() ?? '',
-      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
-      packaging: (json['packaging'] as num?)?.toInt() ?? 0,
-      tefftype: json['tefftype']?.toString() ?? '',
-      quality: json['quality']?.toString() ?? '',
-      totalprice: (json['totalprice'] as num?)?.toInt() ?? 0,
     );
   }
 

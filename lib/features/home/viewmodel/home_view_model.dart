@@ -23,12 +23,12 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<List<ProductModel>> load() async {
-    _loading = false;
+    _loading = true;
     _error = null;
     notifyListeners();
 
     try {
-      flashSale = await _repo.fetchFeatured();
+      flashSale = await _repo.fetchAll();
 
       print(flashSale.length);
 
@@ -45,8 +45,8 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-    Future<List<ProductModel>> loadall() async {
-    _loading = false;
+  Future<List<ProductModel>> loadall() async {
+    _loading = true;
     _error = null;
     notifyListeners();
 
@@ -107,12 +107,11 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-
-void clear() {
-  result = [];
-  _error = null;
-  notifyListeners();
-}
+  void clear() {
+    result = [];
+    _error = null;
+    notifyListeners();
+  }
 
   // Future<void> search(String param) async {
   //   _loading = true;

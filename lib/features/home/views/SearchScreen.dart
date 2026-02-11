@@ -1,91 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
-// import 'package:haqmate/features/home/widgets/ProductSearchCard.dart';
-// import 'package:provider/provider.dart';
-
-// class Searchscreen extends StatefulWidget {
-//   const Searchscreen({super.key});
-
-//   @override
-//   State<Searchscreen> createState() => _SearchscreenState();
-// }
-
-// class _SearchscreenState extends State<Searchscreen> {
-
-
-// @override
-// void initState() {
-//   super.initState();
-//   WidgetsBinding.instance.addPostFrameCallback((_) {
-//     context.read<HomeViewModel>().clear();
-//   });
-// }
-
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final vm = Provider.of<HomeViewModel>(context);
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Search Products'),
-//       ),
-//       body: Column(
-//         children: [
-//           // 🔍 Search Field
-//           Padding(
-//             padding: const EdgeInsets.all(12),
-//             child: TextField(
-//               autofocus: true,
-//               onChanged: vm.onSearchChanged,
-//               decoration: InputDecoration(
-//                 hintText: 'Search teff, quality, type...',
-//                 prefixIcon: const Icon(Icons.search),
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//               ),
-//             ),
-//           ),
-
-//           // 📦 result Area
-//           Expanded(
-//             child: Builder(
-//               builder: (_) {
-//                 if (vm.loading) {
-//                   return const Center(child: CircularProgressIndicator());
-//                 }
-
-//                 if (vm.error != null) {
-//                   return Center(child: Text(vm.error!));
-//                 }
-
-//                 if (vm.result.isEmpty) {
-//                   return const Center(
-//                     child: Text(
-//                       'No products found',
-//                       style: TextStyle(color: Colors.grey),
-//                     ),
-//                   );
-//                 }
-
-//                 return ListView.builder(
-//                   itemCount: vm.result.length,
-//                   itemBuilder: (context, index) {
-//                     final product = vm.result[index];
-//                     return ProductSearchCard(product: product);
-//                   },
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
@@ -148,7 +60,7 @@ class _SearchscreenState extends State<Searchscreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Image.asset(
-              'assets/logo.png', // Add your app logo
+              'assets/images/logo2.png', // Add your app logo
               width: 32,
               height: 32,
             ),
@@ -260,7 +172,7 @@ class _SearchscreenState extends State<Searchscreen> {
                 const SizedBox(height: 8),
 
                 // Search Filters Chips
-                SingleChildScrollView(
+               /*  SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
@@ -275,7 +187,7 @@ class _SearchscreenState extends State<Searchscreen> {
                       _buildFilterChip('ጥራት 1', false),
                     ],
                   ),
-                ),
+                ), */
               ],
             ),
           ),
@@ -325,9 +237,7 @@ class _SearchscreenState extends State<Searchscreen> {
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: AppColors.primary.withOpacity(0.2),
-        ),
+        side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
@@ -421,7 +331,10 @@ class _SearchscreenState extends State<Searchscreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -444,72 +357,78 @@ class _SearchscreenState extends State<Searchscreen> {
   }
 
   Widget _buildEmptySearchState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary.withOpacity(0.1),
-                    AppColors.accent.withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.search_off_rounded,
-                color: AppColors.primary,
-                size: 60,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'የትኛውን የተፍ ዓይነት ትፈልጋለህ?',
-              style: TextStyle(
-                color: AppColors.textDark,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Ethiopia',
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                'የሚፈልጉትን የተፍ ዓይነት፣ ጥራት ወይም መለያ ለመፈለግ ከላይ ባለው የፍለጋ ሳጥን ውስጥ ይፃፉ።',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 14,
-                  height: 1.6,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              alignment: WrapAlignment.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildPopularSearch('ነጩ የተፍ'),
-                _buildPopularSearch('ቀዩ የተፍ'),
-                _buildPopularSearch('ቅባይ'),
-                _buildPopularSearch('ጥራት 1'),
-                _buildPopularSearch('ኦርጋኒክ'),
-                _buildPopularSearch('ፍራፍሬ ያለበት'),
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withOpacity(0.1),
+                        AppColors.accent.withOpacity(0.1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.search_off_rounded,
+                    color: AppColors.primary,
+                    size: 60,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'የትኛውን የተፍ ዓይነት ትፈልጋለህ?',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Ethiopia',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Text(
+                    'የሚፈልጉትን የተፍ ዓይነት፣ ጥራት ወይም መለያ ለመፈለግ ከላይ ባለው የፍለጋ ሳጥን ውስጥ ይፃፉ።',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 14,
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+               /*  Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _buildPopularSearch('ነጩ የተፍ'),
+                    _buildPopularSearch('ቀዩ የተፍ'),
+                    _buildPopularSearch('ቅባይ'),
+                    _buildPopularSearch('ጥራት 1'),
+                    _buildPopularSearch('ኦርጋኒክ'),
+                    _buildPopularSearch('ፍራፍሬ ያለበት'),
+                  ],
+                ), */
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -571,7 +490,7 @@ class _SearchscreenState extends State<Searchscreen> {
               ),
             ),
             const SizedBox(height: 32),
-            SingleChildScrollView(
+           /*  SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -585,14 +504,14 @@ class _SearchscreenState extends State<Searchscreen> {
                   _buildAlternativeSearch('ኦርጋኒክ'),
                 ],
               ),
-            ),
+            ), */
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPopularSearch(String term) {
+  /* Widget _buildPopularSearch(String term) {
     return GestureDetector(
       onTap: () {
         _searchController.text = term;
@@ -603,9 +522,7 @@ class _SearchscreenState extends State<Searchscreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.primary.withOpacity(0.2),
-          ),
+          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
           boxShadow: [
             BoxShadow(
               color: AppColors.primary.withOpacity(0.05),
@@ -625,7 +542,7 @@ class _SearchscreenState extends State<Searchscreen> {
         ),
       ),
     );
-  }
+  } */
 
   Widget _buildAlternativeSearch(String term) {
     return ElevatedButton(
@@ -637,9 +554,7 @@ class _SearchscreenState extends State<Searchscreen> {
         backgroundColor: AppColors.primary.withOpacity(0.1),
         foregroundColor: AppColors.primary,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
       child: Text(
@@ -662,9 +577,7 @@ class _SearchscreenState extends State<Searchscreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
-              bottom: BorderSide(
-                color: AppColors.background.withOpacity(0.5),
-              ),
+              bottom: BorderSide(color: AppColors.background.withOpacity(0.5)),
             ),
           ),
           child: Row(
@@ -680,7 +593,10 @@ class _SearchscreenState extends State<Searchscreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),

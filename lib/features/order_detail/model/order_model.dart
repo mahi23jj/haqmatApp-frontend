@@ -1,8 +1,18 @@
+import 'package:hive/hive.dart';
+
+part 'order_model.g.dart';
+
+@HiveType(typeId: 10)
 class OrderItems {
+  @HiveField(0)
   final String name;
+  @HiveField(1)
   final int packagingSize;
+  @HiveField(2)
   final String image;
+  @HiveField(3)
   final int quantity;
+  @HiveField(4)
   final double price;
 
   OrderItems({
@@ -46,16 +56,16 @@ class OrderItems {
   }
 }
 
+@HiveType(typeId: 11)
 class OrderTrackingStep {
+  @HiveField(0)
   final String title;
+  @HiveField(1)
   final String? date;
+  @HiveField(2)
   final bool completed;
 
-  OrderTrackingStep({
-    required this.title,
-    this.date,
-    required this.completed,
-  });
+  OrderTrackingStep({required this.title, this.date, required this.completed});
 
   factory OrderTrackingStep.fromJson(Map<String, dynamic> json) {
     final timestamp = json['timestamp'];
@@ -66,31 +76,55 @@ class OrderTrackingStep {
       completed: timestamp != null && timestamp.toString().isNotEmpty,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {'status': title, 'timestamp': date};
+  }
 }
 
-
-// order_data.dart
+@HiveType(typeId: 12)
 class OrderData {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String userId;
+  @HiveField(2)
   final String phoneNumber;
+  @HiveField(3)
   final String location;
+  @HiveField(4)
   final int totalAmount;
+  @HiveField(5)
   final String deliverystatus;
+  @HiveField(6)
   final String idempotencyKey;
+  @HiveField(7)
   final String paymentstatus;
+  @HiveField(8)
   final String refundstatus;
+  @HiveField(9)
   final String merchOrderId;
+  @HiveField(10)
   final String orderrecived;
+  @HiveField(11)
   final String paymentMethod;
+  @HiveField(12)
   final String cancelReason;
+  @HiveField(13)
   final String paymentProofUrl;
+  @HiveField(14)
   final int deliveryFee;
+  @HiveField(15)
   final String? deliveryDate;
+  @HiveField(16)
   final String status;
+  @HiveField(17)
   final DateTime createdAt;
+  @HiveField(18)
   final DateTime updatedAt;
+  @HiveField(19)
   final List<OrderItems> items;
+  @HiveField(20)
   final List<OrderTrackingStep> tracking;
 
   OrderData({
@@ -182,12 +216,65 @@ class OrderData {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'items': items.map((e) => e.toJson()).toList(),
-      'tracking': tracking
-          .map((e) => {
-                'status': e.title,
-                'timestamp': e.date,
-              })
-          .toList(),
+      'tracking': tracking.map((e) => e.toJson()).toList(),
     };
   }
+}
+
+@HiveType(typeId: 13)
+enum OrderStatus {
+  @HiveField(0)
+  PENDING_PAYMENT,
+  @HiveField(1)
+  TO_BE_DELIVERED,
+  @HiveField(2)
+  COMPLETED,
+  @HiveField(3)
+  CANCELLED,
+  @HiveField(4)
+  UNKNOWN,
+}
+
+@HiveType(typeId: 14)
+enum PaymentStatus {
+  @HiveField(0)
+  PENDING,
+  @HiveField(1)
+  SCREENSHOT_SENT,
+  @HiveField(2)
+  FAILED,
+  @HiveField(3)
+  CONFIRMED,
+  @HiveField(4)
+  DECLINED,
+  @HiveField(5)
+  REFUNDED,
+  @HiveField(6)
+  UNKNOWN,
+}
+
+@HiveType(typeId: 15)
+enum DeliveryStatus {
+  @HiveField(0)
+  NOT_SCHEDULED,
+  @HiveField(1)
+  SCHEDULED,
+  @HiveField(2)
+  DELIVERED,
+  @HiveField(3)
+  UNKNOWN,
+}
+
+@HiveType(typeId: 16)
+enum RefundStatus {
+  @HiveField(0)
+  NOT_STARTED,
+  @HiveField(1)
+  PENDING,
+  @HiveField(2)
+  APPROVED,
+  @HiveField(3)
+  REJECTED,
+  @HiveField(4)
+  UNKNOWN,
 }

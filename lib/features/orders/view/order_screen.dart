@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/loading_state.dart';
 import 'package:haqmate/features/checkout/view/manual_payment_screen.dart';
 import 'package:haqmate/features/order_detail/view/order_detail_page.dart';
 import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
@@ -32,7 +33,7 @@ class OrdersPage extends StatelessWidget {
         builder: (context, vm, child) {
           // Loading state
           if (vm.loading) {
-            return _buildLoadingState();
+            return const LoadingState();
           }
 
           // Error state
@@ -64,7 +65,7 @@ class OrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
+  /*  Widget _buildLoadingState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -85,7 +86,7 @@ class OrdersPage extends StatelessWidget {
       ),
     );
   }
-
+ */
   Widget _buildErrorState(OrdersViewModel vm) {
     return Center(
       child: Padding(
@@ -93,11 +94,7 @@ class OrdersPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              color: AppColors.accent,
-              size: 64,
-            ),
+            Icon(Icons.error_outline, color: AppColors.accent, size: 64),
             const SizedBox(height: 16),
             Text(
               'አልተሳካም!',
@@ -178,34 +175,45 @@ class OrdersPage extends StatelessWidget {
   Widget _buildSuccessState(BuildContext context, OrdersViewModel vm) {
     return Column(
       children: [
-          Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-              color: AppColors.background,
-              child: Row(
-                children: [
-                  /* IconButton(
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          color: AppColors.background,
+          child: Row(
+            children: [
+              /* IconButton(
                     icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
                     onPressed: () => Navigator.pop(context),
                   ), */
-                  const SizedBox(width: 8),
-                  Text(
-                    "የእኔ ትዕዛዞች",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
+            Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.refresh, color: AppColors.primary),
-                    onPressed: () => vm.load(),
-                    tooltip: 'አደስ',
+                  child: Image.asset(
+                    'assets/images/logo2.png',
+                    height: 60,
+                    width: 60,
                   ),
-                ],
+                ),
+              
+              const SizedBox(width: 8),
+              Text(
+                "የእኔ ትዕዛዞች",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
               ),
-            ),
-
+              const Spacer(),
+              IconButton(
+                icon: Icon(Icons.refresh, color: AppColors.primary),
+                onPressed: () => vm.load(),
+                tooltip: 'አደስ',
+              ),
+            ],
+          ),
+        ),
 
         const SizedBox(height: 10),
 
@@ -221,10 +229,7 @@ class OrdersPage extends StatelessWidget {
             children: [
               Text(
                 '${vm.filtered.length} ትዕዛዝ${vm.filtered.length == 1 ? '' : 'ዎች'} ተገኝተዋል',
-                style: TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: AppColors.textLight, fontSize: 12),
               ),
             ],
           ),
@@ -275,9 +280,8 @@ class OrdersPage extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ManualPaymentScreen(
-                                    orderId: order.id,
-                                  ),
+                                  builder: (context) =>
+                                      ManualPaymentScreen(orderId: order.id),
                                 ),
                               );
                             } else if (action == OrderAction.cancel) {

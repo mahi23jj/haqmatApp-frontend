@@ -119,24 +119,24 @@ class FlashSaleItem extends StatelessWidget {
           border: Border.all(color: Colors.grey.withOpacity(0.1)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image with favorite button
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: Image.network(
+                      product.imageUrl,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  child: Image.asset(
-                    'assets/images/teff.jpg',
-                    height: 130,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                /*  Positioned(
+                  /*  Positioned(
                   top: 8,
                   right: 8,
                   child: Container(
@@ -157,8 +157,8 @@ class FlashSaleItem extends StatelessWidget {
                     ),
                   ),
                 ), */
-                // Discount badge
-                /*   if (product.discount != null && product.discount! > 0)
+                  // Discount badge
+                  /*   if (product.discount != null && product.discount! > 0)
                   Positioned(
                     top: 8,
                     left: 8,
@@ -178,12 +178,13 @@ class FlashSaleItem extends StatelessWidget {
                       ),
                     ),
                   ), */
-              ],
+                ],
+              ),
             ),
 
             // Product Info
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -194,10 +195,10 @@ class FlashSaleItem extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       height: 1.3,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     product.teffType,
                     style: const TextStyle(
@@ -205,10 +206,10 @@ class FlashSaleItem extends StatelessWidget {
                       fontWeight: FontWeight.w300,
                       height: 1,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   // Price
                   Row(
                     children: [

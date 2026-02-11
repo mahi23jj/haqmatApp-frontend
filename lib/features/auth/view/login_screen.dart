@@ -24,6 +24,19 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _formError;
   bool _obscurePassword = true;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<AuthViewModel>();
+      await provider.loadRememberedCredentials();
+      if (!mounted) return;
+      email.text = provider.rememberedEmail ?? '';
+      password.text = provider.rememberedPassword ?? '';
+      setState(() {});
+    });
+  }
+
   // Helper method to translate backend errors to Amharic
   String _translateBackendError(String error) {
     final errorLower = error.toLowerCase();
@@ -128,16 +141,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.shopping_basket_rounded,
-                          color: Colors.white,
-                          size: 30,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            'assets/images/logo2.png',
+                            height: 60,
+                            width: 60,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -345,6 +360,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Consumer<AuthViewModel>(
+                    builder: (context, provider, child) {
+                      return CheckboxListTile(
+                        value: provider.rememberMe,
+                        onChanged: (value) {
+                          provider.setRememberMe(value ?? false);
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        activeColor: AppColors.primary,
+                        title: Text(
+                          'አስታውሰኝ',
+                          style: TextStyle(
+                            color: AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
+                    },
                   ),
 
                   // Forgot Password Link

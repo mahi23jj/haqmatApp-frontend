@@ -162,7 +162,7 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
   Widget build(BuildContext context) {
     final vm = context.watch<ManualPaymentViewModel>();
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
@@ -244,164 +244,162 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
           const SizedBox(height: 32),
 
           // File Upload Section
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ስክሪንሾት ይስቀሉ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ስክሪንሾት ይስቀሉ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                ),
+                const SizedBox(height: 16),
 
-                  GestureDetector(
-                    onTap: vm.submitting ? null : _pickFile,
-                    child: Container(
-                      height: 160,
-                      decoration: BoxDecoration(
+                GestureDetector(
+                  onTap: vm.submitting ? null : _pickFile,
+                  child: Container(
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: _selectedFile != null
+                          ? AppColors.primary.withOpacity(0.05)
+                          : AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
                         color: _selectedFile != null
-                            ? AppColors.primary.withOpacity(0.05)
-                            : AppColors.background,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: _selectedFile != null
-                              ? AppColors.primary
-                              : Colors.grey.shade300,
-                          width: 2,
-                          style: BorderStyle.solid,
-                        ),
-                      ),
-                      child: Center(
-                        child: _selectedFile != null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: AppColors.primary,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    _selectedFile!.name,
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'አድጋለህ ለመቀየር ይንኩ',
-                                    style: TextStyle(
-                                      color: AppColors.textLight,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.cloud_upload_outlined,
-                                    color: AppColors.primary,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'ስክሪንሾት ለመስቀል ይንኩ',
-                                    style: TextStyle(
-                                      color: AppColors.textDark,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'JPG, PNG ወይም PDF',
-                                    style: TextStyle(
-                                      color: AppColors.textLight,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                        width: 2,
+                        style: BorderStyle.solid,
                       ),
                     ),
+                    child: Center(
+                      child: _selectedFile != null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.primary,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  _selectedFile!.name,
+                                  style: TextStyle(
+                                    color: AppColors.textDark,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'አድጋለህ ለመቀየር ይንኩ',
+                                  style: TextStyle(
+                                    color: AppColors.textLight,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.cloud_upload_outlined,
+                                  color: AppColors.primary,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'ስክሪንሾት ለመስቀል ይንኩ',
+                                  style: TextStyle(
+                                    color: AppColors.textDark,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'JPG, PNG ወይም PDF',
+                                  style: TextStyle(
+                                    color: AppColors.textLight,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
+                ),
 
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-                  // File Info
-                  if (_selectedFile != null)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            color: AppColors.accent,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'ፋይሉ በተሳካ ሁኔታ ተመርጧል። ክፍያ ለማረጋገጥ ከታች ያለውን አዝራር ይጫኑ።',
-                              style: TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 12,
-                              ),
+                // File Info
+                if (_selectedFile != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline_rounded,
+                          color: AppColors.accent,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'ፋይሉ በተሳካ ሁኔታ ተመርጧል። ክፍያ ለማረጋገጥ ከታች ያለውን አዝራር ይጫኑ።',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 12,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-
-                  const Spacer(),
-
-                  // Submit Button
-                  CustomButton(
-                    width: double.infinity,
-                    label: vm.submitting ? 'በመላክ ላይ...' : 'ክፍያ ያረጋግጡ',
-                    backgroundColor: _selectedFile != null
-                        ? AppColors.secondary
-                        : Colors.grey.shade400,
-                    foregroundColor: Colors.white,
-                    loading: vm.submitting,
-                    onPressed: (_selectedFile != null && !vm.submitting)
-                        ? () => _submit(context)
-                        : null,
-                    borderRadius: BorderRadius.circular(12),
-                    icon: vm.submitting
-                        ? null
-                        : const Icon(
-                            Icons.send_outlined,
-                            color: Colors.white,
-                            size: 20,
-                          ),
                   ),
-                ],
-              ),
+
+                const SizedBox(height: 16),
+
+                // Submit Button
+                CustomButton(
+                  width: double.infinity,
+                  label: vm.submitting ? 'በመላክ ላይ...' : 'ክፍያ ያረጋግጡ',
+                  backgroundColor: _selectedFile != null
+                      ? AppColors.secondary
+                      : Colors.grey.shade400,
+                  foregroundColor: Colors.white,
+                  loading: vm.submitting,
+                  onPressed: (_selectedFile != null && !vm.submitting)
+                      ? () => _submit(context)
+                      : null,
+                  borderRadius: BorderRadius.circular(12),
+                  icon: vm.submitting
+                      ? null
+                      : const Icon(
+                          Icons.send_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                ),
+              ],
             ),
           ),
         ],

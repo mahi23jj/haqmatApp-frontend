@@ -1,67 +1,148 @@
+import 'dart:core';
+
 import 'package:flutter/foundation.dart';
 import 'package:haqmate/features/order_detail/model/order_model.dart';
+import 'package:hive/hive.dart';
 
-enum OrderStatus { pendingPayment, toBeDelivered, completed, cancelled, unknown }
+part 'order.g.dart';
 
-enum PaymentStatus {
-  pending,
-  screenshotSent,
-  failed,
-  confirmed,
-  declined,
-  refunded,
-  unknown,
-}
-
-enum DeliveryStatus { notScheduled, scheduled, delivered, unknown }
-
-enum RefundStatus { notStarted, pending, approved, rejected, unknown }
-
-enum TrackingType {
-  paymentSubmitted,
-  paymentConfirmed,
-  deliveryScheduled,
-  confirmed,
+@HiveType(typeId: 24)
+enum OrderStatus {
+  @HiveField(0)
+  pendingPayment,
+  @HiveField(1)
+  toBeDelivered,
+  @HiveField(2)
+  completed,
+  @HiveField(3)
   cancelled,
-  refunded,
+  @HiveField(4)
   unknown,
 }
 
+@HiveType(typeId: 25)
+enum PaymentStatus {
+  @HiveField(0)
+  pending,
+  @HiveField(1)
+  screenshotSent,
+  @HiveField(2)
+  failed,
+  @HiveField(3)
+  confirmed,
+  @HiveField(4)
+  declined,
+  @HiveField(5)
+  refunded,
+  @HiveField(6)
+  unknown,
+}
+
+@HiveType(typeId: 26)
+enum DeliveryStatus {
+  @HiveField(0)
+  notScheduled,
+  @HiveField(1)
+  scheduled,
+  @HiveField(2)
+  delivered,
+  @HiveField(3)
+  unknown,
+}
+
+@HiveType(typeId: 27)
+enum RefundStatus {
+  @HiveField(0)
+  notStarted,
+  @HiveField(1)
+  pending,
+  @HiveField(2)
+  approved,
+  @HiveField(3)
+  rejected,
+  @HiveField(4)
+  unknown,
+}
+
+@HiveType(typeId: 23)
+enum TrackingType {
+  @HiveField(0)
+  paymentSubmitted,
+  @HiveField(1)
+  paymentConfirmed,
+  @HiveField(2)
+  deliveryScheduled,
+  @HiveField(3)
+  confirmed,
+  @HiveField(4)
+  cancelled,
+  @HiveField(5)
+  refunded,
+  @HiveField(6)
+  unknown,
+}
+
+@HiveType(typeId: 20)
 class OrderModel {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String merchOrderId;
+  @HiveField(2)
   final String idempotencyKey;
+  @HiveField(3)
   final String userId;
 
+  @HiveField(4)
   final OrderStatus status;
+  @HiveField(5)
   final PaymentStatus paymentStatus;
+  @HiveField(6)
   final DeliveryStatus deliveryStatus;
 
+  @HiveField(7)
   final double totalAmount;
+  @HiveField(8)
   final String phoneNumber;
 
+  @HiveField(9)
   final String orderReceived; // delivery | pickup
+  @HiveField(10)
   final String paymentMethod; // chapa | telebirr | screenshot
+  @HiveField(11)
   final String? paymentProofUrl;
+  @HiveField(12)
   final String? paymentDeclineReason;
 
   // final String areaId;
 
+  @HiveField(13)
   final int totalDeliveryFee;
+  @HiveField(14)
   final int extraDeliveryFee;
+  @HiveField(15)
   final String? extraDistanceLevel;
 
+  @HiveField(16)
   final DateTime? deliveryDate;
 
+  @HiveField(17)
   final RefundStatus refundStatus;
+  @HiveField(18)
   final String? cancelReason;
+  @HiveField(19)
   final double? refundAmount;
 
+  @HiveField(20)
   final DateTime createdAt;
+  @HiveField(21)
   final DateTime updatedAt;
 
+  @HiveField(22)
   final List<OrderItems> items;
+  @HiveField(23)
   final List<OrderTrackingModel> tracking;
+  @HiveField(24)
   final RefundRequestModel? refundRequest;
 
   const OrderModel({
@@ -99,24 +180,42 @@ class OrderModel {
 
     return OrderModel(
       id: _readString(json, ['id']),
-      merchOrderId: _readString(json, ['merchOrderId', 'merchantOrderId', 'orderid']),
+      merchOrderId: _readString(json, [
+        'merchOrderId',
+        'merchantOrderId',
+        'orderid',
+      ]),
       idempotencyKey: _readString(json, ['idempotencyKey']),
       userId: _readString(json, ['userId']),
       status: _orderStatusFromJson(json['status']),
-      paymentStatus: _paymentStatusFromJson(json['paymentStatus'] ?? json['paymentstatus']),
-      deliveryStatus: _deliveryStatusFromJson(json['deliveryStatus'] ?? json['deliverystatus']),
+      paymentStatus: _paymentStatusFromJson(
+        json['paymentStatus'] ?? json['paymentstatus'],
+      ),
+      deliveryStatus: _deliveryStatusFromJson(
+        json['deliveryStatus'] ?? json['deliverystatus'],
+      ),
       totalAmount: _readDouble(json, 'totalAmount'),
       phoneNumber: _readString(json, ['phoneNumber', 'phonenumber']),
       orderReceived: _readString(json, ['orderrecived', 'orderReceived']),
       paymentMethod: _readString(json, ['paymentMethod', 'paymentmethod']),
-      paymentProofUrl: _readNullableString(json, ['paymentProofUrl', 'paymentproofurl']),
-      paymentDeclineReason: _readNullableString(json, ['paymentDeclineReason', 'paymentdeclinereason']),
+      paymentProofUrl: _readNullableString(json, [
+        'paymentProofUrl',
+        'paymentproofurl',
+      ]),
+      paymentDeclineReason: _readNullableString(json, [
+        'paymentDeclineReason',
+        'paymentdeclinereason',
+      ]),
       // areaId: _readString(json, ['areaId']),
       totalDeliveryFee: _readInt(json, 'totalDeliveryFee'),
       extraDeliveryFee: _readInt(json, 'extraDeliveryFee'),
       extraDistanceLevel: _readNullableString(json, ['extraDistanceLevel']),
-      deliveryDate: _parseNullableDate(json['deliveryDate'] ?? json['deliverydate']),
-      refundStatus: _refundStatusFromJson(json['refundStatus'] ?? json['refundstatus']),
+      deliveryDate: _parseNullableDate(
+        json['deliveryDate'] ?? json['deliverydate'],
+      ),
+      refundStatus: _refundStatusFromJson(
+        json['refundStatus'] ?? json['refundstatus'],
+      ),
       cancelReason: _readNullableString(json, ['cancelReason']),
       refundAmount: _readNullableDouble(json, 'refundAmount'),
       createdAt: _parseDate(json['createdAt']) ?? DateTime.now(),
@@ -130,7 +229,9 @@ class OrderModel {
           .map(OrderTrackingModel.fromJson)
           .toList(),
       refundRequest: json['refundRequest'] is Map<String, dynamic>
-          ? RefundRequestModel.fromJson(json['refundRequest'] as Map<String, dynamic>)
+          ? RefundRequestModel.fromJson(
+              json['refundRequest'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
@@ -243,13 +344,21 @@ class OrderModel {
 //   }
 // }
 
+@HiveType(typeId: 21)
 class OrderTrackingModel {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String orderId;
+  @HiveField(2)
   final TrackingType type;
+  @HiveField(3)
   final String title;
+  @HiveField(4)
   final String? message;
+  @HiveField(5)
   final DateTime? timestamp;
+  @HiveField(6)
   final DateTime createdAt;
 
   const OrderTrackingModel({
@@ -287,20 +396,32 @@ class OrderTrackingModel {
   }
 }
 
+@HiveType(typeId: 22)
 class RefundRequestModel {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String orderId;
+  @HiveField(2)
   final String userId;
 
+  @HiveField(3)
   final String accountName;
+  @HiveField(4)
   final String? accountNumber;
+  @HiveField(5)
   final String? phoneNumber;
+  @HiveField(6)
   final String? reason;
 
+  @HiveField(7)
   final RefundStatus status;
+  @HiveField(8)
   final String? adminNote;
 
+  @HiveField(9)
   final DateTime createdAt;
+  @HiveField(10)
   final DateTime updatedAt;
 
   const RefundRequestModel({
@@ -615,7 +736,11 @@ String _normalize(dynamic value) {
   return stringValue.replaceAll('-', '_').toUpperCase();
 }
 
-String _readString(Map<String, dynamic> json, List<String> keys, {String fallback = ''}) {
+String _readString(
+  Map<String, dynamic> json,
+  List<String> keys, {
+  String fallback = '',
+}) {
   for (final key in keys) {
     final value = json[key];
     if (value == null) continue;
@@ -635,7 +760,11 @@ String? _readNullableString(Map<String, dynamic> json, List<String> keys) {
   return null;
 }
 
-double _readDouble(Map<String, dynamic> json, String key, {double fallback = 0}) {
+double _readDouble(
+  Map<String, dynamic> json,
+  String key, {
+  double fallback = 0,
+}) {
   final value = json[key];
   if (value is num) return value.toDouble();
   if (value is String) return double.tryParse(value) ?? fallback;
@@ -666,6 +795,7 @@ DateTime? _parseDate(dynamic value) {
 }
 
 DateTime? _parseNullableDate(dynamic value) => _parseDate(value);
+
 class OrderItem {
   final String id;
   final String userId;
@@ -720,9 +850,7 @@ class OrderItem {
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
       items: json['items'] != null
-          ? (json['items'] as List)
-              .map((item) => Item.fromJson(item))
-              .toList()
+          ? (json['items'] as List).map((item) => Item.fromJson(item)).toList()
           : [],
     );
   }
@@ -761,16 +889,13 @@ class Product {
   final String name;
   final List<String> images;
 
-  Product({
-    required this.id,
-    required this.name,
-    required this.images,
-  });
+  Product({required this.id, required this.name, required this.images});
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final imagesList = json['images'] as List<dynamic>? ?? [];
-    final imageUrls =
-        imagesList.map((img) => img['url']?.toString() ?? '').toList();
+    final imageUrls = imagesList
+        .map((img) => img['url']?.toString() ?? '')
+        .toList();
 
     return Product(
       id: json['id'] ?? '',

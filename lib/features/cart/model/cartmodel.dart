@@ -1,16 +1,28 @@
 import 'package:haqmate/features/home/models/product.dart';
+import 'package:hive/hive.dart';
 
+part 'cartmodel.g.dart';
+
+@HiveType(typeId: 1)
 class CartModel {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   final String imageUrl;
+  @HiveField(3)
   final int packaging;
+  @HiveField(4)
   final int quantity;
+  @HiveField(5)
   final String tefftype;
+  @HiveField(6)
   final String quality;
+  @HiveField(7)
   final String productId;
+  @HiveField(8)
   final int totalprice;
-
 
   CartModel({
     required this.id,
@@ -22,7 +34,6 @@ class CartModel {
     required this.quality,
     required this.productId,
     required this.totalprice,
-
   });
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
@@ -38,7 +49,6 @@ class CartModel {
       quality: json['product']?['quality']?.toString() ?? '',
       productId: json['product']?['id']?.toString() ?? '',
       totalprice: (json['totalPrice'] as num?)?.toInt() ?? 0,
-      
     );
   }
 
@@ -53,7 +63,6 @@ class CartModel {
       'quality': quality,
       'productId': productId,
       'totalprice': totalprice,
-     
     };
   }
 
@@ -84,12 +93,19 @@ class CartModel {
   }
 }
 
+@HiveType(typeId: 3)
 class CartModelList {
+  @HiveField(0)
   final List<CartModel> items;
+  @HiveField(1)
   final LocationModel location;
+  @HiveField(2)
   final String phoneNumber;
+  @HiveField(3)
   final int totalPrice;
+  @HiveField(4)
   final int deliveryFee;
+  @HiveField(5)
   final int subtotalPrice;
 
   CartModelList({
@@ -137,8 +153,11 @@ class CartModelList {
   }
 }
 
+@HiveType(typeId: 2)
 class LocationModel {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
   // final int deliveryFee;
 

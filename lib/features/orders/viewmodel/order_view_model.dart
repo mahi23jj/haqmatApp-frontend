@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/features/orders/data/order_local_data_source.dart';
 import 'package:haqmate/features/orders/model/order.dart';
 import 'package:haqmate/features/orders/service/order_repo.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrdersViewModel extends ChangeNotifier {
   final OrdersRepository _repo = OrdersRepository();
+  final OrderLocalDataSource _localDataSource = OrderLocalDataSource();
 
   List<OrderModel> orders = [];
   List<OrderModel> filtered = [];
@@ -23,18 +25,44 @@ class OrdersViewModel extends ChangeNotifier {
     load();
   }
 
+  // -------------------------
+  // CACHE HELPERS
+  // -------------------------
+  Future<void> _saveCache() async {
+    await _localDataSource.saveOrders(orders);
+  }
+
+  Future<List<OrderModel>?> _readCache() async {
+    return _localDataSource.readOrders();
+  }
+
+  Future<void> clearCache() async {
+    await _localDataSource.clearOrders();
+  }
+
   // Per-order cancel loading state for button feedback
   final Map<String, bool> _cancelLoading = {};
   bool isCancelling(String orderId) => _cancelLoading[orderId] == true;
 
-  Future<void> load() async {
-    _loading = true;
+  Future<void> load({bool refresh = false}) async {
+    if (!refresh) {
+      final cached = await _readCache();
+      if (cached != null) {
+        orders = cached;
+        applyFilter(activeFilter);
+        _error = null;
+        notifyListeners();
+      }
+    }
+
+    _loading = refresh || orders.isEmpty;
     _error = null;
     notifyListeners();
 
     try {
       orders = await _repo.fetchOrders();
-      applyFilter(null);
+      applyFilter(activeFilter);
+      await _saveCache();
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -43,7 +71,6 @@ class OrdersViewModel extends ChangeNotifier {
     _loading = false;
     notifyListeners();
   }
-
 
   // loadorder
   // Future<void> loadOrder(String orderId) async {
@@ -66,7 +93,7 @@ class OrdersViewModel extends ChangeNotifier {
   //   }
 
   //   _loading = false;
-  //   notifyListeners();  
+  //   notifyListeners();
   // }
 
   void applyFilter(OrderStatus? filter) {
@@ -115,7 +142,7 @@ class OrdersViewModel extends ChangeNotifier {
 
       case OrderStatus.cancelled:
         paymentTags.add(PaymentStatus.declined.label);
-         declineReason = order.paymentDeclineReason ?? order.cancelReason;
+        declineReason = order.paymentDeclineReason ?? order.cancelReason;
         break;
 
       case OrderStatus.unknown:
@@ -154,7 +181,7 @@ class OrdersViewModel extends ChangeNotifier {
 
     try {
       await _repo.cancelOrder(orderId);
-      await load();
+      await load(refresh: true);
       _cancelLoading[orderId] = false;
       notifyListeners();
 
@@ -167,7 +194,9 @@ class OrdersViewModel extends ChangeNotifier {
         builder: (ctx) {
           return AlertDialog(
             title: const Text('Order canceled'),
-            content: const Text('Successful canceled. Do you want to request a refund?'),
+            content: const Text(
+              'Successful canceled. Do you want to request a refund?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
@@ -240,12 +269,16 @@ class OrdersViewModel extends ChangeNotifier {
                   children: [
                     TextField(
                       controller: accNameCtrl,
-                      decoration: const InputDecoration(labelText: 'Account Name'),
+                      decoration: const InputDecoration(
+                        labelText: 'Account Name',
+                      ),
                     ),
                     TextField(
                       controller: accNumberCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Account Number'),
+                      decoration: const InputDecoration(
+                        labelText: 'Account Number',
+                      ),
                     ),
                     TextField(
                       controller: reasonCtrl,
@@ -283,9 +316,11 @@ class OrdersViewModel extends ChangeNotifier {
                       Navigator.pop(ctx);
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Refund requested successfully')),
+                        const SnackBar(
+                          content: Text('Refund requested successfully'),
+                        ),
                       );
-                      await load();
+                      await load(refresh: true);
                     } catch (e) {
                       setState(() => submitting = false);
                       if (!context.mounted) return;

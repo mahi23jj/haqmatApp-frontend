@@ -764,6 +764,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/loading_state.dart';
 import 'package:haqmate/features/product_detail/model/products.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/widgets/add_to_cart.dart';
@@ -834,7 +835,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget _buildBody(BuildContext context, ProductViewModel vm) {
     // Loading state
     if (vm.loading && vm.product == null) {
-      return _buildLoadingState();
+      return const LoadingState();
     }
 
     // Error state
@@ -849,32 +850,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     // Success state with product
     return _buildSuccessState(context, vm);
-  }
-
-  Widget _buildLoadingState() {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-            const SizedBox(height: 16),
-            Text(
-              'ምርት በመጫን ላይ...',
-              style: TextStyle(color: AppColors.textLight, fontSize: 14),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildErrorState(ProductViewModel vm) {
@@ -1016,7 +991,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   child: IconButton(
                     icon: Icon(
                       Icons.arrow_back_ios_new,
-                      color: AppColors.textDark,
+                      color: AppColors.primary,
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -1028,24 +1003,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     padding: const EdgeInsets.all(16),
                     child: CircularProgressIndicator(
                       color: AppColors.primary,
-                      strokeWidth: 2,
+                      strokeWidth: 1,
                     ),
                   )
                 else
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.refresh, color: AppColors.textDark),
-                        onPressed: () => vm.reload(widget.productid),
-                      ),
+                    child: IconButton(
+                      icon: Icon(Icons.refresh, color: AppColors.primary),
+                      onPressed: () => vm.reload(widget.productid),
                     ),
                   ),
-                Padding(
+                /*  Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
                     decoration: BoxDecoration(
@@ -1057,10 +1026,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Icons.shopping_cart_outlined,
                         color: AppColors.textDark,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        
+                      },
                     ),
                   ),
-                ),
+                ), */
               ],
               flexibleSpace: LayoutBuilder(
                 builder: (context, constraints) {
@@ -1165,9 +1136,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                        return Container(
+                          height: 180,
+                          color: AppColors.background,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                            ),
                           ),
                         );
                       },
