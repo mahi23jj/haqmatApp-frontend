@@ -33,6 +33,8 @@ dependencies:
   provider: 
   dio:
   http: 
+  hive:
+  hive_flutter:
   shared_preferences: 
   url_launcher:
   webview_flutter:
@@ -53,6 +55,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner:
+  hive_generator:
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -76,6 +80,8 @@ flutter:
   assets:
     - assets/images/teff.jpg
     - assets/images/injera.jpg
+    - assets/images/logo.png
+    - assets/images/logo2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
