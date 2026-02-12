@@ -109,8 +109,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:haqmate/core/bottom_nev_page.dart';
 import 'package:haqmate/features/checkout/viewmodel/manual_payment_viewmodel.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
+import 'package:haqmate/features/order_detail/view/order_detail_page.dart';
+import 'package:haqmate/features/orders/view/order_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:haqmate/core/constants.dart';
 
@@ -638,8 +641,17 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 onPressed: () {
+                  /*       Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Go back to home */
+                  // direct navigate to order page
                   Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back to home
+                  Navigator.pop(context); // Close manual payment screen
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TeffBottomNavPage(),
+                    ),
+                  );
                 },
               ),
             ],

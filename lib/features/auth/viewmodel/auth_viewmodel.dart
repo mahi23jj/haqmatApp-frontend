@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/auth/model/auth_model.dart';
 import 'package:haqmate/features/auth/service/auth_reposiroty.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -88,6 +89,16 @@ class AuthViewModel extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> isLoggedInSafe() async {
+  try {
+    final box = Hive.box('authBox'); // or wherever you store login info
+    return box.get('isLoggedIn', defaultValue: false) as bool;
+  } catch (_) {
+    return false;
+  }
+}
+
 
   Future<bool> signup(
     String email,

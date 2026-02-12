@@ -6,6 +6,8 @@ import 'package:http/http.dart' as Http;
 class AuthRepository {
   Future<AuthModel> login(String email, String password) async {
     try {
+
+      
       final response = await Http.post(
         Uri.parse('${Constants.baseurl}/api/login'),
         headers: {'Content-Type': 'application/json'},

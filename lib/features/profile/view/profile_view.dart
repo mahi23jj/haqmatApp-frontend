@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haqmate/core/bottom_nev_page.dart';
 import 'dart:async';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/core/loading_state.dart';
@@ -1270,7 +1271,15 @@ class _ChangePasswordNewPasswordViewState
                                   backgroundColor: Colors.green,
                                 ),
                               );
-                              Navigator.pop(context);
+                              Navigator.pop(
+                                context,
+                              ); // Close manual payment screen
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const TeffBottomNavPage(),
+                                ),
+                              );
                             }
                           }
                         },

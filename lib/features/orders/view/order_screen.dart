@@ -184,18 +184,18 @@ class OrdersPage extends StatelessWidget {
                     icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
                     onPressed: () => Navigator.pop(context),
                   ), */
-            Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset(
-                    'assets/images/logo2.png',
-                    height: 60,
-                    width: 60,
-                  ),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-              
+                child: Image.asset(
+                  'assets/images/logo2.png',
+                  height: 60,
+                  width: 60,
+                ),
+              ),
+
               const SizedBox(width: 8),
               Text(
                 "የእኔ ትዕዛዞች",
@@ -247,7 +247,7 @@ class OrdersPage extends StatelessWidget {
                     await vm.load();
                   },
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
                     itemCount: vm.filtered.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {

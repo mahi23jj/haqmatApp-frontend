@@ -181,7 +181,7 @@ class OrdersViewModel extends ChangeNotifier {
 
     try {
       await _repo.cancelOrder(orderId);
-      await load(refresh: true);
+      
       _cancelLoading[orderId] = false;
       notifyListeners();
 
@@ -214,7 +214,7 @@ class OrdersViewModel extends ChangeNotifier {
       if (!context.mounted) return;
       if (shouldRequest == true) {
         await _showRefundDialog(context, orderId);
-      }
+      } await load(refresh: true);
     } catch (e) {
       _cancelLoading[orderId] = false;
       notifyListeners();
@@ -253,14 +253,14 @@ class OrdersViewModel extends ChangeNotifier {
     final accNumberCtrl = TextEditingController();
     final reasonCtrl = TextEditingController();
 
-    if (!context.mounted) return;
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) {
+      builder: (ctx) {bool submitting = false;
         return StatefulBuilder(
           builder: (ctx, setState) {
-            bool submitting = false;
+           
             return AlertDialog(
               title: const Text('Request Refund'),
               content: SingleChildScrollView(
@@ -289,11 +289,15 @@ class OrdersViewModel extends ChangeNotifier {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed:submitting
+                      ? null
+                      :  () => Navigator.pop(ctx),
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () async {
+                  onPressed:submitting
+                      ? null
+                      : () async {
                     if (accNameCtrl.text.trim().isEmpty ||
                         accNumberCtrl.text.trim().isEmpty ||
                         reasonCtrl.text.trim().isEmpty) {
@@ -311,16 +315,16 @@ class OrdersViewModel extends ChangeNotifier {
                         accountName: accNameCtrl.text.trim(),
                         accountNumber: accNumberCtrl.text.trim(),
                         reason: reasonCtrl.text.trim(),
-                      );
-                      setState(() => submitting = false);
+                      );if (!context.mounted) return;
+                     
                       Navigator.pop(ctx);
-                      if (!context.mounted) return;
+                     
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Refund requested successfully'),
                         ),
                       );
-                      await load(refresh: true);
+                     
                     } catch (e) {
                       setState(() => submitting = false);
                       if (!context.mounted) return;
@@ -339,7 +343,14 @@ class OrdersViewModel extends ChangeNotifier {
                       );
                     }
                   },
-                  child: const Text('Refund'),
+                  child:submitting
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ) : const Text('Refund'),
                 ),
               ],
             );

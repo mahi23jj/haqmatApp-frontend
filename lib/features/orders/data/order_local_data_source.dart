@@ -5,17 +5,40 @@ import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderLocalDataSource {
-  OrderLocalDataSource({Box<List<OrderModel>>? box})
-    : _box = box ?? Hive.box<List<OrderModel>>(orderBoxName);
+  OrderLocalDataSource({Box<dynamic>? box})
+    : _box = box ?? Hive.box(orderBoxName);
 
   static const String orderBoxName = 'orderBox';
   static const String _cacheKey = 'cache';
   static const String _legacyPrefsKey = 'orders_cache_v1';
 
-  final Box<List<OrderModel>> _box;
+  final Box<dynamic> _box;
 
   Future<List<OrderModel>?> readOrders() async {
-    return _box.get(_cacheKey);
+    final raw = _box.get(_cacheKey);
+    if (raw is List<OrderModel>) {
+      return raw;
+    }
+    if (raw is List) {
+      return raw
+          .map((item) {
+            if (item is OrderModel) return item;
+            if (item is Map<String, dynamic>) {
+              return OrderModel.fromJson(item);
+            }
+            if (item is Map) {
+              return OrderModel.fromJson(
+                item.map(
+                  (key, value) => MapEntry(key.toString(), value),
+                ),
+              );
+            }
+            return null;
+          })
+          .whereType<OrderModel>()
+          .toList();
+    }
+    return null;
   }
 
   Future<void> saveOrders(List<OrderModel> orders) async {
