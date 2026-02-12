@@ -193,18 +193,18 @@ class OrdersViewModel extends ChangeNotifier {
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
-            title: const Text('Order canceled'),
+            title: const Text('ትእዛዙ ተሰርዟል'),
             content: const Text(
-              'Successful canceled. Do you want to request a refund?',
+              'ተሳክቶ ተሰርዟል። መመለሻ ገንዘብ መጠየቅ ይፈልጋሉ?',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('No'),
+                child: const Text('አይ'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Yes'),
+                child: const Text('አዎ'),
               ),
             ],
           );
@@ -227,19 +227,19 @@ class OrdersViewModel extends ChangeNotifier {
         barrierDismissible: true,
         builder: (ctx) {
           return AlertDialog(
-            title: const Text('Cancellation Failed'),
+            title: const Text('መሰረዝ አልተሳካም'),
             content: Text(e.toString()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Close'),
+                child: const Text('ዝጋ'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx);
                   cancelOrder(context, orderId);
                 },
-                child: const Text('Try Again'),
+                child: const Text('እንደገና ሞክር'),
               ),
             ],
           );
@@ -262,7 +262,7 @@ class OrdersViewModel extends ChangeNotifier {
           builder: (ctx, setState) {
            
             return AlertDialog(
-              title: const Text('Request Refund'),
+              title: const Text('መመለሻ ገንዘብ ጥያቄ'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -270,19 +270,19 @@ class OrdersViewModel extends ChangeNotifier {
                     TextField(
                       controller: accNameCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Account Name',
+                        labelText: 'የአካውንት ስም',
                       ),
                     ),
                     TextField(
                       controller: accNumberCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Account Number',
+                        labelText: 'የአካውንት ቁጥር',
                       ),
                     ),
                     TextField(
                       controller: reasonCtrl,
-                      decoration: const InputDecoration(labelText: 'Reason'),
+                      decoration: const InputDecoration(labelText: 'ምክንያት'),
                     ),
                   ],
                 ),
@@ -292,7 +292,7 @@ class OrdersViewModel extends ChangeNotifier {
                   onPressed:submitting
                       ? null
                       :  () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
+                  child: const Text('ይቅር'),
                 ),
                 TextButton(
                   onPressed:submitting
@@ -304,7 +304,7 @@ class OrdersViewModel extends ChangeNotifier {
                       // simple validation
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill all fields')),
+                        const SnackBar(content: Text('እባክዎ ሁሉንም መስኮች ይሙሉ')),
                       );
                       return;
                     }
@@ -321,7 +321,7 @@ class OrdersViewModel extends ChangeNotifier {
                      
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Refund requested successfully'),
+                          content: Text('መመለሻ ገንዘብ ጥያቄው ተልኳል'),
                         ),
                       );
                      
@@ -331,12 +331,12 @@ class OrdersViewModel extends ChangeNotifier {
                       showDialog<void>(
                         context: context,
                         builder: (ctx2) => AlertDialog(
-                          title: const Text('Refund Failed'),
+                          title: const Text('መመለሻ ገንዘብ አልተሳካም'),
                           content: Text(e.toString()),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx2),
-                              child: const Text('Close'),
+                              child: const Text('ዝጋ'),
                             ),
                           ],
                         ),
