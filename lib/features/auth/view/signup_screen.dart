@@ -168,7 +168,7 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
               decoration: BoxDecoration(
-                 image: DecorationImage(
+                image: DecorationImage(
                   image: const AssetImage('assets/images/teff.jpg'),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
@@ -189,16 +189,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.shopping_basket_rounded,
-                          color: Colors.white,
-                          size: 30,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            'assets/images/logo2.png',
+                            height: 60,
+                            width: 60,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
