@@ -233,7 +233,7 @@ class OrderCard extends StatelessWidget {
     final tags = <String>[
       ...config.paymentTags,
       ...config.deliveryTags,
-      if (config.refundStatus != null) config.refundStatus!.label,
+      if (config.refundStatus != null) "refund:${config.refundStatus!.label}",
     ];
 
     // Format date in Amharic style
@@ -333,7 +333,7 @@ class OrderCard extends StatelessWidget {
           ],
 
           // Track Button
-      /*     if (config.actions.contains(OrderAction.track))
+          /*     if (config.actions.contains(OrderAction.track))
             _trackButton(), */
         ],
       ),
@@ -341,7 +341,10 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildImages() {
-    final images = order.items.map((item) => item.image).where((img) => img.isNotEmpty).toList();
+    final images = order.items
+        .map((item) => item.image)
+        .where((img) => img.isNotEmpty)
+        .toList();
     if (images.isEmpty) {
       return Container(
         height: 95,
@@ -353,14 +356,15 @@ class OrderCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shopping_bag_outlined, color: AppColors.textLight, size: 32),
+              Icon(
+                Icons.shopping_bag_outlined,
+                color: AppColors.textLight,
+                size: 32,
+              ),
               const SizedBox(height: 8),
               Text(
                 'ምርቶች',
-                style: TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: AppColors.textLight, fontSize: 12),
               ),
             ],
           ),
@@ -389,9 +393,7 @@ class OrderCard extends StatelessWidget {
                   height: 95,
                   color: AppColors.background,
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 );
               },
@@ -428,15 +430,19 @@ class OrderCard extends StatelessWidget {
       },
     };
 
-    final config = buttonConfigs[action] ?? {
-      'label': _getActionLabel(action),
-      'bgColor': Colors.grey.shade100,
-      'textColor': AppColors.textDark,
-      'icon': Icons.more_horiz,
-    };
+    final config =
+        buttonConfigs[action] ??
+        {
+          'label': _getActionLabel(action),
+          'bgColor': Colors.grey.shade100,
+          'textColor': AppColors.textDark,
+          'icon': Icons.more_horiz,
+        };
 
     return OutlinedButton.icon(
-      onPressed: isCancelling && action == OrderAction.cancel ? null : () => onAction(action),
+      onPressed: isCancelling && action == OrderAction.cancel
+          ? null
+          : () => onAction(action),
       style: OutlinedButton.styleFrom(
         backgroundColor: config['bgColor'],
         foregroundColor: config['textColor'],
@@ -485,10 +491,20 @@ class OrderCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final monthNames = [
-      'ጃንዋሪ', 'ፈብርዋሪ', 'ማርች', 'ኤፕሪል', 'ሜይ', 'ጁን',
-      'ጁላይ', 'ኦገስት', 'ሴፕቴምበር', 'ኦክቶበር', 'ኖቬምበር', 'ዲሴምበር'
+      'ጃንዋሪ',
+      'ፈብርዋሪ',
+      'ማርች',
+      'ኤፕሪል',
+      'ሜይ',
+      'ጁን',
+      'ጁላይ',
+      'ኦገስት',
+      'ሴፕቴምበር',
+      'ኦክቶበር',
+      'ኖቬምበር',
+      'ዲሴምበር',
     ];
-    
+
     return '${date.day} ${monthNames[date.month - 1]} ${date.year}';
   }
 }

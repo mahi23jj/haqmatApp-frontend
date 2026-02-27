@@ -72,7 +72,6 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
 
 class StatusBadge extends StatelessWidget {
@@ -104,6 +103,8 @@ class StatusBadge extends StatelessWidget {
       'NOT_SCHEDULED': 'አልተዘጋጀም',
       'SCHEDULED': 'ተዘጋጅቷል',
       'DECLINED': 'ተገፎታል',
+      'REFUND:APPROVED': 'ተመላሽ ፅድቋል',
+      'REFUND:REJECTED': 'ተመላሽ ተነፍግታል',
     };
 
     final englishLabel = label.toUpperCase().replaceAll(' ', '_');
@@ -112,61 +113,85 @@ class StatusBadge extends StatelessWidget {
 
   Color get bg {
     final normalized = label.toUpperCase().replaceAll(' ', '_');
-    
+
     // Success states
-    if (['COMPLETED', 'DELIVERED', 'CONFIRMED', 'APPROVED', 'PAID']
-        .contains(normalized)) {
+    if ([
+      'COMPLETED',
+      'DELIVERED',
+      'CONFIRMED',
+      'APPROVED',
+      'PAID',
+      'REFUND:APPROVED',
+    ].contains(normalized)) {
       return Colors.green.shade100;
     }
-    
+
     // Pending states
-    if (['PENDING', 'PENDING_PAYMENT', 'NOT_SCHEDULED', 'NOT_STARTED', 'SCREENSHOT_SENT']
-        .contains(normalized)) {
+    if ([
+      'PENDING',
+      'PENDING_PAYMENT',
+      'NOT_SCHEDULED',
+      'NOT_STARTED',
+      'SCREENSHOT_SENT',
+    ].contains(normalized)) {
       return Colors.orange.shade100;
     }
-    
+
     // Processing states
-    if (['PROCESSING', 'SCHEDULED', 'TO_BE_DELIVERED']
-        .contains(normalized)) {
+    if (['PROCESSING', 'SCHEDULED', 'TO_BE_DELIVERED'].contains(normalized)) {
       return Colors.blue.shade100;
     }
-    
+
     // Failed/Cancelled states
-    if (['FAILED', 'DECLINED', 'CANCELLED', 'REJECTED']
-        .contains(normalized)) {
+    if ([
+      'FAILED',
+      'DECLINED',
+      'CANCELLED',
+      'REJECTED',
+      'REFUND:REJECTED',
+    ].contains(normalized)) {
       return Colors.red.shade100;
     }
-    
+
     return Colors.grey.shade200;
   }
 
   Color get fg {
     final normalized = label.toUpperCase().replaceAll(' ', '_');
-    
+
     // Success states
-    if (['COMPLETED', 'DELIVERED', 'CONFIRMED', 'APPROVED', 'PAID']
-        .contains(normalized)) {
+    if ([
+      'COMPLETED',
+      'DELIVERED',
+      'CONFIRMED',
+      'APPROVED',
+      'PAID',
+      'REFUND:APPROVED',
+    ].contains(normalized)) {
       return Colors.green.shade800;
     }
-    
+
     // Pending states
-    if (['PENDING', 'PENDING_PAYMENT', 'NOT_SCHEDULED', 'NOT_STARTED', 'SCREENSHOT_SENT']
-        .contains(normalized)) {
+    if ([
+      'PENDING',
+      'PENDING_PAYMENT',
+      'NOT_SCHEDULED',
+      'NOT_STARTED',
+      'SCREENSHOT_SENT',
+    ].contains(normalized)) {
       return Colors.orange.shade800;
     }
-    
+
     // Processing states
-    if (['PROCESSING', 'SCHEDULED', 'TO_BE_DELIVERED']
-        .contains(normalized)) {
+    if (['PROCESSING', 'SCHEDULED', 'TO_BE_DELIVERED'].contains(normalized)) {
       return Colors.blue.shade800;
     }
-    
+
     // Failed/Cancelled states
-    if (['FAILED', 'DECLINED', 'CANCELLED', 'REJECTED']
-        .contains(normalized)) {
+    if (['FAILED', 'DECLINED', 'CANCELLED', 'REJECTED', 'REFUND:REJECTED'].contains(normalized)) {
       return Colors.red.shade800;
     }
-    
+
     return Colors.grey.shade800;
   }
 
@@ -180,11 +205,7 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         _translatedLabel,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: fg,
-        ),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: fg),
       ),
     );
   }
