@@ -494,7 +494,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             runSpacing: 8,
             children: [
               StatusBadge(label: order.paymentstatus),
-              if (vm.showRefundTag) StatusBadge(label: order.refundstatus),
+              if (vm.showRefundTag) StatusBadge(label: "refund:${order.refundstatus}"),
               if (vm.deliveryStatusTagLabel != null)
                 StatusBadge(label: vm.deliveryStatusTagLabel!),
             ],
@@ -559,7 +559,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ],
 
           // Decline Reason
-          if (vm.showDeclineReason && order.cancelReason.isNotEmpty) ...[
+          if (vm.showDeclineReason & vm.showRefundRejectReason) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -578,7 +578,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'ምክንያት: ${order.cancelReason}',
+                      'ምክንያት: ${vm.cancelReasonText}',
                       style: TextStyle(
                         color: Colors.red.shade700,
                         fontSize: 13,

@@ -163,6 +163,19 @@ class OrderData {
       return DateTime.now();
     }
 
+    String _sanitizeText(dynamic input) {
+      if (input == null) return '';
+      final value = input.toString().trim();
+      if (value.isEmpty || value.toLowerCase() == 'null') return '';
+      return value;
+    }
+
+    String? _sanitizeNullableText(dynamic input) {
+      final value = _sanitizeText(input);
+      if (value.isEmpty) return null;
+      return value;
+    }
+
     return OrderData(
       id: (json['id'] ?? '').toString(),
       userId: (json['userId'] ?? '').toString(),
@@ -177,9 +190,9 @@ class OrderData {
       orderrecived: (json['orderrecived'] ?? '').toString(),
       paymentMethod: (json['paymentMethod'] ?? '').toString(),
       deliveryFee: (json['deliveryFee'] as num?)?.toInt() ?? 0,
-      cancelReason: (json['cancelReason'] ?? '').toString(),
+      cancelReason: _sanitizeText(json['cancelReason']),
       paymentProofUrl: (json['paymentProofUrl'] ?? '').toString(),
-      deliveryDate: json['deliveryDate']?.toString(),
+      deliveryDate: _sanitizeNullableText(json['deliveryDate']),
       status: (json['status'] ?? '').toString(),
       createdAt: _parseDate(json['createdAt']),
       updatedAt: _parseDate(json['updatedAt']),

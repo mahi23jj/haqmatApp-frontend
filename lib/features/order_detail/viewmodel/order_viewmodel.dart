@@ -107,20 +107,43 @@ class OrderdetailViewModel extends ChangeNotifier {
 
   String? get deliveryDateFormatted {
     final o = _order;
-    if (o == null) return null;
-    if (_deliveryStatusEnum == DeliveryStatus.SCHEDULED &&
-        o.deliveryDate != null) {
-      return _formatDate(DateTime.parse(o.deliveryDate!));
+    if (o == null || _deliveryStatusEnum != DeliveryStatus.SCHEDULED) {
+      return null;
     }
-    return null;
+
+    final rawDate = o.deliveryDate?.trim();
+    if (rawDate == null || rawDate.isEmpty) return null;
+
+    final parsed = DateTime.tryParse(rawDate);
+    if (parsed == null) return null;
+
+    return _formatDate(parsed);
   }
+
+  bool _hasMeaningfulText(String? value) {
+    if (value == null) return false;
+    final normalized = value.trim();
+    return normalized.isNotEmpty && normalized.toLowerCase() != 'null';
+  }
+
+  String _cleanText(String value) {
+    if (!_hasMeaningfulText(value)) return '';
+    return value.trim();
+  }
+
+  String get cancelReasonText {
+    final o = _order;
+    if (o == null) return '';
+    return _cleanText(o.cancelReason);
+  }
+
 
   bool get showDeclineReason {
     final o = _order;
     return o != null &&
         _statusEnum == OrderStatus.CANCELLED &&
         _paymentStatusEnum == PaymentStatus.DECLINED &&
-        (o.cancelReason.isNotEmpty);
+        _hasMeaningfulText(o.cancelReason);
   }
 
   bool get showRefundTag {
@@ -132,19 +155,11 @@ class OrderdetailViewModel extends ChangeNotifier {
     final o = _order;
     return o != null &&
         _refundStatusEnum == RefundStatus.REJECTED &&
-        (o.cancelReason.isNotEmpty);
+        _hasMeaningfulText(o.cancelReason);
   }
 
   String _formatDate(DateTime d) {
-    final diff = DateTime.now().difference(d);
-    if (diff.inDays >= 365) {
-      return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-    }
-    if (diff.inDays >= 30) return '${d.month}-${d.day}-${d.year}';
-    if (diff.inDays >= 7) return '${diff.inDays ~/ 7}w ago';
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    return 'just now';
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   }
 
   String _normalize(String? value) {
