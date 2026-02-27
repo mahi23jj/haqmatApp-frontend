@@ -48,7 +48,7 @@ factory Product.fromJson(Map<String, dynamic> json) {
         ? List<String>.from(json['images'])
         : [],
 
-    inStock: json['isstock'] ?? false,
+    inStock: json['isStock'] ?? false,
 
     rating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
 
