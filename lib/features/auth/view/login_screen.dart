@@ -486,6 +486,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                           ),
 
+                          const SizedBox(height: 10),
+                          Text(
+                            'የይለፍ ቃል መመሪያ: ቢያንስ 8 ቁምፊ፣ 1 አቢይ ፊደል፣ 1 አነስተኛ ፊደል እና 1 ቁጥር መያዝ አለበት።',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'እባክዎ ትክክለኛ ኢሜይል በመጠቀም ይግቡ (ለምሳሌ: name@email.com)',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 12,
+                            ),
+                          ),
+
                           // Connection hint for network errors
                           if (_formError != null &&
                               (_formError!.contains('ኢንተርኔት') ||

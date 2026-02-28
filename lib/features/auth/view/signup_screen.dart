@@ -529,6 +529,21 @@ class _SignupScreenState extends State<SignupScreen> {
                     },
                   ),
 
+                  const SizedBox(height: 10),
+                  Text(
+                    'የይለፍ ቃል መመሪያ: ቢያንስ 8 ቁምፊ፣ 1 አቢይ ፊደል፣ 1 አነስተኛ ፊደል እና 1 ቁጥር መያዝ አለበት።',
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'ኢሜይል፣ ስልክ ቁጥር እና አድራሻ ትክክለኛ መሆናቸውን እባክዎ ያረጋግጡ።',
+                    style: TextStyle(color: AppColors.textLight, fontSize: 12),
+                  ),
+
                   const SizedBox(height: 24),
 
                   // Divider
