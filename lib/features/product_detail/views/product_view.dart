@@ -771,6 +771,7 @@ import 'package:haqmate/features/product_detail/widgets/add_to_cart.dart';
 import 'package:haqmate/features/review/view/review_screen.dart';
 import 'package:haqmate/features/review/widget/review_list.dart';
 import 'package:haqmate/features/review/widget/write_review.dart';
+import 'package:haqmate/core/bottom_nev_page.dart';
 import 'package:provider/provider.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
@@ -785,6 +786,18 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   final _scrollController = ScrollController();
+
+  void _goToMainHome() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const TeffBottomNavPage()),
+      (route) => false,
+    );
+  }
+
+  Future<bool> _onWillPop() async {
+    _goToMainHome();
+    return false;
+  }
 
   void _openWriteReviewSheet(BuildContext context, String productId) async {
     final result = await showModalBottomSheet(
@@ -829,7 +842,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget build(BuildContext context) {
     final vm = context.watch<ProductViewModel>();
 
-    return Scaffold(body: _buildBody(context, vm));
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(body: _buildBody(context, vm)),
+    );
   }
 
   Widget _buildBody(BuildContext context, ProductViewModel vm) {
@@ -859,7 +875,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
+          onPressed: _goToMainHome,
         ),
       ),
       body: Center(
@@ -902,7 +918,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     label: 'ይመለሱ',
                     backgroundColor: AppColors.background,
                     foregroundColor: AppColors.primary,
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: _goToMainHome,
                   ),
                 ],
               ),
@@ -920,7 +936,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
+          onPressed: _goToMainHome,
         ),
       ),
       body: Center(
@@ -957,7 +973,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 label: 'ይመለሱ',
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                onPressed: () => Navigator.pop(context),
+                onPressed: _goToMainHome,
               ),
             ],
           ),
@@ -993,7 +1009,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       Icons.arrow_back_ios_new,
                       color: AppColors.primary,
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: _goToMainHome,
                   ),
                 ),
               ),

@@ -37,6 +37,7 @@
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/features/home/models/product.dart';
+import 'package:haqmate/features/product_detail/views/product_view.dart';
 
 class ProductSearchCard extends StatelessWidget {
   final ProductModel product;
@@ -48,6 +49,12 @@ class ProductSearchCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Navigate to product details
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(productid: product.id),
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -70,7 +77,7 @@ class ProductSearchCard extends StatelessWidget {
                 children: [
                   // Product Image
                   _buildProductImage(),
-                  
+
                   // Product Details
                   Expanded(
                     child: Padding(
@@ -90,11 +97,11 @@ class ProductSearchCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          
+
                           const SizedBox(height: 4),
-                          
+
                           // Quality and Origin
-                   /*        if (product.quality != null || product.origin != null)
+                          /*        if (product.quality != null || product.origin != null)
                             Text(
                               _buildProductSubtitle(),
                               style: TextStyle(
@@ -105,9 +112,9 @@ class ProductSearchCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ) */
-                          
+
                           // const SizedBox(height: 8),
-                          
+
                           // Price and Rating Row
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -122,7 +129,7 @@ class ProductSearchCard extends StatelessWidget {
                                   fontFamily: 'Ethiopia',
                                 ),
                               ),
-                              
+
                               // Rating
                               /* if (product.rating != null && product.rating! > 0)
                                 Container(
@@ -155,15 +162,15 @@ class ProductSearchCard extends StatelessWidget {
                                 ), */
                             ],
                           ),
-                          
+
                           const SizedBox(height: 8),
-                          
+
                           // Stock Status and Add Button
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               // Stock Status
-                  /*             Container(
+                              /*             Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
                                   vertical: 4,
@@ -192,7 +199,7 @@ class ProductSearchCard extends StatelessWidget {
                                   ],
                                 ),
                               ), */
-                              
+
                               // Add to Cart Button
                               Container(
                                 width: 36,
@@ -218,9 +225,9 @@ class ProductSearchCard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Favorite Button
-         /*    if (product.isFavorite != null && product.isFavorite!)
+            /*    if (product.isFavorite != null && product.isFavorite!)
               Positioned(
                 top: 12,
                 right: 12,
@@ -305,21 +312,14 @@ class ProductSearchCard extends StatelessWidget {
         color: product.imageUrl.isEmpty
             ? AppColors.background
             : AppColors.primary.withOpacity(0.05),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1),
       ),
       child: product.imageUrl.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.grain_rounded,
-                    color: AppColors.primary,
-                    size: 40,
-                  ),
+                  Icon(Icons.grain_rounded, color: AppColors.primary, size: 40),
                   const SizedBox(height: 8),
                   Text(
                     'የተፍ',
@@ -345,7 +345,7 @@ class ProductSearchCard extends StatelessWidget {
                       color: AppColors.primary,
                       value: loadingProgress.expectedTotalBytes != null
                           ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
+                                loadingProgress.expectedTotalBytes!
                           : null,
                     ),
                   );
@@ -380,19 +380,19 @@ class ProductSearchCard extends StatelessWidget {
 
   String _buildProductSubtitle() {
     final List<String> parts = [];
-    
- /*    if (product.quality != null && product.quality!.isNotEmpty) {
+
+    /*    if (product.quality != null && product.quality!.isNotEmpty) {
       parts.add('ጥራት: ${product.quality!}');
     } */
-    
+
     if (product.teffType != null && product.teffType!.isNotEmpty) {
       parts.add('ዓይነት: ${product.teffType!}');
     }
-    
- /*    if (product.origin != null && product.origin!.isNotEmpty) {
+
+    /*    if (product.origin != null && product.origin!.isNotEmpty) {
       parts.add('አመጣጥ: ${product.origin!}');
     } */
-    
+
     return parts.join(' • ');
   }
 
@@ -431,7 +431,7 @@ class ProductSearchCard extends StatelessWidget {
     }
 
     final discountedPrice = price - (price * discount / 100);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
