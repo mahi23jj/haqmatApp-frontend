@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:haqmate/core/bottom_nev_page.dart';
 import 'package:haqmate/features/auth/viewmodel/auth_viewmodel.dart';
-import 'package:haqmate/features/auth/widget/custom_input.dart';
-import 'package:haqmate/features/auth/widget/glass_card.dart';
-import 'package:haqmate/features/home/views/home_view.dart';
 import 'package:provider/provider.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
 import '../../../core/constants.dart';
@@ -18,8 +16,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final email = TextEditingController();
   final password = TextEditingController();
+  String _fullPhoneNumber = '';
+  String _initialPhoneValue = '';
 
   String? _formError;
   bool _obscurePassword = true;
@@ -31,10 +30,19 @@ class _LoginScreenState extends State<LoginScreen> {
       final provider = context.read<AuthViewModel>();
       await provider.loadRememberedCredentials();
       if (!mounted) return;
-      email.text = provider.rememberedEmail ?? '';
+      _fullPhoneNumber = provider.rememberedPhone ?? '';
+      _initialPhoneValue = _fullPhoneNumber.startsWith('+251')
+          ? _fullPhoneNumber.replaceFirst('+251', '')
+          : _fullPhoneNumber;
       password.text = provider.rememberedPassword ?? '';
       setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    password.dispose();
+    super.dispose();
   }
 
   // Helper method to translate backend errors to Amharic
@@ -44,10 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (errorLower.contains('invalid credentials') ||
         errorLower.contains('wrong password') ||
         errorLower.contains('incorrect password')) {
-      return 'ኢሜይል ወይም የይለፍ ቃል ትክክል አይደለም።';
+      return 'ስልክ ቁጥር ወይም የይለፍ ቃል ትክክል አይደለም።';
     } else if (errorLower.contains('user not found') ||
-        errorLower.contains('email not found')) {
-      return 'ይህ ኢሜይል አልተመዘገበም። መለያ ይፍጠሩ።';
+        errorLower.contains('phone not found')) {
+      return 'ይህ ስልክ ቁጥር አልተመዘገበም። መለያ ይፍጠሩ።';
     } else if (errorLower.contains('network') ||
         errorLower.contains('connection') ||
         errorLower.contains('timeout')) {
@@ -70,8 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _formError = null);
 
     // Validate inputs
-    if (email.text.trim().isEmpty) {
-      setState(() => _formError = 'እባክዎ ኢሜይልዎን ያስገቡ።');
+    if (_fullPhoneNumber.isEmpty) {
+      setState(() => _formError = 'እባክዎ ስልክ ቁጥርዎን ያስገቡ።');
       return;
     }
 
@@ -80,13 +88,14 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (!email.text.contains('@') || !email.text.contains('.')) {
-      setState(() => _formError = 'እባክዎ ትክክለኛ ኢሜይል ያስገቡ።');
+    if (!_fullPhoneNumber.startsWith('+251') ||
+        _fullPhoneNumber.replaceAll('+251', '').length != 9) {
+      setState(() => _formError = 'ስልክ ቁጥር ትክክል አይደለም።');
       return;
     }
 
     try {
-      final ok = await provider.login(email.text.trim(), password.text.trim());
+      final ok = await provider.login(_fullPhoneNumber, password.text.trim());
 
       if (ok) {
         if (mounted) {
@@ -236,12 +245,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  // Email Field
+                  // Phone Number Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ኢሜይል',
+                        'ስልክ ቁጥር',
                         style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w500,
@@ -249,44 +258,43 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      TextField(
-                        controller: email,
-                        keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(color: AppColors.textDark),
-                        decoration: InputDecoration(
-                          hintText: 'ኢሜይልዎን ያስገቡ',
-                          hintStyle: TextStyle(color: Colors.grey.shade400),
-                          filled: true,
-                          fillColor: Colors.white,
-                          prefixIcon: Container(
-                            padding: const EdgeInsets.all(14),
-                            child: Icon(
-                              Icons.email_outlined,
-                              color: AppColors.primary,
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: IntlPhoneField(
+                          initialCountryCode: 'ET',
+                          initialValue:
+                              _initialPhoneValue.isEmpty ? null : _initialPhoneValue,
+                          flagsButtonPadding: const EdgeInsets.only(left: 12),
+                          style: TextStyle(color: AppColors.textDark),
+                          decoration: InputDecoration(
+                            labelText: 'ስልክ ቁጥር',
+                            labelStyle: TextStyle(color: AppColors.textLight),
+                            hintText: '9XXXXXXXX',
+                            hintStyle: TextStyle(color: Colors.grey.shade400),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            prefixIcon: Container(
+                              padding: const EdgeInsets.all(14),
+                              child: Icon(
+                                Icons.phone_outlined,
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.grey.withOpacity(0.3),
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppColors.primary,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
+                          onChanged: (phone) {
+                            _fullPhoneNumber = phone.completeNumber;
+                          },
                         ),
                       ),
                     ],
@@ -497,7 +505,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'እባክዎ ትክክለኛ ኢሜይል በመጠቀም ይግቡ (ለምሳሌ: name@email.com)',
+                            'እባክዎ ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ (ለምሳሌ: +2519XXXXXXXX)',
                             style: TextStyle(
                               color: AppColors.textLight,
                               fontSize: 12,

@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/bottom_nev_page.dart';
 import 'dart:async';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
 import 'package:haqmate/core/loading_state.dart';
 import 'package:haqmate/features/auth/view/login_screen.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 import 'package:haqmate/features/profile/model/profile_model.dart';
-import 'package:haqmate/features/profile/view/change_password.dart';
 import 'package:haqmate/features/profile/view_model/profile_viewmodel.dart';
 import 'package:provider/provider.dart';
-import 'about_us_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ChangeNotifierProvider(
       create: (context) => ProfileViewModel(),
       child: Scaffold(
@@ -34,13 +35,10 @@ class ProfileView extends StatelessWidget {
               ),
             ),
           ),
-          title: const Text(
-            'መገለጫ',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
+          title: BilingualTitle(
+            amharic: l10n.profileTitleAm,
+            english: l10n.profileTitleEn,
+            textAlign: TextAlign.start,
           ),
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.black87,

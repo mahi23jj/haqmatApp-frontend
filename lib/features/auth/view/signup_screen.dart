@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
@@ -7,9 +6,8 @@ import '../../../core/constants.dart';
 import '../../../core/app_router.dart';
 import '../../../core/bottom_nev_page.dart';
 import '../../../core/widgets/custom_button.dart';
+import '../../../features/auth/model/auth_model.dart';
 import '../../../features/auth/viewmodel/auth_viewmodel.dart';
-import '../../../features/cart/model/cartmodel.dart';
-import '../../../features/checkout/service/checkout_service.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -21,29 +19,21 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final name = TextEditingController();
-  final email = TextEditingController();
-  final location = TextEditingController();
+  final specificAddress = TextEditingController();
   final password = TextEditingController();
   final confirmPassword = TextEditingController();
 
-  final CheckoutService _checkoutService = CheckoutService();
-
-  List<LocationModel> _suggestions = [];
-  bool _loadingSuggestions = false;
-  Timer? _debounce;
+  Subcity? _selectedSubcity;
 
   String _fullPhoneNumber = '';
   String? _formError;
-  String locationId = '';
 
   @override
   void dispose() {
     name.dispose();
-    email.dispose();
-    location.dispose();
+    specificAddress.dispose();
     password.dispose();
     confirmPassword.dispose();
-    _debounce?.cancel();
     super.dispose();
   }
 
@@ -60,43 +50,10 @@ class _SignupScreenState extends State<SignupScreen> {
     return regex.hasMatch(password);
   }
 
-  /* ---------------- LOCATION SEARCH ---------------- */
-  void _selectLocation(LocationModel loc) {
-    location.text = loc.name;
-    locationId = loc.id;
-    setState(() => _suggestions = []);
-    FocusScope.of(context).unfocus();
-  }
-
-  void _searchLocations(String query) {
-    _debounce?.cancel();
-
-    if (query.isEmpty) {
-      setState(() => _suggestions = []);
-      return;
-    }
-
-    _debounce = Timer(const Duration(milliseconds: 350), () async {
-      setState(() => _loadingSuggestions = true);
-      try {
-        final results = await _checkoutService.searchLocations(query);
-        if (!mounted) return;
-        setState(() => _suggestions = results);
-      } catch (_) {
-        if (!mounted) return;
-        setState(() => _suggestions = []);
-      }
-      if (!mounted) return;
-      setState(() => _loadingSuggestions = false);
-    });
-  }
-
   String _translateBackendError(String error) {
     final errorLower = error.toLowerCase();
 
     final errorMap = {
-      'email already exists': 'ይህ ኢሜይል ቀደም ብሎ ተመዝግቧል።',
-      'invalid email': 'እባክዎ ትክክለኛ ኢሜይል ያስገቡ።',
       'weak password': 'የይለፍ ቃልዎ በቂ ጠንካራ አይደለም።',
       'network error': 'የኢንተርኔት ግንኙነት ችግር አለ።',
       'server error': 'ከሰርቨር ጋር ችግር አጋጥሞታል።',
@@ -128,6 +85,16 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    if (_selectedSubcity == null) {
+      setState(() => _formError = 'እባክዎ ክፍለ ከተማ ይምረጡ');
+      return;
+    }
+
+    if (specificAddress.text.trim().isEmpty) {
+      setState(() => _formError = 'እባክዎ ዝርዝር አድራሻዎን ያስገቡ');
+      return;
+    }
+
     if (!_isPasswordValid(password.text)) {
       setState(
         () => _formError =
@@ -142,11 +109,11 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     final ok = await provider.signup(
-      email.text.trim(),
-      password.text,
-      name.text.trim(),
-      locationId,
-      _fullPhoneNumber,
+      password: password.text,
+      name: name.text.trim(),
+      subcity: _selectedSubcity!.name,
+      address: specificAddress.text.trim(),
+      phone: _fullPhoneNumber,
     );
 
     if (ok && mounted) {
@@ -292,16 +259,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Email Field
-                  _InputField(
-                    label: "ኢሜይል",
-                    hintText: "ኢሜይልዎን ያስገቡ",
-                    controller: email,
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-
                   // Phone Field
                   Container(
                     decoration: BoxDecoration(
@@ -342,23 +299,31 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Location Field
+                  // Subcity Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextField(
-                        controller: location,
+                      Text(
+                        'ክፍለ ከተማ',
+                        style: TextStyle(
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<Subcity>(
+                        value: _selectedSubcity,
+                        isExpanded: true,
                         decoration: InputDecoration(
-                          labelText: 'አድራሻ',
-                          labelStyle: TextStyle(color: AppColors.textLight),
-                          hintText: 'ከተማ ወይም አካባቢ ይፈልጉ',
+                          hintText: 'ክፍለ ከተማ ይምረጡ',
                           hintStyle: TextStyle(color: Colors.grey.shade400),
                           filled: true,
                           fillColor: Colors.white,
                           prefixIcon: Container(
                             padding: const EdgeInsets.all(14),
                             child: Icon(
-                              Icons.location_on_outlined,
+                              Icons.location_city_outlined,
                               color: AppColors.primary,
                             ),
                           ),
@@ -380,61 +345,34 @@ class _SignupScreenState extends State<SignupScreen> {
                               width: 2,
                             ),
                           ),
-                          suffixIcon: _loadingSuggestions
-                              ? Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                )
-                              : null,
                         ),
-                        onChanged: _searchLocations,
-                      ),
-
-                      if (_suggestions.isNotEmpty)
-                        Container(
-                          margin: const EdgeInsets.only(top: 8),
-                          constraints: const BoxConstraints(maxHeight: 150),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ListView.builder(
-                            itemCount: _suggestions.length,
-                            shrinkWrap: true,
-                            itemBuilder: (_, i) {
-                              final loc = _suggestions[i];
-                              return Material(
-                                color: Colors.transparent,
-                                child: ListTile(
-                                  leading: Icon(
-                                    Icons.place_outlined,
-                                    color: AppColors.primary,
-                                  ),
-                                  title: Text(
-                                    loc.name,
-                                    style: TextStyle(color: AppColors.textDark),
-                                  ),
-                                  onTap: () => _selectLocation(loc),
+                        items: Subcity.values
+                            .map(
+                              (subcity) => DropdownMenuItem<Subcity>(
+                                value: subcity,
+                                child: Text(
+                                  subcity.name,
+                                  style: TextStyle(color: AppColors.textDark),
                                 ),
-                              );
-                            },
-                          ),
-                        ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedSubcity = value;
+                          });
+                        },
+                      ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Specific Address Field
+                  _InputField(
+                    label: "ዝርዝር አድራሻ",
+                    hintText: "ቤት ቁጥር፣ መንገድ ወይም ቦታ ያስገቡ",
+                    controller: specificAddress,
+                    icon: Icons.home_outlined,
                   ),
                   const SizedBox(height: 16),
 
@@ -540,7 +478,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'ኢሜይል፣ ስልክ ቁጥር እና አድራሻ ትክክለኛ መሆናቸውን እባክዎ ያረጋግጡ።',
+                    'ስልክ ቁጥር፣ ክፍለ ከተማ እና ዝርዝር አድራሻ ትክክለኛ መሆናቸውን እባክዎ ያረጋግጡ።',
                     style: TextStyle(color: AppColors.textLight, fontSize: 12),
                   ),
 

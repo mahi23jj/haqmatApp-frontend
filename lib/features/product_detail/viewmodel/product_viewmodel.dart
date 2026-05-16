@@ -185,9 +185,11 @@ class ProductViewModel extends ChangeNotifier {
   /// =========================
 
   final List<WeightOption> _baseWeights = [
-    WeightOption(label: '1 ኪ.ግ', multiplier: 1),
     WeightOption(label: '5 ኪ.ግ', multiplier: 5),
     WeightOption(label: '10 ኪ.ግ', multiplier: 10),
+    WeightOption(label: '25 ኪ.ግ', multiplier: 25),
+    WeightOption(label: '50 ኪ.ግ', multiplier: 50),
+    WeightOption(label: '100 ኪ.ግ', multiplier: 100),
   ];
 
   WeightOption? _customWeight;
@@ -345,7 +347,6 @@ class ProductViewModel extends ChangeNotifier {
   // vm dispose
   @override
   void dispose() {
-    
     super.dispose();
   }
 }

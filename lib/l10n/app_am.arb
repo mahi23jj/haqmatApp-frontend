@@ -1,0 +1,21 @@
+{
+  "@@locale": "am",
+  "appName": "ሐቅማት ጤፍ",
+  "appTagline": "ከእርሻ እስከ ቤትዎ",
+  "homeTitleAm": "ሐቅማት ጤፍ",
+  "homeTitleEn": "Haqmate Teff",
+  "homeSubtitleAm": "ከእርሻ እስከ ቤትዎ",
+  "homeSubtitleEn": "From Farm to Home",
+  "ordersTitleAm": "የእኔ ትዕዛዞች",
+  "ordersTitleEn": "My Orders",
+  "orderDetailTitleAm": "የትዕዛዝ ዝርዝር",
+  "orderDetailTitleEn": "Order Details",
+  "checkoutTitleAm": "የግዢ ሂደት",
+  "checkoutTitleEn": "Checkout",
+  "manualPaymentTitleAm": "ክፍያ ያረጋግጡ",
+  "manualPaymentTitleEn": "Confirm Payment",
+  "profileTitleAm": "መገለጫ",
+  "profileTitleEn": "Profile",
+  "reviewsTitleAm": "ግምገማዎች እና ደረጃዎች",
+  "reviewsTitleEn": "Reviews and Ratings"
+}

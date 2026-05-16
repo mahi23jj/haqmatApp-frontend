@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 
 import 'features/auth/viewmodel/auth_viewmodel.dart';
 import 'features/cart/data/cart_local_data_source.dart';
@@ -222,6 +224,11 @@ class _AppBootstrapperState extends State<AppBootstrapper> {
 class TeffApp extends StatelessWidget {
   const TeffApp({super.key});
 
+  static const List<Locale> _supportedLocales = [
+    Locale('am'),
+    Locale('en'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -255,6 +262,25 @@ class TeffApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: _supportedLocales,
+        localeResolutionCallback: (locale, supportedLocales) {
+          if (locale == null) {
+            return const Locale('am');
+          }
+          for (final supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale.languageCode) {
+              return supportedLocale;
+            }
+          }
+          return const Locale('am');
+        },
         home: const SplashScreen(),
       ),
     );

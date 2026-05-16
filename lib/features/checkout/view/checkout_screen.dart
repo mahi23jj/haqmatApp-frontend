@@ -1,19 +1,15 @@
 // checkout_view.dart
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:haqmate/features/cart/model/cartmodel.dart';
-import 'package:haqmate/features/checkout/service/checkout_service.dart';
-import 'package:haqmate/features/checkout/view/chapa_webview.dart';
 import 'package:haqmate/features/checkout/view/manual_payment_screen.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
-import 'package:haqmate/features/checkout/viewmodel/chapa_viewmodel.dart';
 import 'package:haqmate/features/checkout/viewmodel/checkout_viewmodel.dart';
 import 'package:haqmate/features/checkout/widget/paymentMethod.dart';
-import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 
 class CheckoutView extends StatefulWidget {
   final CartModelList cart;
@@ -29,6 +25,7 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ChangeNotifierProvider<CheckoutViewModel>(
       create: (_) => CheckoutViewModel()..initFromCart(widget.cart),
       child: Consumer<CheckoutViewModel>(
@@ -48,13 +45,10 @@ class _CheckoutViewState extends State<CheckoutView> {
                 icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
                 onPressed: () => Navigator.pop(context),
               ),
-              title: Text(
-                'የግዢ ሂደት',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+              title: BilingualTitle(
+                amharic: l10n.checkoutTitleAm,
+                english: l10n.checkoutTitleEn,
+                textAlign: TextAlign.center,
               ),
               centerTitle: true,
             ),

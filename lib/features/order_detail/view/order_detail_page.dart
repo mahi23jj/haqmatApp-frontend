@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/core/loading_state.dart';
 import 'package:haqmate/features/order_detail/model/order_model.dart';
-import 'package:haqmate/features/orders/model/order.dart'
-    hide PaymentStatus, OrderStatus;
 import 'package:haqmate/features/orders/widgets/status_badge.dart';
-import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../viewmodel/order_viewmodel.dart';
 
@@ -84,6 +83,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final vm = context.watch<OrderdetailViewModel>();
 
     return Scaffold(
@@ -95,13 +95,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          "የትዕዛዝ ዝርዝር",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
+        title: BilingualTitle(
+          amharic: l10n.orderDetailTitleAm,
+          english: l10n.orderDetailTitleEn,
+          textAlign: TextAlign.center,
         ),
         centerTitle: true,
          actions: [
@@ -454,7 +451,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildPaymentSection(OrderdetailViewModel vm) {
     final order = vm.order!;
-    final paymentStatus = _translateStatus(order.paymentstatus);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -494,7 +490,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             runSpacing: 8,
             children: [
               StatusBadge(label: order.paymentstatus),
-              if (vm.showRefundTag) StatusBadge(label: "refund:${order.refundstatus}"),
               if (vm.deliveryStatusTagLabel != null)
                 StatusBadge(label: vm.deliveryStatusTagLabel!),
             ],
@@ -559,7 +554,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ],
 
           // Decline Reason
-          if (vm.showDeclineReason & vm.showRefundRejectReason) ...[
+          if (vm.showDeclineReason) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),

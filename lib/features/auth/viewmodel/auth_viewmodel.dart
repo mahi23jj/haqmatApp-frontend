@@ -9,21 +9,22 @@ class AuthViewModel extends ChangeNotifier {
   final AuthRepository _repo = AuthRepository();
 
   static const String _rememberMeKey = 'remember_me';
-  static const String _rememberedEmailKey = 'remembered_email';
+  static const String _rememberedPhoneKey = 'remembered_phone';
+  static const String _legacyRememberedEmailKey = 'remembered_email';
   static const String _rememberedPasswordKey = 'remembered_password';
 
   bool _loading = false;
   String? _error;
   AuthModel? _user;
   bool _rememberMe = false;
-  String? _rememberedEmail;
+  String? _rememberedPhone;
   String? _rememberedPassword;
 
   bool get loading => _loading;
   String? get error => _error;
   AuthModel? get user => _user;
   bool get rememberMe => _rememberMe;
-  String? get rememberedEmail => _rememberedEmail;
+  String? get rememberedPhone => _rememberedPhone;
   String? get rememberedPassword => _rememberedPassword;
 
   AuthViewModel();
@@ -31,7 +32,8 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> loadRememberedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     _rememberMe = prefs.getBool(_rememberMeKey) ?? false;
-    _rememberedEmail = prefs.getString(_rememberedEmailKey);
+    _rememberedPhone = prefs.getString(_rememberedPhoneKey) ??
+        prefs.getString(_legacyRememberedEmailKey);
     _rememberedPassword = prefs.getString(_rememberedPasswordKey);
     notifyListeners();
   }
@@ -46,35 +48,39 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _saveRememberedCredentials(String email, String password) async {
+  Future<void> _saveRememberedCredentials(
+    String phoneNumber,
+    String password,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_rememberedEmailKey, email);
+    await prefs.setString(_rememberedPhoneKey, phoneNumber);
+    await prefs.remove(_legacyRememberedEmailKey);
     await prefs.setString(_rememberedPasswordKey, password);
-    _rememberedEmail = email;
+    _rememberedPhone = phoneNumber;
     _rememberedPassword = password;
   }
 
   Future<void> _clearRememberedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_rememberedEmailKey);
+    await prefs.remove(_rememberedPhoneKey);
+    await prefs.remove(_legacyRememberedEmailKey);
     await prefs.remove(_rememberedPasswordKey);
-    _rememberedEmail = null;
+    _rememberedPhone = null;
     _rememberedPassword = null;
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String phoneNumber, String password) async {
     _loading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final result = await _repo.login(email, password);
-      print(result);
+      final result = await _repo.login(phoneNumber, password);
       _user = result;
       await saveToken(_user!.token); // save token to local storage
 
       if (_rememberMe) {
-        await _saveRememberedCredentials(email, password);
+        await _saveRememberedCredentials(phoneNumber, password);
       } else {
         await _clearRememberedCredentials();
       }
@@ -91,28 +97,33 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<bool> isLoggedInSafe() async {
-  try {
-    final box = Hive.box('authBox'); // or wherever you store login info
-    return box.get('isLoggedIn', defaultValue: false) as bool;
-  } catch (_) {
-    return false;
+    try {
+      final box = Hive.box('authBox'); // or wherever you store login info
+      return box.get('isLoggedIn', defaultValue: false) as bool;
+    } catch (_) {
+      return false;
+    }
   }
-}
 
-
-  Future<bool> signup(
-    String email,
-    String password,
-    String name,
-    String location,
-    String phone,
-  ) async {
+  Future<bool> signup({
+    required String password,
+    required String name,
+    required String subcity,
+    required String address,
+    required String phone,
+  }) async {
     _loading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final result = await _repo.signup(email, password, name, location, phone);
+      final result = await _repo.signup(
+        password,
+        name,
+        subcity,
+        address,
+        phone,
+      );
       _user = result;
 
       await saveToken(_user!.token); // save token to local storage

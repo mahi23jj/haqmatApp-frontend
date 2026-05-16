@@ -7,6 +7,8 @@ import 'package:haqmate/features/orders/viewmodel/order_view_model.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
 import 'package:haqmate/features/orders/widgets/build_filter_tabs.dart';
 import 'package:haqmate/features/orders/widgets/order_card.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 class OrdersPage extends StatelessWidget {
@@ -173,6 +175,7 @@ class OrdersPage extends StatelessWidget {
   }
 
   Widget _buildSuccessState(BuildContext context, OrdersViewModel vm) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Container(
@@ -196,16 +199,13 @@ class OrdersPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 8),
-              Text(
-                "የእኔ ትዕዛዞች",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
+              const SizedBox(width: 10),
+              Expanded(
+                child: BilingualTitle(
+                  amharic: l10n.ordersTitleAm,
+                  english: l10n.ordersTitleEn,
                 ),
               ),
-              const Spacer(),
               IconButton(
                 icon: Icon(Icons.refresh, color: AppColors.primary),
                 onPressed: () => vm.load(),
@@ -266,7 +266,6 @@ class OrdersPage extends StatelessWidget {
                         child: OrderCard(
                           order: order,
                           config: config,
-                          isCancelling: vm.isCancelling(order.id),
                           onAction: (action) {
                             if (action == OrderAction.track) {
                               Navigator.push(
@@ -284,8 +283,6 @@ class OrdersPage extends StatelessWidget {
                                       ManualPaymentScreen(orderId: order.id),
                                 ),
                               );
-                            } else if (action == OrderAction.cancel) {
-                              vm.cancelOrder(context, order.id);
                             } else {
                               vm.handleAction(action, order);
                             }

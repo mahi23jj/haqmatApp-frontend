@@ -22,8 +22,6 @@ class OrderdetailViewModel extends ChangeNotifier {
       _parsePaymentStatus(_order?.paymentstatus);
   DeliveryStatus? get _deliveryStatusEnum =>
       _parseDeliveryStatus(_order?.deliverystatus);
-  RefundStatus? get _refundStatusEnum =>
-      _parseRefundStatus(_order?.refundstatus);
 
   // -------------------------
   // CACHE HELPERS
@@ -146,18 +144,6 @@ class OrderdetailViewModel extends ChangeNotifier {
         _hasMeaningfulText(o.cancelReason);
   }
 
-  bool get showRefundTag {
-    final o = _order;
-    return o != null && _paymentStatusEnum == PaymentStatus.REFUNDED;
-  }
-
-  bool get showRefundRejectReason {
-    final o = _order;
-    return o != null &&
-        _refundStatusEnum == RefundStatus.REJECTED &&
-        _hasMeaningfulText(o.cancelReason);
-  }
-
   String _formatDate(DateTime d) {
     return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   }
@@ -214,20 +200,6 @@ class OrderdetailViewModel extends ChangeNotifier {
     }
   }
 
-  RefundStatus _parseRefundStatus(String? value) {
-    switch (_normalize(value)) {
-      case 'NOT_STARTED':
-        return RefundStatus.NOT_STARTED;
-      case 'PENDING':
-        return RefundStatus.PENDING;
-      case 'APPROVED':
-        return RefundStatus.APPROVED;
-      case 'REJECTED':
-        return RefundStatus.REJECTED;
-      default:
-        return RefundStatus.UNKNOWN;
-    }
-  }
 }
 
 enum OrderStatus {
@@ -250,4 +222,3 @@ enum PaymentStatus {
 
 enum DeliveryStatus { NOT_SCHEDULED, SCHEDULED, DELIVERED, UNKNOWN }
 
-enum RefundStatus { NOT_STARTED, PENDING, APPROVED, REJECTED, UNKNOWN }

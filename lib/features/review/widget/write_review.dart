@@ -305,6 +305,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
           TextField(
             controller: _controller,
             maxLines: 4,
+            maxLength: 500,
             decoration: InputDecoration(
               hintText: 'ስለ ምርቱ አስተያየትዎን ይጻፉ...',
               hintStyle: TextStyle(color: Colors.grey.shade500),

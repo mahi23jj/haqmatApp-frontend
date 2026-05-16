@@ -105,17 +105,16 @@
 // }
 
 // manual_payment_screen.dart
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:haqmate/core/bottom_nev_page.dart';
 import 'package:haqmate/features/checkout/viewmodel/manual_payment_viewmodel.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
-import 'package:haqmate/features/order_detail/view/order_detail_page.dart';
-import 'package:haqmate/features/orders/view/order_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:haqmate/core/constants.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 
 class ManualPaymentScreen extends StatelessWidget {
   final String orderId;
@@ -124,6 +123,7 @@ class ManualPaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ChangeNotifierProvider(
       create: (_) => ManualPaymentViewModel(orderId: orderId),
       child: Scaffold(
@@ -135,13 +135,10 @@ class ManualPaymentScreen extends StatelessWidget {
             icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text(
-            'ክፍያ ያረጋግጡ',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
+          title: BilingualTitle(
+            amharic: l10n.manualPaymentTitleAm,
+            english: l10n.manualPaymentTitleEn,
+            textAlign: TextAlign.center,
           ),
           centerTitle: true,
         ),
@@ -391,7 +388,7 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
                   foregroundColor: Colors.white,
                   loading: vm.submitting,
                   onPressed: (_selectedFile != null && !vm.submitting)
-                      ? () => _submit(context)
+                    ? () => _confirmBeforeSubmit(context)
                       : null,
                   borderRadius: BorderRadius.circular(12),
                   icon: vm.submitting
@@ -592,6 +589,108 @@ class _ManualPaymentBodyState extends State<_ManualPaymentBody> {
 
   //   debugPrint('Selected file: ${_selectedFile!.name}');
   // }
+
+  Future<void> _confirmBeforeSubmit(BuildContext context) async {
+    final file = _selectedFile;
+    if (file == null) return;
+
+    final shouldSubmit = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'ማረጋገጫ',
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'እባክዎ ስክሪንሾቱ ትክክል መሆኑን ያረጋግጡ።',
+                style: TextStyle(color: AppColors.textLight),
+              ),
+              const SizedBox(height: 12),
+              if (file.bytes != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    file.bytes!,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 120,
+                      width: double.infinity,
+                      color: AppColors.background,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  height: 80,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.insert_drive_file_outlined,
+                    color: AppColors.textLight,
+                  ),
+                ),
+              const SizedBox(height: 12),
+              Text(
+                'ፋይል: ${file.name}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'መጠን: ${(file.size / 1024).toStringAsFixed(1)} KB',
+                style: TextStyle(fontSize: 12, color: AppColors.textLight),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('ይቅር'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondary,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.check_circle_outline, size: 18),
+              label: const Text('አረጋግጥ እና ላክ'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldSubmit == true && mounted) {
+      await _submit(context);
+    }
+  }
 
   Future<void> _submit(BuildContext context) async {
     final vm = context.read<ManualPaymentViewModel>();

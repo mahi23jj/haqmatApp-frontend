@@ -4,10 +4,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/core/loading_state.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
 import 'package:haqmate/features/review/viewmodel/review_view_model.dart';
 import 'package:haqmate/features/review/widget/review_list.dart';
 import 'package:haqmate/features/review/widget/review_summery_card.dart';
 import 'package:haqmate/features/review/widget/write_review.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:haqmate/core/widgets/custom_button.dart';
 
@@ -84,6 +86,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final vm = context.watch<ReviewViewModel>();
 
     return Scaffold(
@@ -95,13 +98,10 @@ class _ReviewsPageState extends State<ReviewsPage> {
           icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'ግምገማዎች እና ደረጃዎች',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
+        title: BilingualTitle(
+          amharic: l10n.reviewsTitleAm,
+          english: l10n.reviewsTitleEn,
+          textAlign: TextAlign.center,
         ),
         centerTitle: true,
         actions: [

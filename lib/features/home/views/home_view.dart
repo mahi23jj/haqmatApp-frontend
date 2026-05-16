@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:haqmate/core/bottom_nev.dart';
 import 'package:haqmate/core/constants.dart';
 import 'package:haqmate/core/loading_state.dart';
+import 'package:haqmate/core/widgets/bilingual_title.dart';
 import 'package:haqmate/features/home/viewmodel/home_view_model.dart';
 import 'package:haqmate/features/home/views/SearchScreen.dart';
 import 'package:haqmate/features/home/widgets/catagory_item.dart';
+import 'package:haqmate/l10n/gen/app_localizations.dart';
 import 'package:haqmate/features/product_detail/viewmodel/product_viewmodel.dart';
 import 'package:haqmate/features/product_detail/views/product_view.dart';
 import 'package:provider/provider.dart';
@@ -92,6 +94,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final vm = Provider.of<HomeViewModel>(context, listen: true);
 
     return Scaffold(
@@ -112,26 +115,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             ),
             child: Image.asset('assets/images/logo2.png', height: 60, width: 60)),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'ሐቅማት ጤፍ ',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-            ),
-            Text(
-              'ከእርሻ እስከ ቤትዎ',
-              style: TextStyle(
-                fontSize: 11,
-                color: AppColors.textLight,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
+        title: BilingualTitle(
+          amharic: l10n.homeTitleAm,
+          english: l10n.homeSubtitleEn,
         ),
         /* actions: [
           Padding(

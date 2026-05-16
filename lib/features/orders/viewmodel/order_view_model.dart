@@ -40,10 +40,6 @@ class OrdersViewModel extends ChangeNotifier {
     await _localDataSource.clearOrders();
   }
 
-  // Per-order cancel loading state for button feedback
-  final Map<String, bool> _cancelLoading = {};
-  bool isCancelling(String orderId) => _cancelLoading[orderId] == true;
-
   Future<void> load({bool refresh = false}) async {
     if (!refresh) {
       final cached = await _readCache();
@@ -113,7 +109,6 @@ class OrdersViewModel extends ChangeNotifier {
     final deliveryTags = <String>[];
     final actions = <OrderAction>[OrderAction.track];
     String? declineReason;
-    RefundStatus? refundTag;
 
     switch (order.status) {
       case OrderStatus.pendingPayment:
@@ -122,17 +117,11 @@ class OrdersViewModel extends ChangeNotifier {
             order.paymentStatus == PaymentStatus.failed) {
           actions.insert(0, OrderAction.pay);
         }
-        if (order.paymentStatus == PaymentStatus.screenshotSent) {
-          actions.insert(0, OrderAction.cancel);
-        }
         break;
 
       case OrderStatus.toBeDelivered:
         paymentTags.add(PaymentStatus.confirmed.label);
         deliveryTags.add(order.deliveryStatus.label);
-        if (order.deliveryStatus == DeliveryStatus.notScheduled) {
-          actions.insert(0, OrderAction.cancel);
-        }
         break;
 
       case OrderStatus.completed:
@@ -150,16 +139,11 @@ class OrdersViewModel extends ChangeNotifier {
         break;
     }
 
-    if (order.paymentStatus == PaymentStatus.refunded) {
-      refundTag = order.refundStatus;
-    }
-
     return OrderUiConfig(
       paymentTags: paymentTags,
       deliveryTags: deliveryTags,
       actions: actions,
       declineReason: declineReason,
-      refundStatus: refundTag,
       deliveryDate: order.deliveryDate,
     );
   }
@@ -174,201 +158,15 @@ class OrdersViewModel extends ChangeNotifier {
   void handleAction(OrderAction action, OrderModel order) {
     debugPrint('Order action: ${action.name} for order ${order.id}');
   }
-
-  Future<void> cancelOrder(BuildContext context, String orderId) async {
-    _cancelLoading[orderId] = true;
-    notifyListeners();
-
-    try {
-      await _repo.cancelOrder(orderId);
-      
-      _cancelLoading[orderId] = false;
-      notifyListeners();
-
-      if (!context.mounted) return;
-
-      // Success dialog asking for refund
-      final shouldRequest = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) {
-          return AlertDialog(
-            title: const Text('ትእዛዙ ተሰርዟል'),
-            content: const Text(
-              'ተሳክቶ ተሰርዟል። መመለሻ ገንዘብ መጠየቅ ይፈልጋሉ?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('አይ'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('አዎ'),
-              ),
-            ],
-          );
-        },
-      );
-
-      if (!context.mounted) return;
-      if (shouldRequest == true) {
-        await _showRefundDialog(context, orderId);
-      } await load(refresh: true);
-    } catch (e) {
-      _cancelLoading[orderId] = false;
-      notifyListeners();
-
-      if (!context.mounted) return;
-
-      // Error dialog with try again
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        builder: (ctx) {
-          return AlertDialog(
-            title: const Text('መሰረዝ አልተሳካም'),
-            content: Text(e.toString()),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('ዝጋ'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  cancelOrder(context, orderId);
-                },
-                child: const Text('እንደገና ሞክር'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-  Future<void> _showRefundDialog(BuildContext context, String orderId) async {
-    final accNameCtrl = TextEditingController();
-    final accNumberCtrl = TextEditingController();
-    final reasonCtrl = TextEditingController();
-
-
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {bool submitting = false;
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-           
-            return AlertDialog(
-              title: const Text('መመለሻ ገንዘብ ጥያቄ'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: accNameCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'የአካውንት ስም',
-                      ),
-                    ),
-                    TextField(
-                      controller: accNumberCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'የአካውንት ቁጥር',
-                      ),
-                    ),
-                    TextField(
-                      controller: reasonCtrl,
-                      decoration: const InputDecoration(labelText: 'ምክንያት'),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed:submitting
-                      ? null
-                      :  () => Navigator.pop(ctx),
-                  child: const Text('ይቅር'),
-                ),
-                TextButton(
-                  onPressed:submitting
-                      ? null
-                      : () async {
-                    if (accNameCtrl.text.trim().isEmpty ||
-                        accNumberCtrl.text.trim().isEmpty ||
-                        reasonCtrl.text.trim().isEmpty) {
-                      // simple validation
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('እባክዎ ሁሉንም መስኮች ይሙሉ')),
-                      );
-                      return;
-                    }
-                    setState(() => submitting = true);
-                    try {
-                      await _repo.requestRefund(
-                        orderId: orderId,
-                        accountName: accNameCtrl.text.trim(),
-                        accountNumber: accNumberCtrl.text.trim(),
-                        reason: reasonCtrl.text.trim(),
-                      );if (!context.mounted) return;
-                     
-                      Navigator.pop(ctx);
-                     
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('መመለሻ ገንዘብ ጥያቄው ተልኳል'),
-                        ),
-                      );
-                     
-                    } catch (e) {
-                      setState(() => submitting = false);
-                      if (!context.mounted) return;
-                      showDialog<void>(
-                        context: context,
-                        builder: (ctx2) => AlertDialog(
-                          title: const Text('መመለሻ ገንዘብ አልተሳካም'),
-                          content: Text(e.toString()),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx2),
-                              child: const Text('ዝጋ'),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                  child:submitting
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        ) : const Text('Refund'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 }
 
-enum OrderAction { pay, cancel, track }
+enum OrderAction { pay, track }
 
 class OrderUiConfig {
   final List<String> paymentTags;
   final List<String> deliveryTags;
   final List<OrderAction> actions;
   final String? declineReason;
-  final RefundStatus? refundStatus;
   final DateTime? deliveryDate;
 
   const OrderUiConfig({
@@ -376,7 +174,6 @@ class OrderUiConfig {
     required this.deliveryTags,
     required this.actions,
     required this.declineReason,
-    required this.refundStatus,
     required this.deliveryDate,
   });
 }

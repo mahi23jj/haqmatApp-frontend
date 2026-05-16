@@ -4,22 +4,20 @@ import 'package:haqmate/features/auth/model/auth_model.dart';
 import 'package:http/http.dart' as Http;
 
 class AuthRepository {
-  Future<AuthModel> login(String email, String password) async {
+  Future<AuthModel> login(String phoneNumber, String password) async {
     try {
-
-      
       final response = await Http.post(
-        Uri.parse('${Constants.baseurl}/api/login'),
+        Uri.parse('${Constants.baseurl}/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "email": email, 
+          "phoneNumber": phoneNumber,
           "password": password,
-          "rememberMe": true // Add this if your backend expects it
+          "rememberMe": true, // Add this if your backend expects it
         }),
       );
 
       final responseBody = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200) {
         return AuthModel.fromJson(responseBody);
       } else {
@@ -35,27 +33,27 @@ class AuthRepository {
   }
 
   Future<AuthModel> signup(
-    String email,
     String password,
     String name,
-    String location,
+    String subcity,
+    String address,
     String phone,
   ) async {
     try {
       final response = await Http.post(
-        Uri.parse('${Constants.baseurl}/api/signup'),
+        Uri.parse('${Constants.baseurl}/auth/signup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "email": email,
           "password": password,
           "username": name,
-          "location": location,
+          "subcity": subcity,
+          "address": address,
           "phoneNumber": phone,
         }),
       );
 
       final responseBody = jsonDecode(response.body);
-      
+
       if (response.statusCode == 201 || response.statusCode == 200) {
         return AuthModel.fromJson(responseBody);
       } else {
@@ -75,9 +73,9 @@ class AuthRepository {
 class AuthException implements Exception {
   final String message;
   final int statusCode;
-  
+
   AuthException(this.message, this.statusCode);
-  
+
   @override
   String toString() => message;
 }
